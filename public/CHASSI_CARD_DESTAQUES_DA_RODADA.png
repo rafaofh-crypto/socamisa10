@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1313" width="1080" height="1313">
+  <!-- Background Gradient -->
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0b1a3a" />
+      <stop offset="50%" stop-color="#0d1f40" />
+      <stop offset="100%" stop-color="#040e21" />
+    </linearGradient>
+    <linearGradient id="rowPill" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff6b35" />
+      <stop offset="100%" stop-color="#ff521a" />
+    </linearGradient>
+    <linearGradient id="greyPill" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#475569" />
+      <stop offset="100%" stop-color="#334155" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="1080" height="1313" fill="url(#bg)" />
+  
+  <!-- Soccer Field Faint Markings -->
+  <path d="M 50 50 L 1030 50 L 1030 1263 L 50 1263 Z" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="4" />
+  <line x1="50" y1="656.5" x2="1030" y2="656.5" stroke="rgba(255,255,255,0.05)" stroke-width="4" />
+  <circle cx="540" cy="656.5" r="180" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="4" />
+  <circle cx="540" cy="656.5" r="10" fill="rgba(255,255,255,0.05)" />
+  
+  <!-- Top Hat Soccer Ball Logo (Só Camisa 10) -->
+  <g transform="translate(100, 80)">
+    <!-- Shield Outline -->
+    <path d="M 30 110 C 30 180, 110 200, 110 200 C 110 200, 190 180, 190 110 L 190 40 L 110 20 L 30 40 Z" fill="#0b1a3a" stroke="#ff6b35" stroke-width="6" />
+    <path d="M 35 105 C 35 170, 110 190, 110 190 C 110 190, 185 170, 185 105 L 185 45 L 110 25 L 35 45 Z" fill="#ffffff" />
+    <!-- Soccer Ball -->
+    <circle cx="110" cy="115" r="45" fill="#f1f5f9" stroke="#000000" stroke-width="3" />
+    <path d="M 110 70 L 110 160" stroke="#000000" stroke-width="2" />
+    <path d="M 65 115 L 155 115" stroke="#000000" stroke-width="2" />
+    <!-- Top Hat -->
+    <rect x="75" y="10" width="70" height="45" rx="4" fill="#000000" />
+    <ellipse cx="110" cy="55" rx="45" ry="8" fill="#ff6b35" stroke="#000000" stroke-width="2" />
+    <!-- Banner -->
+    <rect x="15" y="150" width="190" height="36" rx="8" fill="#ff6b35" stroke="#ffffff" stroke-width="3" />
+    <text x="110" y="174" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="900" font-size="16" fill="#ffffff" text-anchor="middle">SÓ CAMISA 10</text>
+  </g>
+  
+  <!-- Right Header Titles -->
+  <text x="440" y="145" font-family="'Inter', sans-serif" font-weight="900" font-size="44" fill="#ffffff" letter-spacing="1">DESTAQUES</text>
+  <text x="440" y="195" font-family="'Inter', sans-serif" font-weight="900" font-size="44" fill="#ffffff" letter-spacing="1">DA RODADA</text>
+  
+  <!-- White Badge with R$ 80,00 and Crown -->
+  <g transform="translate(820, 220)">
+    <circle cx="60" cy="60" r="50" fill="#ffffff" stroke="#ff6b35" stroke-width="4" />
+    <text x="60" y="55" font-family="'Inter', sans-serif" font-weight="800" font-size="14" fill="#ff6b35" text-anchor="middle">R$</text>
+    <text x="60" y="85" font-family="'Inter', sans-serif" font-weight="950" font-size="30" fill="#ff6b35" text-anchor="middle">80,00</text>
+    <!-- Crown -->
+    <path d="M 30 10 L 40 25 L 60 10 L 80 25 L 90 10 L 85 30 L 35 30 Z" fill="#ff6b35" transform="translate(10, -28)" />
+  </g>
+  
+  <!-- Row 1: Melhor Time -->
+  <!-- Header Label -->
+  <g transform="translate(180, 290)">
+    <rect width="180" height="36" rx="18" fill="url(#rowPill)" />
+    <text x="90" y="23" font-family="'Inter', sans-serif" font-weight="800" font-size="13" fill="#ffffff" text-anchor="middle">MELHOR TIME</text>
+  </g>
+  <!-- Background Row Box -->
+  <rect x="180" y="336" width="790" height="132" rx="16" fill="#ffffff" />
+  <!-- Left Blue Icon Base -->
+  <g transform="translate(62, 332)">
+    <circle cx="58" cy="62" r="58" fill="#1e293b" stroke="#ffffff" stroke-width="4" />
+    <!-- Thumbs up icon SVG path -->
+    <path d="M 46 68 L 46 52 A 4 4 0 0 1 50 48 L 54 48 L 56 34 A 4 4 0 0 1 64 34 L 64 48 L 74 48 A 6 6 0 0 1 80 54 L 76 72 A 4 4 0 0 1 72 76 L 54 76 A 8 8 0 0 1 46 68 Z" fill="none" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" />
+  </g>
+  <!-- Inner Row circle background for Shield (to be overlayed) -->
+  <circle cx="239" cy="402" r="43" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
+  <!-- Rank labels (built-in background) -->
+  <text x="910" y="415" font-family="'Inter', sans-serif" font-weight="900" font-size="36" fill="#0b1a3a" text-anchor="middle">1º</text>
+  
+  <!-- Row 2: Pior Time -->
+  <!-- Header Label -->
+  <g transform="translate(180, 478)">
+    <rect width="180" height="36" rx="18" fill="url(#rowPill)" />
+    <text x="90" y="23" font-family="'Inter', sans-serif" font-weight="800" font-size="13" fill="#ffffff" text-anchor="middle">PIOR TIME</text>
+  </g>
+  <!-- Background Row Box -->
+  <rect x="180" y="524" width="790" height="132" rx="16" fill="#ffffff" />
+  <!-- Left Blue Icon Base -->
+  <g transform="translate(62, 520)">
+    <circle cx="58" cy="62" r="58" fill="#1e293b" stroke="#ffffff" stroke-width="4" />
+    <!-- Thumbs down icon SVG path -->
+    <path d="M 46 56 L 46 72 A 4 4 0 0 0 50 76 L 54 76 L 56 90 A 4 4 0 0 0 64 90 L 64 76 L 74 76 A 6 6 0 0 0 80 70 L 76 52 A 4 4 0 0 0 72 48 L 54 48 A 8 8 0 0 0 46 56 Z" fill="none" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" />
+  </g>
+  <!-- Inner Row circle background for Shield (to be overlayed) -->
+  <circle cx="239" cy="590" r="43" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
+  <!-- Rank labels -->
+  <text x="910" y="603" font-family="'Inter', sans-serif" font-weight="900" font-size="36" fill="#0b1a3a" text-anchor="middle">50º</text>
+
+  <!-- Row 3: Mais Rico -->
+  <!-- Header Label -->
+  <g transform="translate(180, 666)">
+    <rect width="180" height="36" rx="18" fill="url(#rowPill)" />
+    <text x="90" y="23" font-family="'Inter', sans-serif" font-weight="800" font-size="13" fill="#ffffff" text-anchor="middle">MAIS RICO</text>
+  </g>
+  <!-- Background Row Box -->
+  <rect x="180" y="712" width="790" height="132" rx="16" fill="#ffffff" />
+  <!-- Left Blue Icon Base -->
+  <g transform="translate(62, 708)">
+    <circle cx="58" cy="62" r="58" fill="#1e293b" stroke="#ffffff" stroke-width="4" />
+    <!-- Coin Icon paths -->
+    <circle cx="58" cy="62" r="14" fill="none" stroke="#ffffff" stroke-width="4" />
+    <path d="M 58 54 L 58 70" stroke="#ffffff" stroke-width="3" />
+    <path d="M 53 58 C 58 55, 58 60, 63 58 M 53 66 C 58 63, 58 68, 63 66" stroke="#ffffff" stroke-width="3" fill="none" />
+  </g>
+  <!-- Inner Row circle background for Shield (to be overlayed) -->
+  <circle cx="239" cy="778" r="43" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
+  <!-- Rank labels -->
+  <text x="910" y="791" font-family="'Inter', sans-serif" font-weight="900" font-size="36" fill="#0b1a3a" text-anchor="middle">1º</text>
+
+  <!-- Row 4: Maior Pontuador em uma unica rodada -->
+  <!-- Header Label -->
+  <g transform="translate(180, 912)">
+    <rect width="670" height="42" rx="21" fill="url(#greyPill)" />
+    <text x="35" y="26" font-family="'Inter', sans-serif" font-weight="800" font-size="13" fill="#ffffff">MAIOR PONTUADOR EM UMA ÚNICA RODADA</text>
+    <!-- Ribbon Tag on the right -->
+    <path d="M 490 0 L 660 0 L 670 21 L 660 42 L 490 42 Z" fill="url(#rowPill)" />
+  </g>
+  <!-- Background Row Box -->
+  <rect x="180" y="968" width="790" height="132" rx="16" fill="#ffffff" />
+  <!-- Left Blue Icon Base -->
+  <g transform="translate(62, 964)">
+    <circle cx="58" cy="62" r="58" fill="#1e293b" stroke="#ffffff" stroke-width="4" />
+    <!-- Chess Knight Icon -->
+    <path d="M 44 80 L 44 76 C 44 64, 52 56, 56 46 C 58 40, 52 38, 56 30 C 60 30, 68 34, 72 40 C 76 46, 72 56, 72 64 L 72 80 Z" fill="none" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" />
+  </g>
+  <!-- Inner Row circle background for Shield (to be overlayed) -->
+  <circle cx="239" cy="1034" r="43" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
+  <!-- Rank labels -->
+  <text x="910" y="1047" font-family="'Inter', sans-serif" font-weight="900" font-size="36" fill="#0b1a3a" text-anchor="middle">1º</text>
+
+  <!-- Footer Brand -->
+  <text x="540" y="1200" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="900" font-size="18" fill="#ff6b35" text-anchor="middle" letter-spacing="3">SOCAMISA10.FANTASY</text>
+  <text x="540" y="1225" font-family="'Inter', sans-serif" font-weight="500" font-size="12" fill="#64748b" text-anchor="middle">Gerador Integrado • Brasileirão 2026</text>
+</svg>

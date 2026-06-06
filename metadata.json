@@ -1,0 +1,6 @@
+{
+  "name": "Só Camisa 10",
+  "description": "Gerador de chaves de mata-mata e simulador de torneio com 48 times e fase de grupos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
