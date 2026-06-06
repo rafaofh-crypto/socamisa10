@@ -1,54 +1,74 @@
 import React, { useState } from 'react';
 
-// ESTE É O MOTOR COMPLETO. COPIE DAQUI ATÉ O FINAL.
-const Admin = () => {
-  const [status, setStatus] = useState('');
-  const [progress, setProgress] = useState(0);
+interface Team {
+  time_id: number;
+  nome: string;
+  nome_cartola: string;
+  url_escudo_png: string;
+}
+
+interface SyncState {
+  progress: number;
+  status: string;
+  isSyncing: boolean;
+}
+
+const CartolaSyncDashboard: React.FC = () => {
+  const [state, setState] = useState<SyncState>({ progress: 0, status: 'Ready', isSyncing: false });
+
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const syncData = async () => {
-    setStatus('Iniciando sincronização...');
-    setProgress(0);
-    
+    setState({ progress: 0, status: 'Fetching league data...', isSyncing: true });
     try {
-      // Simulando a busca das 17 rodadas com foco em Escudos e Pontos
-      for (let i = 1; i <= 17; i++) {
-        setStatus(`Processando Rodada ${i}...`);
-        // Aqui o sistema conecta com a API do Cartola
-        await new Promise(resolve => setTimeout(resolve, 500)); 
-        setProgress(Math.round((i / 17) * 100));
+      const leagueRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://api.cartola.globo.com/liga/so-camisa-10-2026')}`);
+      const leagueData = JSON.parse((await leagueRes.json()).contents);
+      const teams: Team[] = leagueData.times;
+      const results: any[] = [];
+
+      for (let i = 0; i < teams.length; i++) {
+        const team = teams[i];
+        const teamScores = [];
+        setState({ progress: Math.round((i / teams.length) * 100), status: `Processing ${team.nome}...`, isSyncing: true });
+
+        for (let round = 1; round <= 17; round++) {
+          try {
+            const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://api.cartola.globo.com/time/id/${team.time_id}/${round}`)}`);
+            const data = JSON.parse((await res.json()).contents);
+            teamScores.push({ round, score: data.pontos || 0 });
+          } catch (e) {
+            console.error(`Error fetching round ${round} for ${team.nome}`);
+          }
+          await delay(200);
+        }
+        results.push({ ...team, history: teamScores });
       }
-      
-      setStatus('Sincronização concluída com sucesso! Escudos atualizados.');
-      alert('Dados das 17 rodadas e escudos sincronizados no seu navegador!');
+
+      localStorage.setItem('cartola_rankings', JSON.stringify(results));
+      setState({ progress: 100, status: 'Sync Complete!', isSyncing: false });
     } catch (error) {
-      setStatus('Erro na sincronização. Verifique a conexão.');
+      setState({ progress: 0, status: 'Sync Failed. Check console.', isSyncing: false });
     }
   };
 
   return (
-    <div style={{ backgroundColor: '#121212', minHeight: '100vh', padding: '40px', color: 'white', fontFamily: 'sans-serif' }}>
-      <div style={{ maxWidth: '600px', margin: '0 auto', backgroundColor: 'rgba(255,255,255,0.05)', padding: '30px', borderRadius: '15px', border: '1px solid #D4AF37', backdropFilter: 'blur(10px)' }}>
-        <h1 style={{ color: '#D4AF37', marginBottom: '20px' }}>Painel de Controle - Só Camisa 10</h1>
-        <p style={{ marginBottom: '30px', color: '#B0B0B0' }}>Use este painel para validar o motor de dados antes do lançamento oficial.</p>
-        
+    <div className="p-8 bg-[#1a1a1a] text-[#d4af37] min-h-screen font-sans">
+      <h1 className="text-3xl font-bold mb-6 border-b border-[#d4af37] pb-2">Cartola Sync Dashboard</h1>
+      <div className="bg-[#262626] p-6 rounded-lg shadow-xl">
+        <p className="mb-4">Status: {state.status}</p>
+        <div className="w-full bg-gray-700 h-4 rounded-full overflow-hidden mb-6">
+          <div className="bg-[#d4af37] h-full transition-all duration-300" style={{ width: `${state.progress}%` }} />
+        </div>
         <button 
-          onClick={syncData}
-          style={{ width: '100%', padding: '15px', backgroundColor: '#D4AF37', color: '#121212', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px' }}
+          onClick={syncData} 
+          disabled={state.isSyncing} 
+          className="bg-[#d4af37] text-[#1a1a1a] px-6 py-2 rounded font-bold hover:bg-[#b8962d] disabled:opacity-50"
         >
-          Sincronizar Rodadas 1 a 17 (Pontos + Escudos)
+          {state.isSyncing ? 'Syncing...' : 'Start Sync'}
         </button>
-
-        {status && (
-          <div style={{ marginTop: '20px', padding: '15px', backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: '8px' }}>
-            <p style={{ margin: 0, fontSize: '14px' }}>{status}</p>
-            <div style={{ width: '100%', height: '8px', backgroundColor: '#333', marginTop: '10px', borderRadius: '4px', overflow: 'hidden' }}>
-              <div style={{ width: `${progress}%`, height: '100%', backgroundColor: '#D4AF37', transition: 'width 0.3s' }}></div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
-export default Admin;
+export default CartolaSyncDashboard;
