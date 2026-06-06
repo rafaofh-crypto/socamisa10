@@ -1,83 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import SyncComponent from '../components/SyncComponent';
 
-const Admin = () => {
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState('');
+const Admin: React.FC = () => {
+  const [isSyncing, setIsSyncing] = useState(false);
 
-  const syncData = async () => {
-    setLoading(true);
-    setStatus('Iniciando sincronização...');
-    const tournamentData = {};
-
-    try {
-      for (let i = 1; i <= 17; i++) {
-        setStatus(`Buscando rodada ${i}/17...`);
-        const response = await fetch(`https://api.cartola.globo.com/liga/so-camisa-10-2026/pontuacao/${i}`);
-        if (response.ok) {
-          const data = await response.json();
-          tournamentData[i] = data;
-        }
-      }
-      localStorage.setItem('tournamentData', JSON.stringify(tournamentData));
-      setStatus('Sincronização concluída com sucesso!');
-    } catch (error) {
-      setStatus('Erro ao sincronizar. Verifique a conexão ou o endpoint.');
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+  const handleSyncComplete = (data: any) => {
+    console.log('Sync complete', data);
+    localStorage.setItem('admin_data_rounds', JSON.stringify(data));
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Painel Administrativo</h1>
-        <p style={styles.text}>Gerenciamento de dados do Cartola FC</p>
-        <button 
-          onClick={syncData} 
-          disabled={loading} 
-          style={styles.button}
-        >
-          {loading ? 'Sincronizando...' : 'Sincronizar Rodadas 1-17'}
-        </button>
-        {status && <p style={styles.status}>{status}</p>}
-      </div>
+    <div className="min-h-screen bg-[#121212] text-white p-6 md:p-12 font-sans">
+      <header className="mb-10 border-b border-[#D4AF37]/30 pb-6">
+        <h1 className="text-4xl font-bold text-[#D4AF37] tracking-tight">Admin Dashboard</h1>
+        <p className="text-gray-400 mt-2">Manage round data (1-17) and system synchronization</p>
+      </header>
+
+      <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-[#1e1e1e]/50 backdrop-blur-xl border border-[#D4AF37]/20 p-8 rounded-2xl shadow-2xl">
+          <h2 className="text-2xl font-semibold mb-6 text-[#D4AF37]">Data Synchronization</h2>
+          <p className="text-sm text-gray-300 mb-6">
+            Fetch and cache team shields and match results for rounds 1 through 17. 
+            Ensure your API keys are configured correctly before initiating.
+          </p>
+          <div className="flex items-center justify-center p-4 border border-dashed border-[#D4AF37]/30 rounded-lg">
+            <SyncComponent 
+              onSyncStart={() => setIsSyncing(true)} 
+              onSyncComplete={(data) => {
+                setIsSyncing(false);
+                handleSyncComplete(data);
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="bg-[#1e1e1e]/50 backdrop-blur-xl border border-[#D4AF37]/20 p-8 rounded-2xl shadow-2xl">
+          <h2 className="text-2xl font-semibold mb-6 text-[#D4AF37]">System Status</h2>
+          <div className="space-y-4">
+            <div className="flex justify-between p-4 bg-[#121212] rounded-lg border border-[#D4AF37]/10">
+              <span className="text-gray-400">Storage Status</span>
+              <span className="text-[#D4AF37]">Active</span>
+            </div>
+            <div className="flex justify-between p-4 bg-[#121212] rounded-lg border border-[#D4AF37]/10">
+              <span className="text-gray-400">Last Sync</span>
+              <span className="text-white">{new Date().toLocaleDateString()}</span>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    background: '#121212',
-    padding: '20px'
-  },
-  card: {
-    background: 'rgba(30, 30, 30, 0.7)',
-    backdropFilter: 'blur(10px)',
-    border: '1px solid #D4AF37',
-    borderRadius: '15px',
-    padding: '40px',
-    textAlign: 'center',
-    color: '#fff',
-    maxWidth: '400px',
-    width: '100%'
-  },
-  title: { color: '#D4AF37', marginBottom: '20px' },
-  text: { marginBottom: '30px', opacity: 0.8 },
-  button: {
-    background: '#D4AF37',
-    border: 'none',
-    padding: '12px 24px',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    color: '#000'
-  },
-  status: { marginTop: '20px', fontSize: '0.9rem', color: '#D4AF37' }
 };
 
 export default Admin;
