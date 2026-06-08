@@ -1,1 +1,40 @@
-let cachedSession = null; let cacheExpiry = 0; export default async function handler(req, res) { const { id } = req.query; if (!id) return res.status(400).json({ success: false, error: 'Missing id parameter' }); try { if (!cachedSession || Date.now() > cacheExpiry) { const loginResponse = await fetch('https://login.globo.com/api/authentication', { method: 'POST', headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' }, body: JSON.stringify({ email: process.env.EMAIL, password: process.env.PASSWORD, serviceId: 4728 }) }); if (!loginResponse.ok) throw new Error('Login failed'); const setCookie = loginResponse.headers.get('set-cookie'); if (!setCookie) throw new Error('No session cookie received'); cachedSession = setCookie.split(';')[0]; cacheExpiry = Date.now() + 3600000; } const dataResponse = await fetch(`https://api.cartola.globo.com/time/slug/${id}`, { headers: { 'Cookie': cachedSession, 'User-Agent': 'Mozilla/5.0' } }); if (!dataResponse.ok) throw new Error('Failed to fetch team data'); const data = await dataResponse.json(); return res.status(200).json({ success: true, data }); } catch (error) { return res.status(500).json({ success: false, error: error.message }); } }
+const express = require('express');
+const axios = require('axios');
+const app = express();
+
+const CARTOLA_API_BASE = 'https://api.cartola.globo.com';
+
+app.get('/api/liga/:slug', async (req, res) => {
+  const { slug } = req.params;
+
+  try {
+    const response = await axios.get(`${CARTOLA_API_BASE}/auth/liga/${slug}`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
+    });
+
+    if (!response.data) {
+      throw new Error('Empty response from Cartola API');
+    }
+
+    res.json(response.data);
+  } catch (error) {
+    console.error(`Error fetching league ${slug}:`, error.message);
+
+    const status = error.response ? error.response.status : 500;
+    const message = error.response && error.response.data 
+      ? error.response.data 
+      : 'Failed to fetch league data. Please check the slug or try again later.';
+
+    res.status(status).json({ error: message });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Proxy server running on port ${PORT}`);
+});
