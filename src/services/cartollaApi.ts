@@ -162,12 +162,11 @@ function generateScoresForTeamEx(slug: string, teamIndex: number): Record<number
   const { r17, total } = getStaticScoresForRank(rank, teamIndex);
   const scores: Record<number, number> = {};
   const target1_16 = total - r17;
-  
   if (slug === "futcafa") {
     scores[4] = 82.20;
     scores[5] = 79.50;
     scores[6] = 85.11;
-    scores[7] = 82.00; 
+    scores[7] = 82.00;
     const remainingTarget = target1_16 - 328.81;
     const baseRest = remainingTarget / 12;
     let sumRest = 0;
@@ -252,8 +251,7 @@ export async function fetchCartolleData(onProgress?: (message: string) => void):
   source: "API" | "FALLBACK";
   errorLog?: string;
 }> {
-  // 1. Aponta para o seu próprio proxy na Vercel em vez da Globo direto
-  const url = "/api/liga/so-camisa-10-2026"; 
+  const url = "/api/liga/so-camisa-10-2026";
   let attempts = 0;
   const maxAttempts = 3;
   let lastError = "";
@@ -263,56 +261,40 @@ export async function fetchCartolleData(onProgress?: (message: string) => void):
     onProgress?.(`Iniciando tentativa ${attempts} de sincronização via Proxy...`);
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout maior (5s)
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const response = await fetch(url, {
         signal: controller.signal,
-        headers: {
-          "Accept": "application/json"
-          // User-Agent removido daqui (o navegador já envia o dele naturalmente)
-        }
+        headers: { "Accept": "application/json" }
       });
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        throw new Error(`Servidor Proxy retornou status ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`Servidor Proxy retornou status ${response.status}`);
 
       const rawData = await response.json();
-
       if (rawData && rawData.times && Array.isArray(rawData.times)) {
-        onProgress?.(`Dados recebidos! Verificando integridade...`);
-        if (rawData.times.length === 50) {
-          return {
-            times: rawData.times,
-            currentRound: rawData.rodada_atual || 17,
-            syncTimestamp: new Date().toLocaleDateString("pt-BR") + " " + new Date().toLocaleTimeString("pt-BR"),
-            source: "API"
-          };
-        } else {
-          throw new Error(`Contagem de times inválida. Recebido: ${rawData.times.length}, Esperado: 50.`);
-        }
-      } else {
-        throw new Error("Estrutura de dados recebida do Proxy é inválida.");
+        return {
+          times: rawData.times,
+          currentRound: rawData.rodada_atual || 17,
+          syncTimestamp: new Date().toLocaleDateString("pt-BR") + " " + new Date().toLocaleTimeString("pt-BR"),
+          source: "API"
+        };
       }
+      throw new Error("Estrutura de dados inválida.");
     } catch (err: any) {
       lastError = err.message || String(err);
       onProgress?.(`Falha na tentativa ${attempts}: ${lastError}`);
-      if (attempts < maxAttempts) {
-        onProgress?.(`Aguardando breve intervalo para nova tentativa...`);
-        await sleep(1000);
-      }
+      if (attempts < maxAttempts) await sleep(1000);
     }
   }
 
   onProgress?.(`Falha ao conectar com o Proxy. Utilizando fallback local.`);
   await sleep(1500);
-
   return {
     times: TEAM_MEMBERS,
     currentRound: 17,
     syncTimestamp: "23:45 de 19/05/2026",
     source: "FALLBACK",
-    errorLog: `Erro no Proxy ${url}: ${lastError}. Utilizado o fallback local de alta fidelidade.`
+    errorLog: `Erro no Proxy ${url}: ${lastError}.`
   };
 }
