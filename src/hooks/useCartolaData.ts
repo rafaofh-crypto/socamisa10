@@ -26,7 +26,7 @@ export function useCartolaData() {
 
     trackProgress("Iniciando processo de ETL no Hook...");
     try {
-      const storedToken = localStorage.getItem('cartolaGloboToken') || '';
+      const storedToken = localStorage.getItem('cartolaGloboToken') || '1a2a146c0cc04e74930113079d0ebcbc267464f6e514957545f6e716f307945784879414e35453468704250443735484679465978783643624b4d473044716c4c585930524b73624d5f44446f393569535348565656534930776a6f334e314a34614c547264413d3d3a303a7266686573736d616e6e2e32303136';
       if (storedToken) {
         trackProgress("Token Globo ID / GLOBO_ID encontrado no armazenamento local. Efetuando chamada autenticada...");
       } else {

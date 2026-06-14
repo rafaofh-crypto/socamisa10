@@ -166,6 +166,8 @@ export default function App() {
                 onCutRoundChange={setCutRound}
                 theme={theme}
                 onThemeChange={setTheme}
+                teams={teams}
+                allSyncedScores={data?.allSyncedScores}
               />
             )}
 

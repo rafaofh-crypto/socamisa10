@@ -20,6 +20,10 @@ export interface CartolaData {
   times: CartolaTeam[];
   rodadaAtual: number;
   rodadas: any[];
+  offlineFallback?: boolean;
+  fallbackReason?: string;
+  syncedRounds?: number[];
+  allSyncedScores?: Record<number, Record<string, number>>;
 }
 
 /**
@@ -187,17 +191,24 @@ export function processarDadosCartola(data: any): CartolaData {
       };
     }),
     rodadaAtual: rodadaAtual,
-    rodadas: data.rodadas || rawLiga?.rodadas || []
+    rodadas: data.rodadas || rawLiga?.rodadas || [],
+    offlineFallback: !!data.offlineFallback,
+    fallbackReason: data.fallbackReason,
+    syncedRounds: data.synced_rounds || [],
+    allSyncedScores: data.all_synced_scores || {}
   };
 }
 
 export async function syncCartolaData(onProgress?: (msg: string) => void, token?: string): Promise<CartolaData> {
+  const leagueSlug = localStorage.getItem('cartolaLeagueSlug') || 'so-camisa-10-2026';
+  
   // We prefer proxy route /api/cartola to fully avoid browser CORS issues.
   // Fallback to direct call in case API is exposed.
   const proxyUrl = '/api/cartola';
-  const directUrl = 'https://api.cartola.globo.com/ligas/so-camisa-10-2026';
+  const directUrl = `https://api.cartola.globo.com/ligas/${leagueSlug}`;
 
   const extraHeaders: Record<string, string> = {};
+  extraHeaders['x-league-slug'] = leagueSlug;
   if (token) {
     extraHeaders['x-glb-token'] = token;
   }
@@ -213,11 +224,22 @@ export async function syncCartolaData(onProgress?: (msg: string) => void, token?
     // Save in localStorage
     localStorage.setItem('cartolaData', JSON.stringify(dadosProcessados));
     localStorage.setItem('cartolaDataTimestamp', new Date().toISOString());
-    localStorage.setItem('cartolaDataSource', 'API');
+    
+    if (dadosProcessados.offlineFallback) {
+      localStorage.setItem('cartolaDataSource', 'SIMULADO_FALLBACK');
+      onProgress?.('AVISO: O servidor do Cartola retornou um erro! Carregado o simulador local de segurança com êxito.');
+      if (dadosProcessados.fallbackReason) {
+        onProgress?.(`Detalhe: ${dadosProcessados.fallbackReason}`);
+      }
+    } else {
+      localStorage.setItem('cartolaDataSource', 'API');
+    }
     
     return dadosProcessados;
   } catch (proxyError: any) {
-    console.info('[ETL] Proxy indisponível ou em modo offline, carregando banco do navegador...', proxyError.message);
+    const errorMsg = proxyError.response?.data?.message || proxyError.response?.data?.mensagem || proxyError.message || "Falha na conexão";
+    console.info('[ETL] Proxy indisponível ou em modo offline, carregando banco do navegador...', errorMsg);
+    onProgress?.(`[Aviso Proxy] Falhou: ${errorMsg}. Tentando contingência local...`);
     
     try {
       onProgress?.('Verificando conexão alternativa com servidor de dados...');

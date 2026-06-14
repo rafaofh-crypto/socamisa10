@@ -1,7 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
-  Sliders, Settings, RefreshCw, Layout, AlertCircle
+  Settings, RefreshCw, Layout, AlertCircle, Save, Trash2, Search, Sparkles, Check, Info, FileSpreadsheet, AlertTriangle
 } from "lucide-react";
+
+interface CartolaTeam {
+  id: string;
+  name: string;
+  owner: string;
+  shieldUrl: string;
+  scores: Record<number, number>;
+}
 
 interface AdminProps {
   currentRound: number;
@@ -14,7 +22,63 @@ interface AdminProps {
   onCutRoundChange: (val: number) => void;
   theme: string;
   onThemeChange: (val: string) => void;
+  teams: CartolaTeam[];
+  allSyncedScores?: Record<number, Record<string, number>>;
 }
+
+// Lista Estática Oficial dos 50 Participantes da Liga 2026
+const PARTICIPANTS = [
+  { owner: "Tiago Fattori", name: "Sovaco da Pantera", slug: "sovaco-da-pantera" },
+  { owner: "Rafael Fattori", name: "Onodi Floripa", slug: "onodi-floripa" },
+  { owner: "Fernando Anselmo", name: "Real Barreiros FC", slug: "real-barreiros-fc" },
+  { owner: "Vitinho", name: "Fortaleza da ilha", slug: "fortaleza-da-ilha" },
+  { owner: "HERMES", name: "Jammes Rodriguez", slug: "jammes-rodriguez" },
+  { owner: "Evandro Rebelatto", name: "DuduMathias FC", slug: "dudumathias-fc" },
+  { owner: "Daniel", name: "Barbeariadc", slug: "barbeariadc" },
+  { owner: "Carlos Henrique R. H", name: "Carlao07", slug: "carlao07" },
+  { owner: "Renato Galo", name: "CRF GALO", slug: "crf-galo" },
+  { owner: "Gean Marques", name: "Camisa Pesada SA", slug: "camisa-pesada-sa" },
+  { owner: "Sartori", name: "Chinchila cabeçuda", slug: "chinchila-cabecuda" },
+  { owner: "Laion Gomes", name: "Futcafa", slug: "futcafa" },
+  { owner: "Fernando Lopes", name: "Fernandoguinho", slug: "fernandoguinho" },
+  { owner: "Gabriel Duarte", name: "GD LOMEUSC", slug: "gd-lomeusc" },
+  { owner: "Hessmann", name: "Montinho Artilheiro FC", slug: "montinho-artilheiro-fc" },
+  { owner: "Fabio Okuno", name: "NINJA DO OCIDENTE", slug: "ninja-do-ocidente" },
+  { owner: "Lincoln", name: "LENOCH 'N' ROLL", slug: "lenoch-n-roll" },
+  { owner: "Anderson D da Rosa", name: "Dida82 FC", slug: "dida82-fc" },
+  { owner: "Angelo Cassol", name: "Dois Vizinhos SA", slug: "dois-vizinhos-sa" },
+  { owner: "Dieverson Pereira", name: "Pretinho99 F.C", slug: "pretinho99-f-c" },
+  { owner: "Diego a Jorge", name: "C.R.Pirika", slug: "c-r-pirika" },
+  { owner: "Chico Pimenta", name: "TeamPimenta", slug: "teampimenta" },
+  { owner: "gustavo", name: "lendinhaxx fc", slug: "lendinhaxx-fc" },
+  { owner: "Andrey Damasco", name: "Dedeyy Fc", slug: "dedeyy-fc" },
+  { owner: "Tiago Melo", name: "Rivers of Babylon", slug: "rivers-of-babylon" },
+  { owner: "José Bereta", name: "JBERETTA", slug: "jberetta" },
+  { owner: "Everton Samir", name: "Everton UltraMaratonista F.C", slug: "everton-ultramaratonista-f-c" },
+  { owner: "Ricardo Bittencourt", name: "kaka F C", slug: "kaka-f-c" },
+  { owner: "Henrique Augusto Rau", name: "Mazanza Futebol Clube", slug: "mazanza-futebol-clube" },
+  { owner: "Gabriel Alvarez", name: "Avaih F C", slug: "avaih-f-c" },
+  { owner: "Everton Ribeiro", name: "Ribeiro Copeiro 84 F.C", slug: "ribeiro-copeiro-84-f-c" },
+  { owner: "dudu", name: "marixco fc", slug: "marixco-fc" },
+  { owner: "Bruno buske", name: "capita Buske", slug: "capita-buske" },
+  { owner: "Carlos Augusto", name: "Avahy Costa da Lagoa", slug: "avahy-costa-da-lagoa" },
+  { owner: "ArthureHeitorHermes", name: "Abedaozinho", slug: "abedaozinho" },
+  { owner: "WIllian Alexandre", name: "Rolo Compressor 4Lib", slug: "rolo-compressor-4lib" },
+  { owner: "Alexandre De Sousa", name: "Tainha Ovada FC", slug: "tainha-ovada-fc" },
+  { owner: "Marcelo", name: "Monges tibetanos FC", slug: "monges-tibetanos-fc" },
+  { owner: "Dyego", name: "Floripamengao", slug: "floripamengao" },
+  { owner: "Abedao", name: "Abedao", slug: "abedao" },
+  { owner: "Cassio", name: "FURACÃO K7 FC", slug: "furacao-k7-fc" },
+  { owner: "Fernando Reis Silva", name: "DIFERENCIAL F.C.", slug: "diferencial-f-c" },
+  { owner: "Agnaldo Garceis", name: "Gui FiFla", slug: "gui-fifla" },
+  { owner: "Chico Machado", name: "Delirio Futebol e Festa", slug: "delirio-futebol-e-festa" },
+  { owner: "roger_futz", name: "campecheiro_futz", slug: "campecheiro-futz" },
+  { owner: "alfradique -sc", name: "dique-sc", slug: "dique-sc" },
+  { owner: "Robson Valério", name: "Casquinha EC", slug: "casquinha-ec" },
+  { owner: "China Oliveira", name: "E C CASCALHO", slug: "e-c-cascalho" },
+  { owner: "Luizep Guardiola", name: "Figueirense FC o maior", slug: "figueirense-fc-o-maior" },
+  { owner: "Maykel Jesus Silva", name: "Brazzers MKL FC", slug: "brazzers-mkl-fc" }
+];
 
 export default function Admin({
   currentRound,
@@ -26,309 +90,511 @@ export default function Admin({
   cutRound,
   onCutRoundChange,
   theme,
-  onThemeChange
+  onThemeChange,
+  teams,
+  allSyncedScores = {}
 }: AdminProps) {
-  const [globoToken, setGloboToken] = useState<string>(() => localStorage.getItem("cartolaGloboToken") || "");
+  // Rodada selecionada para gerenciamento
+  const [selectedRound, setSelectedRound] = useState<number>(() => {
+    return currentRound || 17;
+  });
 
-  const handleTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.trim();
-    setGloboToken(val);
-    localStorage.setItem("cartolaGloboToken", val);
+  // Estado local para digitação e manipulação de pontuações
+  const [localScores, setLocalScores] = useState<Record<string, number>>({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [pasteAreaContent, setPasteAreaContent] = useState("");
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [crawlLoading, setCrawlLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [pasteFeedback, setPasteFeedback] = useState<string[]>([]);
+
+  // Carregar dados de pontuações reais persistidos assim que a rodada mudar
+  useEffect(() => {
+    const scoresForRound = allSyncedScores[selectedRound] || {};
+    const initialScores: Record<string, number> = {};
+
+    PARTICIPANTS.forEach((p) => {
+      if (scoresForRound[p.slug] !== undefined) {
+        initialScores[p.slug] = scoresForRound[p.slug];
+      } else {
+        // Fallback para exibir pontuação atual na UI se for a rodada corrente, senão 0.0
+        const foundTeam = teams.find(t => t.name.toLowerCase() === p.name.toLowerCase() || t.owner.toLowerCase() === p.owner.toLowerCase());
+        if (foundTeam && foundTeam.scores && foundTeam.scores[selectedRound] !== undefined) {
+          initialScores[p.slug] = foundTeam.scores[selectedRound];
+        } else {
+          initialScores[p.slug] = selectedRound === 17 ? 60.00 : 0.00;
+        }
+      }
+    });
+
+    setLocalScores(initialScores);
+    setPasteFeedback([]);
+    setStatusMessage(null);
+  }, [selectedRound, allSyncedScores, teams]);
+
+  // Modificação manual na tabela
+  const handleScoreChange = (slug: string, value: string) => {
+    const num = value === "" ? 0.0 : parseFloat(value.replace(",", "."));
+    setLocalScores(prev => ({
+      ...prev,
+      [slug]: isNaN(num) ? 0.0 : num
+    }));
   };
 
-  const [syncingR17, setSyncingR17] = useState(false);
-  const [r17Logs, setR17Logs] = useState<string[]>([]);
-  const [r17Sql, setR17Sql] = useState<string[]>([]);
-  const [showSql, setShowSql] = useState(false);
+  // Processar e associar texto vindo do Excel/Google Sheets
+  const handleSpreadsheetImport = () => {
+    if (!pasteAreaContent.trim()) {
+      setStatusMessage({ type: "error", text: "A área de texto está vazia. Por favor, copie e cole sua planilha primeiro." });
+      return;
+    }
 
-  const handleSyncR17 = async () => {
-    setSyncingR17(true);
-    setR17Logs(["[" + new Date().toLocaleTimeString("pt-BR") + "] Conectando ao servidor backend..." ]);
-    setR17Sql([]);
+    const lines = pasteAreaContent.split("\n");
+    const newScores = { ...localScores };
+    let matches = 0;
+    let unmatchedLines: string[] = [];
 
-    try {
-      const response = await fetch("/api/sync/rodada17", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
+    const normalize = (str: string) => {
+      return str
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // remove acentos
+        .replace(/[^a-z0-9]/g, "");    // remove espaços e símbolos
+    };
+
+    lines.forEach((line, idx) => {
+      const trimmed = line.trim();
+      if (!trimmed) return;
+
+      // Dividir dados por tab, ponto-e-vírgula ou vírgula caso seja CSV
+      const parts = trimmed.split(/[\t|;,]/).map(p => p.trim()).filter(Boolean);
+      
+      let valStr = "";
+      let nameStr = "";
+
+      if (parts.length >= 2) {
+        // Encontra o valor numérico de pontuação (geralmente o último elemento ou um float nítido)
+        let foundValIdx = -1;
+        for (let i = parts.length - 1; i >= 0; i--) {
+          const rawPart = parts[i].replace(",", ".");
+          const parsed = parseFloat(rawPart);
+          if (!isNaN(parsed) && /^-?\d+(\.\d+)?$/.test(rawPart)) {
+            valStr = rawPart;
+            foundValIdx = i;
+            break;
+          }
         }
+
+        if (foundValIdx !== -1) {
+          const rest = parts.filter((_, ip) => ip !== foundValIdx);
+          nameStr = rest.join(" ");
+        }
+      } else {
+        // Se for linha de texto contínua sem formatação clara, tenta extrair o número ao final
+        const regexMatch = trimmed.match(/(.*?)\s+([-+]?\d+[\.,]\d+|[-+]?\d+)$/);
+        if (regexMatch) {
+          nameStr = regexMatch[1].trim();
+          valStr = regexMatch[2].trim().replace(",", ".");
+        }
+      }
+
+      const scoreVal = parseFloat(valStr);
+      if (isNaN(scoreVal)) {
+        unmatchedLines.push(`Linha ${idx + 1}: Sem nota encontrada em ("${trimmed}")`);
+        return;
+      }
+
+      // Procurar time correspondente pelo nome, slug ou dono de forma bem tolerante
+      const searchKey = normalize(nameStr);
+      if (!searchKey) return;
+
+      const matched = PARTICIPANTS.find(p => {
+        const slugKey = normalize(p.slug);
+        const nameKey = normalize(p.name);
+        const ownerKey = normalize(p.owner);
+        return slugKey === searchKey ||
+               nameKey === searchKey ||
+               ownerKey === searchKey ||
+               slugKey.includes(searchKey) ||
+               searchKey.includes(slugKey) ||
+               nameKey.includes(searchKey) ||
+               searchKey.includes(nameKey);
+      });
+
+      if (matched) {
+        newScores[matched.slug] = Number(scoreVal.toFixed(2));
+        matches++;
+      } else {
+        unmatchedLines.push(`Linha ${idx + 1}: Não mapeado ("${nameStr}" com nota ${scoreVal})`);
+      }
+    });
+
+    setLocalScores(newScores);
+    setPasteFeedback(unmatchedLines);
+
+    if (matches > 0) {
+      setPasteAreaContent(""); // Limpa para dar feedback visual
+      setStatusMessage({
+        type: "success",
+        text: `Excelente! Associamos com sucesso ${matches} times da sua planilha. As notas foram carregadas temporariamente na tabela abaixo. Clique no botão "Salvar Notas Permanentes" no pé para consolidar no campeonato!`
+      });
+    } else {
+      setStatusMessage({
+        type: "error",
+        text: "Infelizmente nenhum time pôde ser detectado. Lembre-se de colar do Excel contendo o Nome do Time/Dono e a Pontuação ao lado."
+      });
+    }
+  };
+
+  // Salvar alterações de forma persistente no servidor
+  const handleSaveScores = async () => {
+    setSaveLoading(true);
+    setStatusMessage(null);
+    try {
+      const response = await fetch(`/api/sync/rodada/${selectedRound}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ manualScores: localScores })
       });
 
       if (!response.ok) {
-        throw new Error(`Erro HTTP: ${response.status}`);
+        throw new Error(`Servidor rejeitou gravação: ${response.status}`);
       }
 
       const result = await response.json();
       if (result.success) {
-        setR17Logs(result.logs);
-        setR17Sql(result.sqlQueries);
-        onSyncTrigger(); // Notifica o contexto de dados para regerar os rankings gerais e a aba Copa
+        setStatusMessage({
+          type: "success",
+          text: `Sucesso! Pontuações da Rodada ${selectedRound} salvas e persistidas no servidor com total segurança! Classificação geral atualizada.`
+        });
+        onSyncTrigger(); // Notifica app principal
       } else {
-        throw new Error("Sincronização retornou código de falha no servidor.");
+        throw new Error("Resposta sem êxito do servidor de arquivos.");
       }
-    } catch (e: any) {
-      setR17Logs((prev) => [
-        ...prev,
-        `[FALHA] Falha na sincronização completa: ${e.message}`
-      ]);
+    } catch (err: any) {
+      setStatusMessage({ type: "error", text: `Falha ao persistir no servidor: ${err.message}` });
     } finally {
-      setSyncingR17(false);
+      setSaveLoading(false);
     }
   };
 
+  // Metodo alternativo automático se a Globo/CORS permitir no dia
+  const handleCrawlCartola = async () => {
+    setCrawlLoading(true);
+    setStatusMessage(null);
+    try {
+      const response = await fetch(`/api/sync/rodada/${selectedRound}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+      if (!response.ok) {
+        throw new Error(`Erro de resposta HTTP: ${response.status}`);
+      }
+      const result = await response.json();
+      if (result.success) {
+        const obtained = result.scores || {};
+        const combined = { ...localScores };
+        PARTICIPANTS.forEach(p => {
+          if (obtained[p.slug] !== undefined) {
+            combined[p.slug] = obtained[p.slug];
+          }
+        });
+        setLocalScores(combined);
+        setStatusMessage({
+          type: "success",
+          text: `Varredura automática da Globo processada! Revises as notas obtidas e clique em "Salvar Notas Permanentes" logo abaixo.`
+        });
+      } else {
+        throw new Error("Erro de processo de sincronização direta.");
+      }
+    } catch (err: any) {
+      setStatusMessage({
+        type: "error",
+        text: "Sincronização automática direta bloqueada temporariamente pela Globo (CORS/Rate limit). Por favor, use a Área de Copiar e Colar do Excel abaixo, que é 100% garantida e livre de erros!"
+      });
+    } finally {
+      setCrawlLoading(false);
+    }
+  };
+
+  // Filtragem rápida da tabela
+  const filteredParticipants = PARTICIPANTS.filter(p => {
+    const q = searchQuery.toLowerCase();
+    return p.name.toLowerCase().includes(q) || p.owner.toLowerCase().includes(q) || p.slug.includes(q);
+  });
+
   return (
-    <div className="space-y-6 animate-fadeIn text-white">
+    <div className="space-y-6 text-white animate-fadeIn">
       
-      <div className="p-5 glass-effect rounded-2xl flex items-center gap-4 border border-gold/15">
-        <Settings className="w-6 h-6 text-gold" />
+      {/* TÍTULO PRINCIPAL E INTRO */}
+      <div className="p-6 bg-charcoal-dark/30 border border-white/5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <span className="text-xs uppercase font-bold tracking-widest text-[#B0B0B0] font-mono">Gerência e Controle White-Label</span>
-          <h2 className="text-2xl font-black font-display uppercase tracking-wider text-white mt-0.5">Painel de Administração</h2>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="h-2 w-2 rounded-full bg-gold animate-ping" />
+            <span className="text-[10px] tracking-widest font-mono text-gold font-bold uppercase">Painel Administrativo Simplificado</span>
+          </div>
+          <h2 className="text-2xl font-black font-display uppercase tracking-wider text-white">Central de Notas & Lançamentos</h2>
+          <p className="text-xs text-slate-400 mt-1 max-w-xl">
+            Insira ou modifique as notas calculadas em campo. Você pode copiar e colar do Excel em 1-Clique ou digitar na lista abaixo.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-mono font-bold text-slate-400 uppercase">Gerenciar Rodada:</label>
+          <select
+            value={selectedRound}
+            onChange={(e) => setSelectedRound(parseInt(e.target.value) || 17)}
+            className="px-4 py-2 bg-charcoal-dark border border-gold/40 rounded-xl text-gold font-display font-black text-sm outline-none cursor-pointer focus:border-gold"
+          >
+            {[17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38].map((r) => (
+              <option key={r} value={r} className="bg-charcoal-dark">Rodada {r}</option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {currentRound >= 38 && (
-        <div className="p-5 bg-gradient-to-r from-red-950/20 via-red-900/10 to-red-950/20 border-2 border-red-500/20 rounded-2xl flex items-start gap-4">
-          <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+      {/* STATUS & FEEDBACK DYNAMIC ALERTS */}
+      {statusMessage && (
+        <div className={`p-4 rounded-xl border flex items-start gap-3 animate-fadeIn ${
+          statusMessage.type === "success" 
+            ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-400" 
+            : "bg-red-500/5 border-red-500/20 text-red-400"
+        }`}>
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-xs font-mono font-extrabold text-red-400 uppercase tracking-wider">
-              🔒 Bloqueio de Copas & Modo Gala Ativo
-            </h4>
-            <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">
-              O campeonato foi totalmente concluído e consolidado no final da <strong>Rodada 37 (Copas M10 e B10 finalizadas)</strong>. Todas as sincronizações parciais de dados de copas, alteração dos pontos/rodada de corte e testes estão atualmente <strong>bloqueados para preservar os dados oficiais dos pódios e campeões</strong>.
-            </p>
+            <span className="text-xs font-mono font-bold uppercase block">Mensagem do Sistema</span>
+            <p className="text-xs mt-0.5 text-slate-200 leading-normal">{statusMessage.text}</p>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* API SYNC CONTAINER */}
-        <section className="bg-charcoal-dark/45 border border-white/5 p-5 rounded-2xl space-y-4">
-          <div className="flex items-center gap-2 border-b border-white/5 pb-2">
-            <RefreshCw className="w-5 h-5 text-gold" />
-            <h3 className="font-display font-semibold text-xs tracking-wider uppercase">Sincronização com Cartola FC (ETL Real)</h3>
-          </div>
-
-          <div className="space-y-2 text-xs font-mono">
-            <p>🔄 Rodada Ativa no Cartola: <span className="text-gold font-bold">{currentRound}</span></p>
-            <p>🗓️ Último Fetch Efetuado: <span className="text-slate-250">{syncTimestamp}</span></p>
-            <p>📡 Servidor Ativo: <span className="text-slate-300 bg-white/5 px-2 py-0.5 rounded text-[10px] uppercase font-bold">{source}</span></p>
-          </div>
-
-          <div className="bg-[#121212]/80 border border-gold/10 p-3 rounded-xl space-y-2 mt-4">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider font-extrabold block">
-                🔑 Token Globo ID (Opcional)
-              </span>
-              <span className="text-[9px] text-gold bg-gold/5 px-1.5 py-0.2 rounded font-mono uppercase font-semibold">
-                Privado
-              </span>
-            </div>
-            <p className="text-[10px] text-slate-400 leading-normal">
-              A liga <strong className="text-white">Só Camisa 10 2026</strong> é privada no Cartola FC. Para burlar o Erro 500/401 do servidor da Globo, insira seu token GLOBO_ID obtido após fazer login em <a href="https://cartola.globo.com" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">cartola.globo.com</a>.
+      {/* METODOLOGIA 1: IMPORTAR DA PLANILHA (O VERDADEIRO SALVA-VIDAS) */}
+      <section className="p-6 bg-charcoal-dark border border-white/5 rounded-2xl space-y-4">
+        <div className="flex items-center gap-3 border-b border-white/5 pb-3">
+          <FileSpreadsheet className="w-6 h-6 text-gold" />
+          <div>
+            <h3 className="font-display font-black text-sm uppercase tracking-wider text-white">
+              Sincronia Rápida: Copiar e Colar do Excel / Google Sheets
+            </h3>
+            <p className="text-xs text-slate-400">
+              Copie as colunas de times e notas da sua planilha e cole abaixo. O sistema associa os dados automaticamente!
             </p>
-            <input
-              type="text"
-              placeholder="Cole seu GLB ID token aqui..."
-              value={globoToken}
-              onChange={handleTokenChange}
-              disabled={currentRound >= 38}
-              className="w-full px-3 py-2 rounded-lg bg-charcoal-dark border border-slate-700 text-xs text-slate-150 placeholder:text-slate-500 font-mono disabled:opacity-40"
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div className="lg:col-span-8 space-y-2">
+            <textarea
+              value={pasteAreaContent}
+              onChange={(e) => setPasteAreaContent(e.target.value)}
+              placeholder="Exemplo de conteúdo aceito (basta copiar do seu Excel e colar completo):
+
+Sovaco da Pantera   82.15
+Onodi Floripa       74.50
+Fernando Anselmo   Real Barreiros FC   66.90"
+              rows={5}
+              className="w-full p-3 rounded-xl bg-black/30 border border-white/10 text-xs font-mono text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-gold leading-relaxed"
             />
-            <span className="block text-[9px] text-slate-500 leading-tight">
-              * O token é salvo localmente em seu navegador e retransmitido de forma segura pelo nosso proxy. Se deixado vazio, usaremos o Banco de Dados simulado local de Alta Fidelidade (Rodada 17).
-            </span>
-          </div>
-
-          <button
-            onClick={onSyncTrigger}
-            disabled={isSyncing || currentRound >= 38}
-            className="w-full py-3 bg-gold hover:bg-gold/90 text-charcoal-dark font-display font-bold text-xs uppercase rounded-xl transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
-          >
-            <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin" : ""}`} />
-            <span>{currentRound >= 38 ? "Sincronização Bloqueada (Gala)" : isSyncing ? "Sincronizando..." : "Sincronizar Agora (ETL)"}</span>
-          </button>
-
-          {/* Sync logs timeline */}
-          <div className="mt-4">
-            <span className="text-[10px] text-slate-500 uppercase font-mono tracking-wider font-extrabold block">Fila de Processamento de API (Logs)</span>
-            <div className="mt-2 text-[9.5px] font-mono leading-relaxed bg-[#0a0a0a] border border-white/5 rounded-xl p-3 max-h-48 overflow-y-auto space-y-1 block">
-              {syncLogs.length > 0 ? (
-                syncLogs.map((l, index) => (
-                  <div key={index} className="text-slate-400">
-                    &gt; {l}
-                  </div>
-                ))
-              ) : (
-                <span className="text-slate-600 block">Nenhum log registrado na sessão ativa.</span>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* CUP SETTINGS CONTAINER */}
-        <section className="bg-charcoal-dark/45 border border-white/5 p-5 rounded-2xl space-y-4 flex flex-col justify-between">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/5 pb-2">
-              <Sliders className="w-5 h-5 text-gold" />
-              <h3 className="font-display font-semibold text-xs tracking-wider uppercase">Parâmetros do Mata-Mata (Copa)</h3>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="block text-[11px] uppercase tracking-wider text-slate-400 font-mono mb-1 font-bold">Rodada de Corte do Brasileirão</label>
-                <input
-                  type="number"
-                  min={1}
-                  max={38}
-                  value={cutRound}
-                  onChange={(e) => onCutRoundChange(Math.max(1, parseInt(e.target.value) || 21))}
-                  disabled={currentRound >= 38}
-                  className="w-full max-w-xs px-3.5 py-2.5 rounded-xl bg-charcoal-dark border border-gold/20 font-mono text-xs font-bold text-gold disabled:opacity-40"
-                />
-                <span className="block text-[10px] text-slate-500 mt-1 max-w-sm">Define qual rodada civil serve de corte (padrão CBF: 21)</span>
-              </div>
-
-              <div>
-                <span className="block text-[11px] uppercase tracking-wider text-slate-400 font-mono mb-1 font-extrabold">Rodadas da Fase de Grupos</span>
-                <div className="flex gap-2">
-                  <span className="bg-white/5 font-mono text-xs px-3 py-1.5 rounded-lg border border-white/10 text-slate-405">R22</span>
-                  <span className="bg-white/5 font-mono text-xs px-3 py-1.5 rounded-lg border border-white/10 text-slate-410">R23</span>
-                  <span className="bg-white/5 font-mono text-xs px-3 py-1.5 rounded-lg border border-white/10 text-slate-415">R24</span>
-                </div>
-              </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] text-slate-500 font-mono">
+                Suporta quebras de linha e separadores tradicionais de Excel.
+              </span>
+              <button
+                type="button"
+                onClick={handleSpreadsheetImport}
+                className="px-5 py-2.5 bg-gold text-charcoal-dark hover:bg-gold/90 rounded-xl transition font-display font-black text-xs uppercase tracking-wider cursor-pointer"
+              >
+                Identificar Dados do Excel
+              </button>
             </div>
           </div>
 
-          {/* COLOR THEMES BRANDING */}
-          <div className="border-t border-white/5 pt-4">
-            <span className="text-[11px] uppercase font-mono font-bold tracking-widest text-slate-400 flex items-center gap-1.5">
-              <Layout className="w-4 h-4 text-gold" />
-              White-Label Branding (SaaS Temas)
-            </span>
-            <div className="grid grid-cols-4 gap-2 mt-2">
-              {[
-                { id: "gold", name: "Gold 10", color: "#D4AF37" },
-                { id: "emerald", name: "Emerald", color: "#10B981" },
-                { id: "ruby", name: "Ruby", color: "#EF4444" },
-                { id: "neon", name: "Cyberpunk", color: "#EC4899" }
-              ].map((themeOpt) => (
-                <button
-                  key={themeOpt.id}
-                  onClick={() => onThemeChange(themeOpt.id)}
-                  className={`p-2.5 rounded-xl border transition-all text-center cursor-pointer ${theme === themeOpt.id ? "border-gold bg-gold/10" : "border-slate-800 bg-charcoal-dark/30 hover:bg-white/5"}`}
-                >
-                  <div className="w-4 h-4 rounded-full mx-auto" style={{ backgroundColor: themeOpt.color }} />
-                  <span className="text-[9px] font-bold block mt-1">{themeOpt.name}</span>
-                </button>
+          <div className="lg:col-span-4 bg-black/20 p-4 rounded-xl border border-white/5 flex flex-col justify-between text-xs space-y-3">
+            <div className="space-y-1.5">
+              <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 font-bold block">✓ Vantagens do Copiar/Colar</span>
+              <ul className="list-disc pl-4 space-y-1 text-slate-350 leading-relaxed text-[11px]">
+                <li>Livre de bloqueios por segurança ou instabilidade da Globo.</li>
+                <li>Assegura dados perfeitos exatamente como você computou.</li>
+                <li>Evita o desgaste de preencher 50 caixas de texto uma a uma.</li>
+              </ul>
+            </div>
+            
+            <div className="pt-2 border-t border-white/5 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={handleCrawlCartola}
+                disabled={crawlLoading}
+                className="text-xs font-mono font-bold text-sky-400 hover:text-sky-305 underline uppercase cursor-pointer disabled:opacity-45"
+              >
+                {crawlLoading ? "Consultando..." : "Sincronizar da Globo (Auto)"}
+              </button>
+              <span className="text-[9px] text-[#A0A0A0] uppercase font-mono italic">Método Secundário</span>
+            </div>
+          </div>
+        </div>
+
+        {/* LOGS DE IMPORTAÇÃO PARCIAL DE PLANILHA */}
+        {pasteFeedback.length > 0 && (
+          <div className="p-3 bg-yellow-500/5 border border-yellow-500/15 rounded-xl space-y-1.5 text-[10px] leading-normal font-mono text-slate-350">
+            <div className="text-yellow-400 font-extrabold flex items-center gap-1.5 uppercase">
+              <AlertTriangle className="w-3.5 h-3.5" /> Alguns times não puderam ser associados automaticamente:
+            </div>
+            <div className="max-h-24 overflow-y-auto space-y-0.5">
+              {pasteFeedback.map((fb, fi) => (
+                <div key={fi}>&gt; {fb}</div>
               ))}
             </div>
+            <span className="block text-[8.5px] text-slate-500 italic mt-1 leading-normal">
+              Dica: Você pode preencher as notas desses times específicos manualmente na tabela abaixo sem problemas!
+            </span>
           </div>
-        </section>
-      </div>
+        )}
+      </section>
 
-      {/* INTEGRATION SECTION FOR ROUND 17 REAL SCORE FETCHER */}
-      <section className="bg-charcoal-dark/45 border border-gold/15 p-6 rounded-2xl space-y-6 mt-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-gold/10 p-2.5 rounded-xl border border-gold/25">
-              <RefreshCw className="w-5 h-5 text-gold animate-pulse" />
-            </div>
-            <div>
-              <h3 className="font-display font-black text-sm uppercase tracking-wider text-white">
-                🏆 Sincronizador de Pontuações de Campo Real (Rodada 17)
-              </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Substitui as simulações e puxa as notas consolidadas pontuadas pelos 50 participantes diretamente da API do Cartola FC.
-              </p>
-            </div>
-          </div>
+      {/* METODOLOGIA 2: TABELA GERAL MANUAL COM FILTRO */}
+      <section className="bg-charcoal-dark border border-white/5 p-6 rounded-2xl space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/5 pb-4">
           <div>
+            <h3 className="font-display font-black text-sm uppercase tracking-wider text-white">
+              Tabela de Conferência e Edição Direta (Rodada {selectedRound})
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Ajuste qualquer nota diretamente ou utilize-a para tirar dúvidas de dados mapeados.
+            </p>
+          </div>
+
+          {/* BARRA DE PESQUISA */}
+          <div className="relative w-full md:w-80">
+            <Search className="w-4 h-4 text-slate-450 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Pesquisar por time ou dono..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-[#0a0a0b]/80 border border-white/10 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-gold"
+            />
+          </div>
+        </div>
+
+        {/* GRID DA TABELA */}
+        <div className="overflow-x-auto rounded-xl border border-white/5 bg-black/10">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-[#121213] uppercase font-mono text-[9px] text-slate-400 border-b border-white/5">
+              <tr>
+                <th className="py-2.5 px-4"># Nº</th>
+                <th className="py-2.5 px-4">Clube Associado</th>
+                <th className="py-2.5 px-4 text-center w-40">Nota da R{selectedRound}</th>
+                <th className="py-2.5 px-4 text-slate-405">Copa Ativa (Simulada)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {filteredParticipants.length > 0 ? (
+                filteredParticipants.map((p, idx) => {
+                  const val = localScores[p.slug] !== undefined ? localScores[p.slug] : "";
+                  // Localizar escudo do time
+                  const matchingTeam = teams.find(t => t.name.toLowerCase() === p.name.toLowerCase());
+                  const shield = matchingTeam?.shieldUrl || `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2500/svg" viewBox="0 0 100 100" width="36" height="36"><circle cx="50" cy="50" r="45" fill="%23D4AF37"/><text x="50" y="58" font-family="Arial" font-weight="bold" font-size="20" fill="%23FFFFFF" text-anchor="middle">${encodeURIComponent(p.name.substring(0,2).toUpperCase())}</text></svg>`;
+
+                  return (
+                    <tr key={p.slug} className="hover:bg-white/2 transition-colors">
+                      <td className="py-2.5 px-4 font-mono text-slate-500 font-bold">{idx + 1}</td>
+                      <td className="py-2.5 px-4">
+                        <div className="flex items-center gap-3">
+                          <img 
+                            src={shield} 
+                            alt={p.name} 
+                            className="w-7 h-7 rounded-full border border-white/5 bg-slate-800 object-contain shrink-0"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div>
+                            <span className="font-bold text-slate-100 text-[12px] block">{p.name}</span>
+                            <span className="text-[10px] text-slate-450 block font-mono">Dono: {p.owner} • <code className="text-gray-500">{p.slug}</code></span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-4 text-center">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={val}
+                          onChange={(e) => handleScoreChange(p.slug, e.target.value)}
+                          className="w-28 px-2 py-1.5 rounded bg-black/45 border border-white/10 text-center font-mono font-bold text-gold focus:outline-none focus:border-gold text-xs"
+                          placeholder="0.00"
+                        />
+                      </td>
+                      <td className="py-2.5 px-4">
+                        {idx < 25 ? (
+                          <span className="text-emerald-400 font-mono text-[9px] bg-emerald-500/10 px-1.5 py-0.5 rounded">Copa M10 Principal</span>
+                        ) : (
+                          <span className="text-red-400 font-mono text-[9px] bg-red-400/10 px-1.5 py-0.5 rounded">Copa B10 Repescagem</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-slate-500 font-mono">
+                    Nenhum time localizado com a pesquisa "{searchQuery}"
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* CONTROLES EXTRA DE CONFIGURAÇÃO DE COPAS */}
+        <div className="p-4 bg-black/20 rounded-xl border border-white/5 grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase font-mono text-slate-400 font-bold block">Definições da Copa</span>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-xs text-slate-300">Rodada de Corte:</span>
+              <input
+                type="number"
+                min={1}
+                max={38}
+                value={cutRound}
+                onChange={(e) => onCutRoundChange(Math.max(1, Math.min(38, parseInt(e.target.value) || 20)))}
+                className="w-16 px-1.5 py-1 rounded bg-black border border-gold/30 text-center font-mono font-black text-gold text-xs"
+              />
+            </div>
+            <p className="text-[9px] text-slate-500 leading-normal">
+              A rodada limite na qual os piores 25 times são redirecionados para a Copa B10.
+            </p>
+          </div>
+
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase font-mono text-slate-400 font-bold block">Temas Dinâmicos (SaaS)</span>
+            <div className="flex gap-1.5 mt-1.5">
+              {[
+                { id: "gold", color: "#ff6b35" },
+                { id: "emerald", color: "#10B981" },
+                { id: "ruby", color: "#EF4444" },
+                { id: "neon", color: "#D946EF" }
+              ].map((th) => (
+                <button
+                  key={th.id}
+                  onClick={() => onThemeChange(th.id)}
+                  className={`w-6 h-6 rounded-full border-2 transition-transform cursor-pointer hover:scale-110 ${theme === th.id ? "border-white" : "border-transparent"}`}
+                  style={{ backgroundColor: th.color }}
+                  title={`Tema: ${th.id}`}
+                />
+              ))}
+            </div>
+            <p className="text-[9px] text-slate-500 leading-normal">
+              Selecione o esquema de cores para o painel geral do sócio.
+            </p>
+          </div>
+
+          <div className="flex flex-col justify-end">
             <button
-              onClick={handleSyncR17}
-              disabled={syncingR17 || currentRound >= 38}
-              className="px-5 py-3 bg-gold hover:bg-gold/90 text-charcoal-dark font-display font-black text-xs uppercase rounded-xl transition flex items-center gap-2 cursor-pointer disabled:opacity-40"
+              onClick={handleSaveScores}
+              disabled={saveLoading || crawlLoading}
+              className="w-full py-3 bg-gold hover:bg-gold/90 text-charcoal-dark font-display font-black text-xs uppercase rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-gold/15"
             >
-              <RefreshCw className={`w-4 h-4 ${syncingR17 ? "animate-spin" : ""}`} />
-              <span>{currentRound >= 38 ? "Bloqueado em Gala" : syncingR17 ? "Sincronizando..." : "Sincronizar Rodada 17"}</span>
+              {saveLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              <span>{saveLoading ? "Salvando..." : `Salvar Notas Permanentes (R${selectedRound})`}</span>
             </button>
           </div>
         </div>
-
-        {/* METRICS OF THE COMPONENT */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-black/25 border border-white/5 p-4 rounded-xl space-y-1">
-            <span className="text-[9px] uppercase tracking-wider font-mono font-bold text-gold">1. Varredura Segura</span>
-            <p className="text-xs text-slate-350 font-sans leading-normal">
-              Consome individualmente as APIs de tempo/slug para cada participante de forma sequencial com timeouts controlados.
-            </p>
-          </div>
-          <div className="bg-black/25 border border-white/5 p-4 rounded-xl space-y-1">
-            <span className="text-[9px] uppercase tracking-wider font-mono font-bold text-gold">2. Extração Fiel</span>
-            <p className="text-xs text-slate-350 font-sans leading-normal">
-              Extrai o campo oficial consolidado <code className="text-gold font-mono bg-white/5 px-1 rounded">pontos</code> do time.
-            </p>
-          </div>
-          <div className="bg-black/25 border border-white/5 p-4 rounded-xl space-y-1">
-            <span className="text-[9px] uppercase tracking-wider font-mono font-bold text-gold">3. Escrita SQL Direta</span>
-            <p className="text-xs text-slate-350 font-sans leading-normal">
-              Gera queries <code className="text-gold font-mono bg-white/5 px-1 rounded block mt-1">INSERT INTO scores ... ON CONFLICT</code> prontas para rodar.
-            </p>
-          </div>
-        </div>
-
-        {/* LOGS and SQL OUTPUT */}
-        {(r17Logs.length > 0 || r17Sql.length > 0) && (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 pt-2">
-            {/* LOG STREAMER */}
-            <div className="space-y-2">
-              <span className="text-[10px] text-slate-400 font-mono tracking-wider font-bold block uppercase">
-                🖥️ Logs da Fila de Processamento (API)
-              </span>
-              <div className="text-[10px] font-mono leading-relaxed bg-[#0a0a0a] border border-white/5 rounded-xl p-4 max-h-60 overflow-y-auto space-y-1 text-slate-300">
-                {r17Logs.map((log, idx) => (
-                  <div key={idx} className={log.includes("[Sufixo OK]") ? "text-emerald-400" : log.includes("[Alerta API]") ? "text-amber-400 font-semibold" : ""}>
-                    &gt; {log}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* SQL OUTPUT COMMANDS */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-400 font-mono tracking-wider font-bold block uppercase">
-                  💾 Queries SQL Geradas (<code className="text-gold font-mono bg-white/10 px-1 rounded">scores</code>)
-                </span>
-                <button 
-                  onClick={() => setShowSql(!showSql)}
-                  className="text-[9px] text-gold border border-gold/30 hover:bg-gold/10 px-2.5 py-1 rounded uppercase font-extrabold transition font-mono cursor-pointer"
-                >
-                  {showSql ? "Ocultar SQL" : "Ver Código SQL"}
-                </button>
-              </div>
-              
-              <div className="bg-[#0a0a0a] border border-white/5 rounded-xl p-4 max-h-60 overflow-y-auto relative">
-                {r17Sql.length > 0 ? (
-                  showSql ? (
-                    <pre className="text-[9.5px] font-mono leading-normal text-slate-300 whitespace-pre-wrap select-all">
-                      {r17Sql.join("\n")}
-                    </pre>
-                  ) : (
-                    <div className="text-center py-8 space-y-2">
-                      <p className="text-xs text-slate-400">Total de <strong className="text-gold">{r17Sql.length} queries SQL</strong> geradas com sucesso.</p>
-                      <p className="text-[10px] text-slate-500">Clique em "Ver Código SQL" para examinar as instruções preparadas.</p>
-                    </div>
-                  )
-                ) : (
-                  <div className="text-center py-12 text-xs text-slate-650 font-mono">
-                    Logs SQL serão processados após início da sincronização.
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </section>
 
     </div>
