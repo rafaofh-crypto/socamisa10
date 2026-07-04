@@ -198,6 +198,295 @@ export function processarDadosCartola(data: any): CartolaData {
   };
 }
 
+async function fetchSheetsConfig(): Promise<{ spreadsheetUrl: string; tabName: string }> {
+  // First, check localStorage for a custom client-saved config
+  const localUrl = localStorage.getItem("customSpreadsheetUrl") || localStorage.getItem("isM10Enabled_temp_sheetUrl"); // support admin page custom inputs
+  const localTab = localStorage.getItem("customTabName");
+  if (localUrl) {
+    return { spreadsheetUrl: localUrl, tabName: localTab || "" };
+  }
+
+  // Next, try `/api/sheets/config`
+  try {
+    const res = await axios.get("/api/sheets/config", { timeout: 3000 });
+    if (res.data && res.data.spreadsheetUrl) {
+      return res.data;
+    }
+  } catch (err) {
+    console.warn("[ETL] Falha ao ler /api/sheets/config, tentando /sheets_config.json estático...", err);
+  }
+
+  // Next, try `/sheets_config.json` static file
+  try {
+    const res = await axios.get("/sheets_config.json", { timeout: 3000 });
+    if (res.data && res.data.spreadsheetUrl) {
+      return res.data;
+    }
+  } catch (err) {
+    console.warn("[ETL] Falha ao ler /sheets_config.json, usando padrão estático.", err);
+  }
+
+  // Default fallback URL
+  return {
+    spreadsheetUrl: "https://docs.google.com/spreadsheets/d/1wGw0eOvoqS-Iv_qSqzpRBSPA815SqHFiEu2TMk0O_Lk/edit",
+    tabName: ""
+  };
+}
+
+export async function syncCartolaDataFromGoogleSheetsDirectly(
+  spreadsheetUrl: string,
+  tabName: string,
+  onProgress?: (msg: string) => void
+): Promise<CartolaData> {
+  onProgress?.("Conectando diretamente à planilha do Google...");
+  
+  let spreadsheetId = spreadsheetUrl.trim();
+  if (spreadsheetUrl.includes("docs.google.com/spreadsheets")) {
+    const match = spreadsheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+    if (match) {
+      spreadsheetId = match[1];
+    }
+  }
+
+  let exportUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`;
+  if (tabName) {
+    exportUrl += `&sheet=${encodeURIComponent(tabName)}`;
+  }
+
+  onProgress?.("Baixando dados da planilha via CORS...");
+  const response = await axios.get(exportUrl, {
+    timeout: 15000
+  });
+
+  if (response.status !== 200 || !response.data) {
+    throw new Error(`Resposta do Google Sheets inválida: Status ${response.status}`);
+  }
+
+  const csvText = response.data;
+  onProgress?.("Planilha importada! Analisando estrutura...");
+
+  // Parser local de CSV
+  const parseCSV = (text: string): string[][] => {
+    const lines: string[][] = [];
+    let row: string[] = [];
+    let entry = "";
+    let insideQuote = false;
+
+    const firstLine = text.split('\n')[0] || '';
+    const semicolons = (firstLine.match(/;/g) || []).length;
+    const commas = (firstLine.match(/,/g) || []).length;
+    const delimiter = semicolons > commas ? ';' : ',';
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
+
+      if (char === '"') {
+        if (insideQuote && nextChar === '"') {
+          entry += '"';
+          i++;
+        } else {
+          insideQuote = !insideQuote;
+        }
+      } else if (char === delimiter && !insideQuote) {
+        row.push(entry.trim());
+        entry = "";
+      } else if ((char === '\n' || char === '\r') && !insideQuote) {
+        if (char === '\r' && nextChar === '\n') {
+          i++;
+        }
+        row.push(entry.trim());
+        lines.push(row);
+        row = [];
+        entry = "";
+      } else {
+        entry += char;
+      }
+    }
+    if (row.length > 0 || entry !== "") {
+      row.push(entry.trim());
+      lines.push(row);
+    }
+    return lines.filter(r => r.length > 0 && r.some(c => c.trim() !== ""));
+  };
+
+  const rows = parseCSV(csvText);
+  if (rows.length < 3) {
+    throw new Error("Formato de planilha inválido. Deve ter ao menos 3 linhas (cabeçalhos e dados).");
+  }
+
+  const row0 = rows[0];
+  const row1 = rows[1];
+
+  // Mapear colunas de rodadas e tipos
+  const columnMapping: { colIdx: number; round: number; type: "score" | "patrimonio" }[] = [];
+  let currentRoundName = "";
+
+  for (let colIdx = 1; colIdx < row1.length; colIdx++) {
+    const r0Val = row0[colIdx] ? row0[colIdx].trim() : "";
+    if (r0Val) {
+      currentRoundName = r0Val;
+    }
+
+    if (currentRoundName) {
+      const rMatch = currentRoundName.match(/RODADA\s*(\d+)/i);
+      if (rMatch) {
+         const roundNumber = parseInt(rMatch[1]);
+         const typeVal = row1[colIdx] ? row1[colIdx].trim().toLowerCase() : "";
+         
+         if (typeVal.includes("pont") || typeVal.includes("nota") || typeVal.includes("score") || typeVal.includes("pts")) {
+           columnMapping.push({ colIdx, round: roundNumber, type: "score" });
+         } else if (typeVal.includes("patr") || typeVal.includes("cart") || typeVal.includes("val")) {
+           columnMapping.push({ colIdx, round: roundNumber, type: "patrimonio" });
+         }
+      }
+    }
+  }
+
+  if (columnMapping.length === 0) {
+    throw new Error("Não foi possível mapear nenhuma coluna de rodada (ex: 'RODADA 01' e 'Pontuação').");
+  }
+
+  // Encontrar a rodada máxima mapeada
+  const mappedRounds = Array.from(new Set(columnMapping.map(c => c.round))).sort((a,b) => a-b);
+  const maxActiveRound = mappedRounds.length > 0 ? mappedRounds[mappedRounds.length - 1] : 17;
+
+  onProgress?.(`Estrutura mapeada! Encontradas rodadas de 1 a ${maxActiveRound}. Mapeando times...`);
+
+  const syncedScores: Record<number, Record<string, number>> = {};
+  const syncedPatries: Record<number, Record<string, number>> = {};
+
+  const normalizeLocal = (str: string) => {
+    return str
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+  };
+
+  const findTeamInMembers = (nameRaw: string) => {
+    const searchKey = normalizeLocal(nameRaw);
+    if (!searchKey) return null;
+
+    let found = TEAM_MEMBERS.find(p => normalizeLocal(p.name) === searchKey);
+    if (found) return found;
+
+    found = TEAM_MEMBERS.find(p => normalizeLocal(p.owner) === searchKey);
+    if (found) return found;
+
+    found = TEAM_MEMBERS.find(p => {
+      const nK = normalizeLocal(p.name);
+      return nK.includes(searchKey) || searchKey.includes(nK);
+    });
+
+    return found || null;
+  };
+
+  let matchedCount = 0;
+  const teamRecords: Record<string, { scores: Record<number, number>; patrimonios: Record<number, number> }> = {};
+
+  // Inicializar registros para todos os times
+  TEAM_MEMBERS.forEach(t => {
+    teamRecords[t.id] = {
+      scores: {},
+      patrimonios: {}
+    };
+    // Preencher rodadas default com 0
+    for (let r = 1; r <= 38; r++) {
+      teamRecords[t.id].scores[r] = 0;
+      teamRecords[t.id].patrimonios[r] = 100.00;
+    }
+  });
+
+  for (let ri = 2; ri < rows.length; ri++) {
+    const teamNameRaw = rows[ri][0];
+    if (!teamNameRaw) continue;
+
+    const matchedTeam = findTeamInMembers(teamNameRaw);
+    if (!matchedTeam) {
+      console.warn(`Time da planilha "${teamNameRaw}" não correspondido.`);
+      continue;
+    }
+
+    matchedCount++;
+    const record = teamRecords[matchedTeam.id];
+
+    columnMapping.forEach(({ colIdx, round, type }) => {
+      const valRaw = rows[ri][colIdx];
+      if (valRaw !== undefined && valRaw.trim() !== "") {
+        const val = parseFloat(valRaw.replace(",", "."));
+        if (!isNaN(val)) {
+          if (type === "score") {
+            record.scores[round] = Number(val.toFixed(2));
+            if (!syncedScores[round]) syncedScores[round] = {};
+            const teamSlug = matchedTeam.name.toLowerCase().trim().replace(/\s+/g, '-').normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            syncedScores[round][teamSlug] = Number(val.toFixed(2));
+          } else {
+            record.patrimonios[round] = Number(val.toFixed(2));
+            if (!syncedPatries[round]) syncedPatries[round] = {};
+            const teamSlug = matchedTeam.name.toLowerCase().trim().replace(/\s+/g, '-').normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            syncedPatries[round][teamSlug] = Number(val.toFixed(2));
+          }
+        }
+      }
+    });
+  }
+
+  // Reconstituir patrimônios acumulados/propagar último valor
+  TEAM_MEMBERS.forEach(t => {
+    const record = teamRecords[t.id];
+    let lastKnownPatr = 100.00;
+    for (let r = 1; r <= 38; r++) {
+      if (record.patrimonios[r] !== undefined && record.patrimonios[r] !== 100.00) {
+        lastKnownPatr = record.patrimonios[r];
+      } else {
+        record.patrimonios[r] = lastKnownPatr;
+      }
+    }
+  });
+
+  onProgress?.(`Mapeamento direto bem sucedido! Associados ${matchedCount} de ${TEAM_MEMBERS.length} times.`);
+
+  const updatedTimes: CartolaTeam[] = TEAM_MEMBERS.map(t => {
+    const record = teamRecords[t.id];
+    
+    // Obter pontuação da rodada ativa
+    const roundScore = record.scores[maxActiveRound] || 0;
+
+    // Calcular total do campeonato até a rodada ativa
+    let totalScore = 0;
+    for (let r = 1; r <= maxActiveRound; r++) {
+      totalScore += record.scores[r] || 0;
+    }
+
+    return {
+      ...t,
+      scores: record.scores,
+      patrimonios: record.patrimonios,
+      pontos: {
+        campeonato: Number(totalScore.toFixed(2)),
+        rodada: Number(roundScore.toFixed(2))
+      }
+    } as any;
+  });
+
+  return {
+    liga: {
+      id: 169382,
+      nome: "Só Camisa 10 2026",
+      slug: "so-camisa-10-2026",
+      temporada: 2026
+    },
+    times: updatedTimes,
+    rodadaAtual: maxActiveRound,
+    rodadas: [],
+    offlineFallback: false,
+    fallbackReason: `Planilha Google Sincronizada via Cliente (Rodada ${maxActiveRound})`,
+    syncedRounds: mappedRounds,
+    allSyncedScores: syncedScores
+  };
+}
+
 export async function syncCartolaData(onProgress?: (msg: string) => void, token?: string): Promise<CartolaData> {
   const leagueSlug = localStorage.getItem('cartolaLeagueSlug') || 'so-camisa-10-2026';
   
@@ -225,11 +514,25 @@ export async function syncCartolaData(onProgress?: (msg: string) => void, token?
     return dadosProcessados;
   } catch (proxyError: any) {
     const errorMsg = proxyError.response?.data?.message || proxyError.response?.data?.mensagem || proxyError.message || "Falha na conexão";
-    console.info('[ETL] Servidor indisponível ou em modo offline, carregando contingência local...', errorMsg);
-    onProgress?.(`[Sincronização] Falhou: ${errorMsg}. Carregando contingência estática local...`);
+    console.info('[ETL] Servidor indisponível ou em modo offline, tentando sincronizar diretamente com o Google Sheets...', errorMsg);
+    onProgress?.(`Conectando diretamente à planilha do Google...`);
     
-    console.log('[ETL] Utilizando os dados offline locais integrados ao SaaS.');
-    
+    try {
+      const config = await fetchSheetsConfig();
+      if (config.spreadsheetUrl) {
+        const directData = await syncCartolaDataFromGoogleSheetsDirectly(config.spreadsheetUrl, config.tabName, onProgress);
+        
+        localStorage.setItem('cartolaData', JSON.stringify(directData));
+        localStorage.setItem('cartolaDataTimestamp', new Date().toISOString());
+        localStorage.setItem('cartolaDataSource', 'DIRECT_SHEETS');
+        
+        return directData;
+      }
+    } catch (sheetError: any) {
+      console.error('[ETL] Falha ao sincronizar diretamente com o Google Sheets, recorrendo a dados locais:', sheetError.message);
+      onProgress?.(`[Sincronização] Falha na planilha direta: ${sheetError.message}. Carregando contingência estática local...`);
+    }
+
     // Fallback robusto de alta fidelidade
     const mockResult: CartolaData = {
       liga: {
@@ -250,3 +553,4 @@ export async function syncCartolaData(onProgress?: (msg: string) => void, token?
     return mockResult;
   }
 }
+

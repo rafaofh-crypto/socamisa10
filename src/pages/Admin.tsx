@@ -138,49 +138,115 @@ export default function Admin({
   const [sheetsLogs, setSheetsLogs] = useState<string[]>([]);
 
   useEffect(() => {
-    // Carregar configurações de planilha salvas pelo servidor
+    // Carregar configurações de planilha de forma resiliente (Servidor ou estático)
     fetch("/api/sheets/config")
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("API não disponível");
+        return res.json();
+      })
       .then(data => {
         if (data.spreadsheetUrl) setSpreadsheetUrl(data.spreadsheetUrl);
         if (data.tabName) setTabName(data.tabName);
       })
-      .catch(err => console.error("Erro ao carregar sheets config", err));
+      .catch(err => {
+        console.warn("API de Sheets não disponível, buscando configuração estática do repositório...", err);
+        fetch("/sheets_config.json")
+          .then(res => res.json())
+          .then(data => {
+            if (data.spreadsheetUrl) {
+              setSpreadsheetUrl(localStorage.getItem("customSpreadsheetUrl") || data.spreadsheetUrl);
+              setTabName(localStorage.getItem("customTabName") || data.tabName);
+            }
+          })
+          .catch(err2 => {
+            console.error("Falha ao ler sheets_config.json estático", err2);
+            setSpreadsheetUrl(localStorage.getItem("customSpreadsheetUrl") || "https://docs.google.com/spreadsheets/d/1wGw0eOvoqS-Iv_qSqzpRBSPA815SqHFiEu2TMk0O_Lk/edit");
+            setTabName(localStorage.getItem("customTabName") || "");
+          });
+      });
   }, []);
 
   const handleSheetsSync = async () => {
     setSheetsLoading(true);
-    setSheetsLogs([`[${new Date().toLocaleTimeString("pt-BR")}] Conectando ao robô de importação...`]);
+    setSheetsLogs([`[${new Date().toLocaleTimeString("pt-BR")}] Iniciando processo de sincronização híbrida...`]);
+    
+    // Salvar localmente de imediato para persistência no navegador do usuário
+    localStorage.setItem("customSpreadsheetUrl", spreadsheetUrl);
+    localStorage.setItem("customTabName", tabName);
+
     try {
-      const response = await fetch("/api/sheets/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      // 1. Tentar salvar a configuração no servidor (em segundo plano, silenciosamente)
+      try {
+        await fetch("/api/sheets/config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ spreadsheetUrl, tabName })
+        });
+      } catch (e) {
+        console.warn("Não foi possível salvar no servidor. Estamos em um ambiente estático (Vercel/GitHub Pages).");
+      }
+
+      let serverSyncSuccess = false;
+      let serverLogs: string[] = [];
+      let serverMsg = "";
+
+      // 2. Tentar sincronizar via API do servidor (se disponível)
+      try {
+        const response = await fetch("/api/sheets/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            spreadsheetUrl,
+            tabName,
+            selectedRound,
+            syncAllRounds
+          })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.logs) serverLogs = result.logs;
+          serverMsg = result.message;
+          serverSyncSuccess = true;
+        }
+      } catch (e) {
+        console.warn("Servidor de sincronização não respondeu ou indisponível.");
+      }
+
+      if (serverSyncSuccess) {
+        setSheetsLogs(serverLogs);
+        setStatusMessage({
+          type: "success",
+          text: serverMsg || `Parabéns! Planilha sincronizada com sucesso via servidor.`
+        });
+        onSyncTrigger();
+      } else {
+        // 3. Fallback inteligente: Sincronização direta no Navegador (Excelente para Vercel!)
+        setSheetsLogs(prev => [...prev, `[Sincronizador Híbrido] Sincronização direta por CORS iniciada no navegador...`]);
+        
+        const { syncCartolaDataFromGoogleSheetsDirectly } = await import("../services/cartolaService");
+        
+        const directData = await syncCartolaDataFromGoogleSheetsDirectly(
           spreadsheetUrl,
           tabName,
-          selectedRound,
-          syncAllRounds
-        })
-      });
+          (msg) => setSheetsLogs(prev => [...prev, `[CORS Client] ${msg}`])
+        );
 
-      const result = await response.json();
-      if (result.logs) {
-        setSheetsLogs(result.logs);
+        localStorage.setItem('cartolaData', JSON.stringify(directData));
+        localStorage.setItem('cartolaDataTimestamp', new Date().toISOString());
+        localStorage.setItem('cartolaDataSource', 'DIRECT_SHEETS');
+
+        setStatusMessage({
+          type: "success",
+          text: `Planilha sincronizada diretamente pelo navegador! Todos os dados e rodadas oficiais foram carregados com sucesso.`
+        });
+        onSyncTrigger();
       }
-
-      if (!response.ok) {
-        throw new Error(result.message || `Falhou: código HTTP ${response.status}`);
-      }
-
-      setStatusMessage({
-        type: "success",
-        text: result.message || `Parabéns! Sua planilha do Google Sheets foi sincronizada e carregada com sucesso!`
-      });
-      onSyncTrigger();
     } catch (err: any) {
+      setSheetsLogs(prev => [...prev, `[Erro] Falha: ${err.message}`]);
       setStatusMessage({
         type: "error",
-        text: `Sincronização Google Sheets falhou: ${err.message}`
+        text: `Falha na sincronização Google Sheets: ${err.message}`
       });
     } finally {
       setSheetsLoading(false);
