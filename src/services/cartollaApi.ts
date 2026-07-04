@@ -259,16 +259,99 @@ function generateScoresForTeamEx(slug: string, teamIndex: number): Record<number
   return scores;
 }
 
+export const SHIELD_MAP: Record<string, string> = {
+  "sovaco da pantera": "Sovaco da Pantera.avif",
+  "onodi floripa": "Onodi Floripa.avif",
+  "real barreiros fc": "Real Barreiros FC.avif",
+  "fortaleza da ilha": "Fortaliza da ilha.avif",
+  "jammes rodriguez": "Jammes Rodriguez.avif",
+  "dudumathias fc": "Dudu Mathias FC.avif",
+  "barbeariadc": "Barbeariadc.avif",
+  "carlao07": "Carlao07.avif",
+  "crf galo": "CRF GALO.avif",
+  "camisa pesada sa": "Camisa Pesada SA.avif",
+  "chinchila cabeçuda": "Chinchila cabecuda.avif",
+  "chinchila cabecuda": "Chinchila cabecuda.avif",
+  "futcafa": "Futcafa.avif",
+  "fernandoguinho": "Fernandoguinho.avif",
+  "gd lomeusc": "GD LOMEUSC.avif",
+  "montinho artilheiro fc": "Montinho Artilheiro FC.avif",
+  "ninja do ocidente": "NINJA DO OCIDENTE.avif",
+  "lenoch 'n' roll": "LENOCH 'N' ROLL.avif",
+  "dida82 fc": "Dida82 FC.avif",
+  "dois vizinhos sa": "Dois Vizinhos SA.avif",
+  "pretinho99 f.c": "Pretinho99 FC.avif",
+  "pretinho99 fc": "Pretinho99 FC.avif",
+  "c.r.pirika": "C.R.Pirika.avif",
+  "teampimenta": "TeamPimenta.avif",
+  "lendinhaxx fc": "Lendinhaxx fc.avif",
+  "dedeyy fc": "Dedeyy Fc.avif",
+  "rivers of babylon": "Rivers of Babylon.avif",
+  "jberetta": "JBERETTA.avif",
+  "everton ultramaratonista f.c": "Everton UltraMaratonista FC.avif",
+  "everton ultramaratonista fc": "Everton UltraMaratonista FC.avif",
+  "kaka f c": "kaka F C.avif",
+  "mazanza futebol clube": "Mazanza Futebol Clube.avif",
+  "avaih f c": "Avaih F C.avif",
+  "ribeiro copeiro 84 f.c": "Ribeiro Copeiro 84 FC.avif",
+  "ribeiro copeiro 84 fc": "Ribeiro Copeiro 84 FC.avif",
+  "marixco fc": "marixco fc.avif",
+  "capita buske": "capita Buske.avif",
+  "avahy costa da lagoa": "Avahy Costa da Lagoa.avif",
+  "abedaozinho": "Abedaozinho.avif",
+  "rolo compressor 4lib": "Rolo Compressor 4Lib.avif",
+  "tainha ovada fc": "Tainha Ovada FC.avif",
+  "monges tibetanos fc": "Monges tibetanos FC.avif",
+  "floripamengao": "Floripamengao.avif",
+  "abedao": "Abedao.avif",
+  "furacão k7 fc": "FURACÃO K7 FC.avif",
+  "furacao k7 fc": "FURACÃO K7 FC.avif",
+  "diferencial f.c.": "DIFERENCIAL FC.avif",
+  "diferencial fc": "DIFERENCIAL FC.avif",
+  "gui fifla": "Gui FiFla.avif",
+  "delirio futebol e festa": "Delirio Futebol e Festa.avif",
+  "campecheiro_futz": "campecheiro_futz.avif",
+  "dique-sc": "dique-sc.avif",
+  "casquinha ec": "Casquinha EC.avif",
+  "e c cascalho": "E C CASCALHO.avif",
+  "figueirense fc o maior": "Figueirense FC o maior.avif",
+  "brazzers mkl fc": "Brazzers MKL FC.avif"
+};
+
+export function getShieldUrlForTeam(teamName: string, fallbackUrl: string): string {
+  const key = teamName.toLowerCase().trim()
+    .replace(/\s+/g, ' ')
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, ""); // Normalizes accents
+  
+  if (SHIELD_MAP[key]) {
+    return `/escudos/${SHIELD_MAP[key]}`;
+  }
+  
+  // Fuzzy match
+  const mapKeys = Object.keys(SHIELD_MAP);
+  for (const mapKey of mapKeys) {
+    const normalizedMapKey = mapKey.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (key.includes(normalizedMapKey) || normalizedMapKey.includes(key)) {
+      return `/escudos/${SHIELD_MAP[mapKey]}`;
+    }
+  }
+  
+  return fallbackUrl;
+}
+
 // Initialized above to prevent TDZ issues
 
 export const TEAM_MEMBERS: CartolaTeam[] = OFFICIAL_PARTICIPANTS.map((team, index) => {
   const color = SHIELD_COLORS[index % SHIELD_COLORS.length];
   const name = team.name;
+  const fallbackSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><circle cx="50" cy="50" r="45" fill="${encodeURIComponent(color.bg)}" stroke="${encodeURIComponent(color.border)}" stroke-width="5"/><text x="50" y="58" font-family="Montserrat, Arial, sans-serif" font-weight="bold" font-size="24" fill="${encodeURIComponent(color.text)}" text-anchor="middle">${encodeURIComponent(name.substring(0, 2).toUpperCase())}</text></svg>`;
+  
   return {
     id: `team_${index + 1}`,
     name: name,
     owner: team.owner,
-    shieldUrl: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><circle cx="50" cy="50" r="45" fill="${encodeURIComponent(color.bg)}" stroke="${encodeURIComponent(color.border)}" stroke-width="5"/><text x="50" y="58" font-family="Montserrat, Arial, sans-serif" font-weight="bold" font-size="24" fill="${encodeURIComponent(color.text)}" text-anchor="middle">${encodeURIComponent(name.substring(0, 2).toUpperCase())}</text></svg>`,
+    shieldUrl: getShieldUrlForTeam(name, fallbackSvg),
     scores: generateScoresForTeamEx(team.slug, index)
   };
 });

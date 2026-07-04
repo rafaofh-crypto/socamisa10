@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
-import { TEAM_MEMBERS } from './cartollaApi';
+import { TEAM_MEMBERS, getShieldUrlForTeam } from './cartollaApi';
 
 export interface CartolaTeam {
   id: string;
@@ -177,11 +177,8 @@ export function processarDadosCartola(data: any): CartolaData {
       const generatedScores = generateHistoricalScores(timeId, pontosCampeonato, rodadaAtual, ultimaPontuacao);
 
       // Make sure we have a valid SVG or render fallback shape
-      let shieldUrl = rawShield;
-      if (!shieldUrl) {
-        // SVG Fallback Shield
-        shieldUrl = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><circle cx="50" cy="50" r="45" fill="%23D4AF37" stroke="%23121212" stroke-width="5"/><text x="50" y="58" font-family="Montserrat, sans-serif" font-weight="bold" font-size="22" fill="%23FFFFFF" text-anchor="middle">${encodeURIComponent(rawNome.substring(0, 2).toUpperCase())}</text></svg>`;
-      }
+      const fallbackSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><circle cx="50" cy="50" r="45" fill="%23D4AF37" stroke="%23121212" stroke-width="5"/><text x="50" y="58" font-family="Montserrat, sans-serif" font-weight="bold" font-size="22" fill="%23FFFFFF" text-anchor="middle">${encodeURIComponent(rawNome.substring(0, 2).toUpperCase())}</text></svg>`;
+      const shieldUrl = getShieldUrlForTeam(rawNome, rawShield || fallbackSvg);
 
       return {
         id: timeId,
