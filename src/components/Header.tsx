@@ -5,15 +5,23 @@ interface HeaderProps {
   activeTab: "dashboard" | "rodada" | "mensal" | "copa" | "copa_b10" | "regras" | "admin";
   setActiveTab: (tab: "dashboard" | "rodada" | "mensal" | "copa" | "copa_b10" | "regras" | "admin") => void;
   currentRound: number;
+  isM10Enabled?: boolean;
+  isB10Enabled?: boolean;
 }
 
-export default function Header({ activeTab, setActiveTab, currentRound }: HeaderProps) {
+export default function Header({ 
+  activeTab, 
+  setActiveTab, 
+  currentRound,
+  isM10Enabled = true,
+  isB10Enabled = true
+}: HeaderProps) {
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: Trophy },
     { id: "rodada", label: "Destaques", icon: Star },
     { id: "mensal", label: "Mensal", icon: Calendar },
-    { id: "copa", label: "Copa M10", icon: Award },
-    { id: "copa_b10", label: "Copa B10", icon: Crown },
+    ...(isM10Enabled ? [{ id: "copa" as const, label: "Copa M10", icon: Award }] : []),
+    ...(isB10Enabled ? [{ id: "copa_b10" as const, label: "Copa B10", icon: Crown }] : []),
     { id: "regras", label: "Regras", icon: BookOpen },
     { id: "admin", label: "Admin", icon: Settings }
   ] as const;

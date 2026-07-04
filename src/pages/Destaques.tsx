@@ -27,6 +27,10 @@ const getSlug = (name: string) => name.toLowerCase().normalize("NFD").replace(/[
 
 // Function to calculate deterministic but realistic patrimonio for teams
 function getPatrimonioForSelectedRound(team: CartolaTeam, selectedRound: number): number {
+  if (team.patrimonios && team.patrimonios[selectedRound] !== undefined) {
+    return team.patrimonios[selectedRound];
+  }
+
   const slug = getSlug(team.name);
   if (slug === "onodi-floripa") return 184.20;
   if (slug === "ribeiro-copeiro-84-f-c") return 178.50;

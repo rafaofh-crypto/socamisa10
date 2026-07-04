@@ -20,9 +20,10 @@ interface MataMataProps {
   teams: CartolaTeam[];
   currentRound: number;
   cutRound: number;
+  isSimulatorsEnabled?: boolean;
 }
 
-export default function MataMata({ teams, currentRound, cutRound }: MataMataProps) {
+export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEnabled = true }: MataMataProps) {
   const [subTab, setSubTab] = useState<"classification" | "groups" | "bracket" | "calendar">("classification");
   const [manualScores, setManualScores] = useState<Record<string, { home: number; away: number }>>({});
   const [searchTerm, setSearchTerm] = useState("");
@@ -488,6 +489,7 @@ export default function MataMata({ teams, currentRound, cutRound }: MataMataProp
             manualScores={manualScores} 
             onMatchScoreChange={handleMatchScoreChange} 
             onSimulateCompleteBracket={handleSimulateCompleteBracket} 
+            isSimulatorsEnabled={isSimulatorsEnabled}
           />
         </div>
       )}

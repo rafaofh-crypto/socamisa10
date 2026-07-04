@@ -32,7 +32,29 @@ const getVariation = (teamId: string, month: string) => {
 };
 
 export default function Mensal({ teams, currentRound }: MensalProps) {
-  const [selectedMonth, setSelectedMonth] = useState<string>("Julho");
+  const [selectedMonth, setSelectedMonth] = useState<string>(() => {
+    // Find the month containing the currentRound, or the latest month with played rounds
+    const ALL_MONTHS = [
+      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
+      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ];
+    for (const m of ALL_MONTHS) {
+      const list = MONTH_TO_ROUNDS[m] || [];
+      if (list.includes(currentRound)) {
+        return m;
+      }
+    }
+    // Fallback: find the latest month that has any completed rounds
+    let lastPlayed = "Março";
+    for (const m of ALL_MONTHS) {
+      const list = MONTH_TO_ROUNDS[m] || [];
+      const played = list.filter(r => r <= currentRound);
+      if (played.length > 0) {
+        lastPlayed = m;
+      }
+    }
+    return lastPlayed;
+  });
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
 
   const monthRounds = useMemo(() => {

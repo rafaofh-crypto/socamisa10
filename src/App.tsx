@@ -20,6 +20,38 @@ export default function App() {
   // Application active tab navigation state
   const [activeTab, setActiveTab ] = useState<"dashboard" | "rodada" | "mensal" | "copa" | "copa_b10" | "regras" | "admin" >("dashboard");
 
+  // Visible components states managed by Admin
+  const [isM10Enabled, setIsM10Enabled] = useState<boolean>(() => {
+    return localStorage.getItem("isM10Enabled") !== "false";
+  });
+  const [isB10Enabled, setIsB10Enabled] = useState<boolean>(() => {
+    return localStorage.getItem("isB10Enabled") !== "false";
+  });
+  const [isSimulatorsEnabled, setIsSimulatorsEnabled] = useState<boolean>(() => {
+    return localStorage.getItem("isSimulatorsEnabled") !== "false";
+  });
+
+  const handleM10EnabledChange = (val: boolean) => {
+    setIsM10Enabled(val);
+    localStorage.setItem("isM10Enabled", val ? "true" : "false");
+    if (!val && activeTab === "copa") {
+      setActiveTab("dashboard");
+    }
+  };
+
+  const handleB10EnabledChange = (val: boolean) => {
+    setIsB10Enabled(val);
+    localStorage.setItem("isB10Enabled", val ? "true" : "false");
+    if (!val && activeTab === "copa_b10") {
+      setActiveTab("dashboard");
+    }
+  };
+
+  const handleSimulatorsEnabledChange = (val: boolean) => {
+    setIsSimulatorsEnabled(val);
+    localStorage.setItem("isSimulatorsEnabled", val ? "true" : "false");
+  };
+
   // Derived states from the useCartolaData hook
   const teams = data?.times || [];
   const currentRound = data?.rodadaAtual || 17;
@@ -88,7 +120,13 @@ export default function App() {
       <div className="absolute top-1/3 left-10 w-96 h-96 bg-gold/3 rounded-full filter blur-[120px] pointer-events-none z-0" />
 
       {/* Primary header & Navigation */}
-      <Header activeTab={activeTab} setActiveTab={setActiveTab} currentRound={currentRound} />
+      <Header 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        currentRound={currentRound} 
+        isM10Enabled={isM10Enabled}
+        isB10Enabled={isB10Enabled}
+      />
 
       {/* Main workspace frame */}
       <main className="relative z-10 max-w-7xl mx-auto w-full px-5 py-6 sm:py-8 flex-grow">
@@ -138,6 +176,7 @@ export default function App() {
                     teams={teams} 
                     currentRound={currentRound} 
                     cutRound={cutRound} 
+                    isSimulatorsEnabled={isSimulatorsEnabled}
                   />
                 )}
 
@@ -168,6 +207,12 @@ export default function App() {
                 onThemeChange={setTheme}
                 teams={teams}
                 allSyncedScores={data?.allSyncedScores}
+                isM10Enabled={isM10Enabled}
+                onM10EnabledChange={handleM10EnabledChange}
+                isB10Enabled={isB10Enabled}
+                onB10EnabledChange={handleB10EnabledChange}
+                isSimulatorsEnabled={isSimulatorsEnabled}
+                onSimulatorsEnabledChange={handleSimulatorsEnabledChange}
               />
             )}
 

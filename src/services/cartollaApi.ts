@@ -6,22 +6,23 @@ export interface CartolaTeam {
   owner: string;
   shieldUrl: string;
   scores: Record<number, number>; // Round -> Score mapping
+  patrimonios?: Record<number, number>; // Round -> Patrimonio mapping
   is_survivor?: boolean; // Whether the team survived the 'Esperneio'
 }
 
 export const MONTH_TO_ROUNDS: Record<string, number[]> = {
   "Janeiro": [],
   "Fevereiro": [],
-  "Março": [],
-  "Abril": [1, 2, 3],
-  "Maio": [4, 5, 6, 7],
-  "Junho": [8, 9, 10, 11, 12],
-  "Julho": [13, 14, 15, 16, 17, 18, 19],
-  "Agosto": [20, 21, 22, 23, 24, 25],
-  "Setembro": [26, 27, 28, 29],
-  "Outubro": [30, 31, 32, 33],
-  "Novembro": [34, 35, 36],
-  "Dezembro": [37, 38]
+  "Março": [1, 2, 3, 4, 5],
+  "Abril": [6, 7, 8, 9, 10],
+  "Maio": [11, 12, 13, 14, 15, 16],
+  "Junho": [17, 18],
+  "Julho": [19, 20],
+  "Agosto": [21, 22, 23, 24, 25, 26],
+  "Setembro": [27, 28, 29, 30],
+  "Outubro": [31, 32, 33, 34],
+  "Novembro": [35, 36, 37],
+  "Dezembro": [38]
 };
 
 const SHIELD_COLORS = [

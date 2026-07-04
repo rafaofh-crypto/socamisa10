@@ -7,6 +7,7 @@ export interface CartolaTeam {
   owner: string;
   shieldUrl: string;
   scores: Record<number, number>; // Round -> Score mapping
+  patrimonios?: Record<number, number>; // Round -> Patrimonio mapping
   is_survivor?: boolean; // Whether the team survived the 'Esperneio'
 }
 
@@ -187,7 +188,8 @@ export function processarDadosCartola(data: any): CartolaData {
         name: rawNome,
         owner: rawOwner,
         shieldUrl: shieldUrl,
-        scores: generatedScores
+        scores: item.scores || generatedScores,
+        patrimonios: item.patrimonios || {}
       };
     }),
     rodadaAtual: rodadaAtual,
@@ -202,10 +204,7 @@ export function processarDadosCartola(data: any): CartolaData {
 export async function syncCartolaData(onProgress?: (msg: string) => void, token?: string): Promise<CartolaData> {
   const leagueSlug = localStorage.getItem('cartolaLeagueSlug') || 'so-camisa-10-2026';
   
-  // We prefer proxy route /api/cartola to fully avoid browser CORS issues.
-  // Fallback to direct call in case API is exposed.
   const proxyUrl = '/api/cartola';
-  const directUrl = `https://api.cartola.globo.com/ligas/${leagueSlug}`;
 
   const extraHeaders: Record<string, string> = {};
   extraHeaders['x-league-slug'] = leagueSlug;
@@ -214,65 +213,43 @@ export async function syncCartolaData(onProgress?: (msg: string) => void, token?
   }
 
   try {
-    onProgress?.('Conectando ao proxy seguro do servidor (/api/cartola)...');
-    console.log('[ETL] Iniciando sincronização via proxy...');
-    const response = await fetchCartolaDataWithRetry(proxyUrl, 2, 500, extraHeaders);
+    onProgress?.('Acessando o banco de dados e dados da Planilha (/api/cartola)...');
+    console.log('[ETL] Iniciando sincronização via servidor...');
+    const response = await fetchCartolaDataWithRetry(proxyUrl, 3, 500, extraHeaders);
     
-    onProgress?.('Resposta do proxy recebida! Validando estrutura de dados...');
+    onProgress?.('Dados recebidos com sucesso! Atualizando painel...');
     const dadosProcessados = processarDadosCartola(response.data);
     
     // Save in localStorage
     localStorage.setItem('cartolaData', JSON.stringify(dadosProcessados));
     localStorage.setItem('cartolaDataTimestamp', new Date().toISOString());
-    
-    if (dadosProcessados.offlineFallback) {
-      localStorage.setItem('cartolaDataSource', 'SIMULADO_FALLBACK');
-      onProgress?.('AVISO: O servidor do Cartola retornou um erro! Carregado o simulador local de segurança com êxito.');
-      if (dadosProcessados.fallbackReason) {
-        onProgress?.(`Detalhe: ${dadosProcessados.fallbackReason}`);
-      }
-    } else {
-      localStorage.setItem('cartolaDataSource', 'API');
-    }
+    localStorage.setItem('cartolaDataSource', 'API');
     
     return dadosProcessados;
   } catch (proxyError: any) {
     const errorMsg = proxyError.response?.data?.message || proxyError.response?.data?.mensagem || proxyError.message || "Falha na conexão";
-    console.info('[ETL] Proxy indisponível ou em modo offline, carregando banco do navegador...', errorMsg);
-    onProgress?.(`[Aviso Proxy] Falhou: ${errorMsg}. Tentando contingência local...`);
+    console.info('[ETL] Servidor indisponível ou em modo offline, carregando contingência local...', errorMsg);
+    onProgress?.(`[Sincronização] Falhou: ${errorMsg}. Carregando contingência estática local...`);
     
-    try {
-      onProgress?.('Verificando conexão alternativa com servidor de dados...');
-      const response = await fetchCartolaDataWithRetry(directUrl, 2, 500);
-      onProgress?.('Conexão alternativa bem Sucedida! Validando...');
-      const dadosProcessados = processarDadosCartola(response.data);
-      
-      localStorage.setItem('cartolaData', JSON.stringify(dadosProcessados));
-      localStorage.setItem('cartolaDataTimestamp', new Date().toISOString());
-      localStorage.setItem('cartolaDataSource', 'API_DIRECT');
-      return dadosProcessados;
-    } catch (directError: any) {
-      console.log('[ETL] Utilizando o simulador local de alta fidelidade (50 times) integrado ao SaaS.');
-      onProgress?.('Inicializando Banco de Dados local simulado de alto desempenho...');
-      
-      // Fallback robusto de alta fidelidade de acordo com as regras do MVP
-      const mockResult: CartolaData = {
-        liga: {
-          id: 11223,
-          nome: "Só Camisa 10 2026",
-          slug: "so-camisa-10-2026",
-          temporada: 2026
-        },
-        times: TEAM_MEMBERS,
-        rodadaAtual: 17,
-        rodadas: []
-      };
+    console.log('[ETL] Utilizando os dados offline locais integrados ao SaaS.');
+    
+    // Fallback robusto de alta fidelidade
+    const mockResult: CartolaData = {
+      liga: {
+        id: 11223,
+        nome: "Só Camisa 10 2026",
+        slug: "so-camisa-10-2026",
+        temporada: 2026
+      },
+      times: TEAM_MEMBERS,
+      rodadaAtual: 17,
+      rodadas: []
+    };
 
-      localStorage.setItem('cartolaData', JSON.stringify(mockResult));
-      localStorage.setItem('cartolaDataTimestamp', new Date().toISOString());
-      localStorage.setItem('cartolaDataSource', 'FALLBACK');
-      
-      return mockResult;
-    }
+    localStorage.setItem('cartolaData', JSON.stringify(mockResult));
+    localStorage.setItem('cartolaDataTimestamp', new Date().toISOString());
+    localStorage.setItem('cartolaDataSource', 'FALLBACK');
+    
+    return mockResult;
   }
 }

@@ -9,6 +9,7 @@ interface BracketProps {
   manualScores: Record<string, { home: number; away: number }>;
   onMatchScoreChange: (matchCode: string, isHome: boolean, val: string) => void;
   onSimulateCompleteBracket: () => void;
+  isSimulatorsEnabled?: boolean;
 }
 
 export default function BracketVisualization({
@@ -16,7 +17,8 @@ export default function BracketVisualization({
   finalRankings,
   manualScores,
   onMatchScoreChange,
-  onSimulateCompleteBracket
+  onSimulateCompleteBracket,
+  isSimulatorsEnabled = true
 }: BracketProps) {
 
   if (!bracket) {
@@ -90,8 +92,9 @@ export default function BracketVisualization({
           step="0.01"
           placeholder="0.00"
           value={inputScoreValue}
+          disabled={!isSimulatorsEnabled}
           onChange={(e) => onMatchScoreChange(matchCode, teamKey === "home", e.target.value)}
-          className={`w-14 text-center py-1 rounded bg-[#0a0a0a]/90 border border-slate-800 font-mono text-[11px] font-bold ${scoreTextClass} focus:outline-none focus:border-gold/50`}
+          className={`w-14 text-center py-1 rounded bg-[#0a0a0a]/90 border border-slate-800 font-mono text-[11px] font-bold ${scoreTextClass} focus:outline-none focus:border-gold/50 disabled:opacity-50 disabled:cursor-not-allowed`}
           style={scoreStyle}
         />
       </div>
@@ -177,22 +180,30 @@ export default function BracketVisualization({
             <Trophy className="w-4 h-4" />
             Estrutura de Chaveamento Mirelhada
           </h4>
-          <p className="text-xs text-slate-450 mt-0.5">Modifique os placares nos inputs de texto para propagação imediata ou simule todos os placares abaixo.</p>
+          <p className="text-xs text-slate-450 mt-0.5">
+            {isSimulatorsEnabled 
+              ? "Modifique os placares nos inputs de texto para propagação imediata ou simule todos os placares abaixo."
+              : "As simulações manuais de copa estão bloqueadas pelo administrador."}
+          </p>
         </div>
-        <button
-          onClick={onSimulateCompleteBracket}
-          className="px-4 py-2.5 bg-gold hover:bg-gold/90 text-charcoal-dark text-xs uppercase font-extrabold rounded-lg tracking-wider flex items-center gap-2 cursor-pointer transition shadow hover:shadow-gold/15"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          <span>Simular Chave da Copa</span>
-        </button>
+        {isSimulatorsEnabled && (
+          <button
+            onClick={onSimulateCompleteBracket}
+            className="px-4 py-2.5 bg-gold hover:bg-gold/90 text-charcoal-dark text-xs uppercase font-extrabold rounded-lg tracking-wider flex items-center gap-2 cursor-pointer transition shadow hover:shadow-gold/15"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Simular Chave da Copa</span>
+          </button>
+        )}
       </div>
 
       {/* PORTAL INFO ACCENT */}
-      <div className="bg-[#121212]/40 border border-slate-800 rounded-xl p-3 flex gap-2.5 items-start text-xs text-slate-400 max-w-sm ml-auto">
-        <Info className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
-        <p>Gere os vencedores automaticamente ou defina-os manualmente. Os classificados avançam para o centro direto ao título!</p>
-      </div>
+      {isSimulatorsEnabled && (
+        <div className="bg-[#121212]/40 border border-slate-800 rounded-xl p-3 flex gap-2.5 items-start text-xs text-slate-400 max-w-sm ml-auto">
+          <Info className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
+          <p>Gere os vencedores automaticamente ou defina-os manualmente. Os classificados avançam para o centro direto ao título!</p>
+        </div>
+      )}
 
       {/* HORIZONTAL MIRRORED BRACKET CONTAINER */}
       <div className="overflow-x-auto py-6 rounded-2xl bg-charcoal-dark/25 p-4 border border-white/5 select-none my-6">

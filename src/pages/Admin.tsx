@@ -24,6 +24,14 @@ interface AdminProps {
   onThemeChange: (val: string) => void;
   teams: CartolaTeam[];
   allSyncedScores?: Record<number, Record<string, number>>;
+  
+  // Toggles for active championships and simulators
+  isM10Enabled: boolean;
+  onM10EnabledChange: (val: boolean) => void;
+  isB10Enabled: boolean;
+  onB10EnabledChange: (val: boolean) => void;
+  isSimulatorsEnabled: boolean;
+  onSimulatorsEnabledChange: (val: boolean) => void;
 }
 
 // Lista Estática Oficial dos 50 Participantes da Liga 2026
@@ -92,8 +100,22 @@ export default function Admin({
   theme,
   onThemeChange,
   teams,
-  allSyncedScores = {}
+  allSyncedScores = {},
+  isM10Enabled,
+  onM10EnabledChange,
+  isB10Enabled,
+  onB10EnabledChange,
+  isSimulatorsEnabled,
+  onSimulatorsEnabledChange
 }: AdminProps) {
+  // Autenticação Admin
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return sessionStorage.getItem("admin_logged_in") === "true";
+  });
+
   // Rodada selecionada para gerenciamento
   const [selectedRound, setSelectedRound] = useState<number>(() => {
     return currentRound || 17;
@@ -107,6 +129,63 @@ export default function Admin({
   const [crawlLoading, setCrawlLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [pasteFeedback, setPasteFeedback] = useState<string[]>([]);
+
+  // Estados Google Sheets
+  const [spreadsheetUrl, setSpreadsheetUrl] = useState("");
+  const [tabName, setTabName] = useState("");
+  const [syncAllRounds, setSyncAllRounds] = useState(true);
+  const [sheetsLoading, setSheetsLoading] = useState(false);
+  const [sheetsLogs, setSheetsLogs] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Carregar configurações de planilha salvas pelo servidor
+    fetch("/api/sheets/config")
+      .then(res => res.json())
+      .then(data => {
+        if (data.spreadsheetUrl) setSpreadsheetUrl(data.spreadsheetUrl);
+        if (data.tabName) setTabName(data.tabName);
+      })
+      .catch(err => console.error("Erro ao carregar sheets config", err));
+  }, []);
+
+  const handleSheetsSync = async () => {
+    setSheetsLoading(true);
+    setSheetsLogs([`[${new Date().toLocaleTimeString("pt-BR")}] Conectando ao robô de importação...`]);
+    try {
+      const response = await fetch("/api/sheets/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          spreadsheetUrl,
+          tabName,
+          selectedRound,
+          syncAllRounds
+        })
+      });
+
+      const result = await response.json();
+      if (result.logs) {
+        setSheetsLogs(result.logs);
+      }
+
+      if (!response.ok) {
+        throw new Error(result.message || `Falhou: código HTTP ${response.status}`);
+      }
+
+      setStatusMessage({
+        type: "success",
+        text: result.message || `Parabéns! Sua planilha do Google Sheets foi sincronizada e carregada com sucesso!`
+      });
+      onSyncTrigger();
+    } catch (err: any) {
+      setStatusMessage({
+        type: "error",
+        text: `Sincronização Google Sheets falhou: ${err.message}`
+      });
+    } finally {
+      setSheetsLoading(false);
+    }
+  };
 
   // Carregar dados de pontuações reais persistidos assim que a rodada mudar
   useEffect(() => {
@@ -316,6 +395,72 @@ export default function Admin({
     }
   };
 
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (username === "SoCamisa10" && password === "AtualizacaoDadosAPPc10") {
+      setIsLoggedIn(true);
+      sessionStorage.setItem("admin_logged_in", "true");
+      setLoginError("");
+    } else {
+      setLoginError("Usuário ou senha inválidos. Tente novamente.");
+    }
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <div className="max-w-md mx-auto my-12 p-8 bg-charcoal-card border border-gold/20 rounded-3xl shadow-2xl backdrop-blur-md text-white animate-fadeIn">
+        <div className="text-center space-y-3 mb-6">
+          <div className="inline-flex p-3 rounded-2xl bg-gold/10 border border-gold/30 text-gold shadow-lg shadow-gold/5">
+            <Settings className="w-8 h-8 text-gold" />
+          </div>
+          <h2 className="text-xl font-black font-display uppercase tracking-wider text-white">Central do Administrador</h2>
+          <p className="text-xs text-slate-400 leading-normal">
+            Área de acesso restrito para gerenciamento de ligas, copas, notas e visibilidade do aplicativo.
+          </p>
+        </div>
+
+        <form onSubmit={handleLoginSubmit} className="space-y-4">
+          <div>
+            <label className="text-[10px] uppercase font-mono font-bold tracking-wider text-slate-400 block mb-1">Usuário</label>
+            <input
+              type="text"
+              placeholder="Digite o login..."
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-gold"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-[10px] uppercase font-mono font-bold tracking-wider text-slate-400 block mb-1">Senha</label>
+            <input
+              type="password"
+              placeholder="Digite a senha..."
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-gold"
+              required
+            />
+          </div>
+
+          {loginError && (
+            <p className="text-xs text-red-400 font-mono text-center mt-1 bg-red-500/10 border border-red-500/20 py-2 rounded-lg">
+              {loginError}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            className="w-full py-3 bg-gold hover:bg-gold/90 text-charcoal-dark font-display font-black text-xs uppercase tracking-wider rounded-xl transition shadow-lg shadow-gold/15 cursor-pointer mt-2"
+          >
+            Confirmar Acesso
+          </button>
+        </form>
+      </div>
+    );
+  }
+
   // Filtragem rápida da tabela
   const filteredParticipants = PARTICIPANTS.filter(p => {
     const q = searchQuery.toLowerCase();
@@ -350,6 +495,86 @@ export default function Admin({
           </select>
         </div>
       </div>
+
+      {/* PAINEL DE VISIBILIDADE DE CAMPEONATOS & SIMULADORES */}
+      <section className="p-6 bg-charcoal-dark border border-white/5 rounded-2xl space-y-4">
+        <div className="flex items-center gap-3 border-b border-white/5 pb-3">
+          <Settings className="w-6 h-6 text-gold" />
+          <div>
+            <h3 className="font-display font-black text-sm uppercase tracking-wider text-white">
+              Painel de Controle de Recursos & Visibilidade das Abas
+            </h3>
+            <p className="text-xs text-slate-400">
+              Gerencie instantaneamente quais abas de campeonatos e ferramentas de simulação estão visíveis e liberadas para os usuários.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* TOGGLE COPA M10 */}
+          <div className="p-4 rounded-xl border bg-black/10 border-white/5 flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <span className="text-[11px] uppercase font-mono text-slate-300 font-bold block">Exibir Copa M10</span>
+              <p className="text-[10px] text-slate-400 leading-snug">
+                Ativa ou oculta a aba da Copa M10 no menu de navegação.
+              </p>
+            </div>
+            <button
+              id="btn-toggle-m10"
+              onClick={() => onM10EnabledChange(!isM10Enabled)}
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase transition-all duration-250 cursor-pointer ${
+                isM10Enabled
+                  ? "bg-emerald-500 text-charcoal-dark shadow-lg shadow-emerald-500/10 hover:bg-emerald-400"
+                  : "bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"
+              }`}
+            >
+              {isM10Enabled ? "Ativo" : "Inativo"}
+            </button>
+          </div>
+
+          {/* TOGGLE COPA B10 */}
+          <div className="p-4 rounded-xl border bg-black/10 border-white/5 flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <span className="text-[11px] uppercase font-mono text-slate-300 font-bold block">Exibir Copa B10</span>
+              <p className="text-[10px] text-slate-400 leading-snug">
+                Ativa ou oculta a aba da Copa B10 no menu de navegação.
+              </p>
+            </div>
+            <button
+              id="btn-toggle-b10"
+              onClick={() => onB10EnabledChange(!isB10Enabled)}
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase transition-all duration-250 cursor-pointer ${
+                isB10Enabled
+                  ? "bg-emerald-500 text-charcoal-dark shadow-lg shadow-emerald-500/10 hover:bg-emerald-400"
+                  : "bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"
+              }`}
+            >
+              {isB10Enabled ? "Ativo" : "Inativo"}
+            </button>
+          </div>
+
+          {/* TOGGLE SIMULADORES */}
+          <div className="p-4 rounded-xl border bg-black/10 border-white/5 flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <span className="text-[11px] uppercase font-mono text-slate-300 font-bold block">Simuladores de Copas</span>
+              <p className="text-[10px] text-slate-400 leading-snug">
+                Bloqueia ou libera a edição de chaves e simulação manual para os usuários.
+              </p>
+            </div>
+            <button
+              id="btn-toggle-simulators"
+              onClick={() => onSimulatorsEnabledChange(!isSimulatorsEnabled)}
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase transition-all duration-250 cursor-pointer ${
+                isSimulatorsEnabled
+                  ? "bg-emerald-500 text-charcoal-dark shadow-lg shadow-emerald-500/10 hover:bg-emerald-400"
+                  : "bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"
+              }`}
+            >
+              {isSimulatorsEnabled ? "Liberado" : "Bloqueado"}
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* STATUS & FEEDBACK DYNAMIC ALERTS */}
       {statusMessage && (
@@ -447,6 +672,116 @@ Fernando Anselmo   Real Barreiros FC   66.90"
             </span>
           </div>
         )}
+      </section>
+
+      {/* METODOLOGIA 1B: GOOGLE SHEETS AUTOMÁTICO (INTEGRAÇÃO COMPLETA) */}
+      <section className="p-6 bg-charcoal-dark border border-white/5 rounded-2xl space-y-4">
+        <div className="flex items-center gap-3 border-b border-white/5 pb-3">
+          <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/15">
+            <FileSpreadsheet className="w-5 h-5 text-emerald-400" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-display font-black text-sm uppercase tracking-wider text-white">
+                Sincronização Automatizada via Planilha Google Sheets
+              </h3>
+              <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/15">
+                On-line
+              </span>
+            </div>
+            <p className="text-xs text-slate-400">
+              Conecte o painel diretamente à sua planilha do Google Sheets pública. O sistema buscará as pontuações e variações de patrimônio automaticamente.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div className="lg:col-span-8 space-y-3">
+            <div>
+              <label className="text-[10px] uppercase font-mono font-bold tracking-wider text-slate-400 block mb-1">
+                Link ou ID da Planilha Google Sheets (Acesso: Qualquer pessoa com o link pode ler)
+              </label>
+              <input
+                type="text"
+                placeholder="https://docs.google.com/spreadsheets/d/.../edit"
+                value={spreadsheetUrl}
+                onChange={(e) => setSpreadsheetUrl(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl bg-[#0a0a0b]/80 border border-white/10 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] uppercase font-mono font-bold tracking-wider text-slate-400 block mb-1">
+                  Nome da Aba/Tab (Opcional, ex: Rodada {selectedRound})
+                </label>
+                <input
+                  type="text"
+                  placeholder="Deixe em branco para aba padrão"
+                  value={tabName}
+                  onChange={(e) => setTabName(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl bg-[#0a0a0b]/80 border border-white/10 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="flex items-center pt-5">
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-350 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={syncAllRounds}
+                    onChange={(e) => setSyncAllRounds(e.target.checked)}
+                    className="rounded border-white/10 bg-black/45 text-emerald-500 focus:ring-emerald-505 w-4 h-4 cursor-pointer"
+                  />
+                  <span>Sincronizar Todas as Rodadas Relatadas</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={handleSheetsSync}
+                disabled={sheetsLoading || !spreadsheetUrl}
+                className="px-5 py-2.5 bg-emerald-500 text-charcoal-dark hover:bg-emerald-400 disabled:opacity-40 disabled:hover:bg-emerald-500 rounded-xl transition font-display font-black text-xs uppercase tracking-wider cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                {sheetsLoading ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    Sincronizando com Robô...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Sincronizar Google Sheets
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="lg:col-span-4 bg-black/20 p-4 rounded-xl border border-white/5 flex flex-col justify-between text-xs space-y-3">
+            <div>
+              <span className="text-[9px] uppercase font-mono tracking-wider text-emerald-400 font-bold block mb-1.5">
+                ℹ Instruções para Compartilhamento
+              </span>
+              <ul className="list-disc pl-4 space-y-1.5 text-slate-400 text-[10.5px] leading-relaxed">
+                <li>No Google Sheets, clique em <strong className="text-white font-semibold">Compartilhar</strong> (superior direito).</li>
+                <li>Mude o acesso geral para <strong className="text-white font-semibold">Qualquer pessoa com o link pode ler (Leitor)</strong>.</li>
+                <li>Sua planilha precisa conter uma coluna para identificar os times (ex. <code className="text-emerald-400 font-mono">Time</code> ou <code className="text-emerald-400 font-mono">Nome</code>).</li>
+                <li>Ele busca as colunas como <code className="text-emerald-400 font-mono">Pontos</code> (para scores) e <code className="text-emerald-400 font-mono">Patrimônio</code> (para cartoletas).</li>
+              </ul>
+            </div>
+
+            {sheetsLogs.length > 0 && (
+              <div className="p-2.5 bg-black/35 rounded-lg border border-white/5 font-mono text-[9px] text-slate-350 max-h-32 overflow-y-auto space-y-1">
+                <span className="text-[8px] text-emerald-500 uppercase font-bold tracking-widest block">Histórico de Conexão:</span>
+                {sheetsLogs.map((log, li) => (
+                  <div key={li} className="truncate">{log}</div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </section>
 
       {/* METODOLOGIA 2: TABELA GERAL MANUAL COM FILTRO */}

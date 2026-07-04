@@ -140,10 +140,20 @@ export const getStaticScoresServer = (rank: number) => {
   return { r17, total };
 };
 
+// Cache em memória para evitar IOs síncronos repetitivos no disco a cada requisição
+let cachedSyncedRounds: { synced: Record<number, Record<string, number>>; maxRound: number } | null = null;
+let cachedSyncedPatrimonios: Record<number, Record<string, number>> | null = null;
+let cachedLocalShieldsMap: Record<string, string> | null = null;
+let cachedLiveMetadata: Record<string, { nome: string; owner: string; shield: string; pontos?: number }> | null = null;
+
 // Carregar e monitorar todas as rodadas sincronizadas no disco
 export function getSyncedRounds() {
+  if (cachedSyncedRounds !== null) {
+    return cachedSyncedRounds;
+  }
+
   const synced: Record<number, Record<string, number>> = {};
-  let maxRound = 17;
+  let maxRound = 1;
 
   try {
     const files = fs.readdirSync(process.cwd());
@@ -165,7 +175,297 @@ export function getSyncedRounds() {
   } catch (err) {
     console.error("Erro geral ao varrer rodadas sincronizadas do disco:", err);
   }
-  return { synced, maxRound };
+
+  cachedSyncedRounds = { synced, maxRound };
+  return cachedSyncedRounds;
+}
+
+// Sincronizador robusto e oficial com a planilha do Google Sheets
+export async function executeSheetsSynchronization(spreadsheetUrl: string, tabName: string) {
+  const logs: string[] = [];
+  logs.push(`[${new Date().toLocaleTimeString("pt-BR")}] Iniciando conexão com a planilha do Google...`);
+
+  if (!spreadsheetUrl) {
+    throw new Error("A URL ou ID da Planilha é obrigatória.");
+  }
+
+  // Extrair o ID da planilha
+  let spreadsheetId = spreadsheetUrl.trim();
+  if (spreadsheetUrl.includes("docs.google.com/spreadsheets")) {
+    const match = spreadsheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+    if (match) {
+      spreadsheetId = match[1];
+    }
+  }
+
+  let exportUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`;
+  if (tabName) {
+    exportUrl += `&sheet=${encodeURIComponent(tabName)}`;
+  }
+
+  logs.push(`Consultando URL: ${exportUrl}`);
+  const response = await axios.get(exportUrl, {
+    timeout: 15000,
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    }
+  });
+
+  if (response.status !== 200 || !response.data) {
+    throw new Error(`Código de resposta HTTP ${response.status} ao baixar.`);
+  }
+
+  const csvText = response.data;
+  logs.push(`[${new Date().toLocaleTimeString("pt-BR")}] Planilha importada com sucesso! Analisando linhas...`);
+
+  // Função de parsing robusta de CSV que lidará com delimitadores de vírgula ou ponto-e-vírgula
+  const parseCSV = (text: string): string[][] => {
+    const lines: string[][] = [];
+    let row: string[] = [];
+    let entry = "";
+    let insideQuote = false;
+
+    const firstLine = text.split('\n')[0] || '';
+    const semicolons = (firstLine.match(/;/g) || []).length;
+    const commas = (firstLine.match(/,/g) || []).length;
+    const delimiter = semicolons > commas ? ';' : ',';
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
+
+      if (char === '"') {
+        if (insideQuote && nextChar === '"') {
+          entry += '"';
+          i++;
+        } else {
+          insideQuote = !insideQuote;
+        }
+      } else if (char === delimiter && !insideQuote) {
+        row.push(entry.trim());
+        entry = "";
+      } else if ((char === '\n' || char === '\r') && !insideQuote) {
+        if (char === '\r' && nextChar === '\n') {
+          i++;
+        }
+        row.push(entry.trim());
+        lines.push(row);
+        row = [];
+        entry = "";
+      } else {
+        entry += char;
+      }
+    }
+    if (row.length > 0 || entry !== "") {
+      row.push(entry.trim());
+      lines.push(row);
+    }
+    return lines.filter(r => r.length > 0 && r.some(c => c.trim() !== ""));
+  };
+
+  const rows = parseCSV(csvText);
+  if (rows.length < 3) {
+    throw new Error("A planilha deve conter pelo menos duas linhas de cabeçalho e linhas de dados.");
+  }
+
+  const row0 = rows[0];
+  const row1 = rows[1];
+
+  logs.push(`Cabeçalho principal detectado: [ ${row0.slice(0, 8).filter(Boolean).join(" | ")}... ]`);
+  logs.push(`Sub-cabeçalho de dados detectado: [ ${row1.slice(0, 8).filter(Boolean).join(" | ")}... ]`);
+
+  // Mapear colunas e rodadas baseados em cabeçalho duplo
+  const columnMapping: { colIdx: number; round: number; type: "score" | "patrimonio" }[] = [];
+  let currentRoundName = "";
+
+  for (let colIdx = 1; colIdx < row1.length; colIdx++) {
+    const r0Val = row0[colIdx] ? row0[colIdx].trim() : "";
+    if (r0Val) {
+      currentRoundName = r0Val;
+    }
+
+    if (currentRoundName) {
+      const rMatch = currentRoundName.match(/RODADA\s*(\d+)/i);
+      if (rMatch) {
+         const roundNumber = parseInt(rMatch[1]);
+         const typeVal = row1[colIdx] ? row1[colIdx].trim().toLowerCase() : "";
+         
+         if (typeVal.includes("pont") || typeVal.includes("nota") || typeVal.includes("score") || typeVal.includes("pts")) {
+           columnMapping.push({ colIdx, round: roundNumber, type: "score" });
+         } else if (typeVal.includes("patr") || typeVal.includes("cart") || typeVal.includes("val")) {
+           columnMapping.push({ colIdx, round: roundNumber, type: "patrimonio" });
+         }
+      }
+    }
+  }
+
+  if (columnMapping.length === 0) {
+    throw new Error("Não foi possível mapear nenhuma coluna de rodada (ex: 'RODADA 01' e 'Pontuação' ou 'Patrimonio'). Verifique a estrutura do cabeçalho.");
+  }
+
+  logs.push(`Mapeamento concluído! Detectadas ${columnMapping.length} colunas associadas a rodadas.`);
+
+  const syncedScores: Record<number, Record<string, number>> = {};
+  const syncedPatries: Record<number, Record<string, number>> = {};
+  let matchedCount = 0;
+
+  const normalizeLocal = (str: string) => {
+    return str
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+  };
+
+  const findTeam = (nameRaw: string) => {
+    const searchKey = normalizeLocal(nameRaw);
+    if (!searchKey) return null;
+
+    // 1. Tentar correspondência exata de slug
+    let found = OFFICIAL_PARTICIPANTS.find(p => normalizeLocal(p.slug) === searchKey);
+    if (found) return found;
+
+    // 2. Tentar correspondência exata de nome
+    found = OFFICIAL_PARTICIPANTS.find(p => normalizeLocal(p.name) === searchKey);
+    if (found) return found;
+
+    // 3. Tentar correspondência exata de dono
+    found = OFFICIAL_PARTICIPANTS.find(p => normalizeLocal(p.owner) === searchKey);
+    if (found) return found;
+
+    // 4. Somente como fallback, tentar correspondências aproximadas se não houver conflitos óbvios
+    found = OFFICIAL_PARTICIPANTS.find(p => {
+      const sK = normalizeLocal(p.slug);
+      const nK = normalizeLocal(p.name);
+      return sK.includes(searchKey) || searchKey.includes(sK) ||
+             nK.includes(searchKey) || searchKey.includes(nK);
+    });
+
+    return found || null;
+  };
+
+  for (let ri = 2; ri < rows.length; ri++) {
+    const teamNameRaw = rows[ri][0];
+    if (!teamNameRaw) continue;
+
+    const t = findTeam(teamNameRaw);
+    if (!t) {
+      logs.push(`Aviso: Time da planilha "${teamNameRaw}" não correspondido nos participantes oficiais.`);
+      continue;
+    }
+
+    matchedCount++;
+    columnMapping.forEach(({ colIdx, round, type }) => {
+      const valRaw = rows[ri][colIdx];
+      if (valRaw !== undefined && valRaw.trim() !== "") {
+        const val = parseFloat(valRaw.replace(",", "."));
+        if (!isNaN(val)) {
+          if (type === "score") {
+            if (!syncedScores[round]) syncedScores[round] = {};
+            syncedScores[round][t.slug] = Number(val.toFixed(2));
+          } else {
+            if (!syncedPatries[round]) syncedPatries[round] = {};
+            syncedPatries[round][t.slug] = Number(val.toFixed(2));
+          }
+        }
+      }
+    });
+  }
+
+  logs.push(`Associação bem sucedida! Mapeados ${matchedCount} de ${OFFICIAL_PARTICIPANTS.length} times oficiais da Liga.`);
+
+  // Deletar arquivos JSON antigos do disco ANTES de salvar a atualizacao para expurgar lixo de fallbacks
+  try {
+    const files = fs.readdirSync(process.cwd());
+    for (const file of files) {
+      if (file.match(/^round(\d+)_scores_db\.json$/) || file.match(/^round(\d+)_patrimonio_db\.json$/)) {
+        fs.unlinkSync(path.join(process.cwd(), file));
+      }
+    }
+    logs.push("Lixeira limpa de scores antigos com sucesso. Escrevendo novos dados oficiais da tabela...");
+  } catch (pruneErr) {
+    // Ignorar se o arquivo estiver bloqueado temporariamente
+  }
+
+  // Gravar no disco rodada por rodada
+  let roundsCount = 0;
+  const allRounds = Array.from(new Set(columnMapping.map(c => c.round))).sort((a,b) => a-b);
+  
+  allRounds.forEach(roundNum => {
+    const scorePath = path.join(process.cwd(), `round${roundNum}_scores_db.json`);
+    const patrPath = path.join(process.cwd(), `round${roundNum}_patrimonio_db.json`);
+
+    const sObj = syncedScores[roundNum] || {};
+    const pObj = syncedPatries[roundNum] || {};
+
+    fs.writeFileSync(scorePath, JSON.stringify(sObj, null, 2), "utf-8");
+    fs.writeFileSync(patrPath, JSON.stringify(pObj, null, 2), "utf-8");
+    roundsCount++;
+  });
+
+  // Limpar os caches em memória para recarregar os novos dados oficiais gravados
+  cachedSyncedRounds = null;
+  cachedSyncedPatrimonios = null;
+  cachedLocalShieldsMap = null;
+  cachedLiveMetadata = null;
+
+  return {
+    success: true,
+    logs,
+    message: `Planilha Google Sincronizada com Sucesso! Foram importadas ${roundsCount} rodadas inteiras para todos os times.`
+  };
+}
+
+// Carregar e monitorar patrimônios sincronizados no disco
+export function getSyncedPatrimonios() {
+  if (cachedSyncedPatrimonios !== null) {
+    return cachedSyncedPatrimonios;
+  }
+
+  const synced: Record<number, Record<string, number>> = {};
+  try {
+    const files = fs.readdirSync(process.cwd());
+    for (const file of files) {
+      const match = file.match(/^round(\d+)_patrimonio_db\.json$/);
+      if (match) {
+        const roundNum = parseInt(match[1]);
+        const filePath = path.join(process.cwd(), file);
+        try {
+          synced[roundNum] = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+        } catch (je) {
+          console.error(`Erro ao ler JSON de patrimonio da rodada ${roundNum}`, je);
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Erro geral de leitura do patrimonio:", err);
+  }
+
+  cachedSyncedPatrimonios = synced;
+  return cachedSyncedPatrimonios;
+}
+
+// Cálculo aproximado / fallback para o patrimônio
+export function getDefaultPatrimonioServer(team: { name: string; slug: string }, selectedRound: number, finalTotal: number): number {
+  const normalize = (str: string) => {
+    return str
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+  };
+  const normSlug = normalize(team.slug);
+  if (normSlug === "onodifloripa") return 184.20;
+  if (normSlug === "ribeirocopeiro84fc") return 178.50;
+  if (normSlug === "montinhoartilheirofc") return 175.40;
+  if (normSlug === "sovacodapantera") return 172.10;
+  if (normSlug === "realbarreirosfc") return 165.80;
+
+  const base = 100 + (finalTotal * (selectedRound / 17) * 0.054);
+  const hash = team.name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const variation = (hash % 120) / 10 - 6.0; // -6.0 to +6.0
+
+  return Number(Math.min(180, Math.max(93.10, base + variation)).toFixed(2));
 }
 
 // Arquivo de cache persistente para nomes, donos e escudos reais coletados da globo
@@ -176,73 +476,33 @@ let isScanningMetadata = false;
 let lastScanTimestamp = 0;
 
 export async function backgroundUpdateMetadata() {
-  const now = Date.now();
-  // Limitação de 10 minutos (600.000 ms) entre varreduras
-  if (isScanningMetadata || (now - lastScanTimestamp < 600000)) {
-    return;
-  }
-
-  isScanningMetadata = true;
-  lastScanTimestamp = now;
-
-  console.log("[Hacker Background Scraper] Iniciando coleta assíncrona por time...");
-  
-  let currentMetadata: Record<string, { nome: string; owner: string; shield: string; pontos?: number }> = {};
-  try {
-    if (fs.existsSync(METADATA_CACHE_PATH)) {
-      currentMetadata = JSON.parse(fs.readFileSync(METADATA_CACHE_PATH, "utf-8"));
-    }
-  } catch (e) {
-    console.warn("[Hacker Background Scraper] Criando novo cache de metadados vazios");
-  }
-
-  // Fazemos varredura sequencial com pequeno delay para garantir altíssima tolerância CORS/Globo
-  for (const team of OFFICIAL_PARTICIPANTS) {
-    try {
-      const targetUrl = `https://api.cartola.globo.com/time/slug/${team.slug}`;
-      const res = await axios.get(targetUrl, {
-        headers: {
-          "Accept": "application/json, text/plain, */*",
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          "Referer": "https://cartola.globo.com/",
-          "Origin": "https://cartola.globo.com"
-        },
-        timeout: 4000
-      });
-
-      if (res.status === 200 && res.data) {
-        const timeObj = res.data.time || res.data;
-        if (timeObj && (timeObj.nome || timeObj.nome_cartoleiro)) {
-          currentMetadata[team.slug] = {
-            nome: timeObj.nome || team.name,
-            owner: timeObj.nome_cartoleiro || team.owner,
-            shield: timeObj.url_escudo_svg || timeObj.url_escudo_png || "",
-            pontos: res.data.pontos || timeObj.pontos || undefined
-          };
-          console.log(`[Hacker Background Scraper] Sucesso ao atualizar: ${team.slug}`);
-        }
-      }
-    } catch (teamErr: any) {
-      console.log(`[Hacker Background Scraper] Ignorado/Erro em ${team.slug}: ${teamErr.message}`);
-    }
-
-    // Delay de 200ms entre as requisições para evitar rate-limits
-    await new Promise(r => setTimeout(r, 200));
-  }
-
-  try {
-    fs.writeFileSync(METADATA_CACHE_PATH, JSON.stringify(currentMetadata, null, 2), "utf-8");
-    console.log("[Hacker Background Scraper] Metadados reais dos times salvos com sucesso no servidor!");
-  } catch (writeErr: any) {
-    console.error("[Hacker Background Scraper] Erro ao persistir cache de metadados:", writeErr.message);
-  }
-
-  isScanningMetadata = false;
+  // Removido o scraper da API oficial da Globo Cartola.
+  // O sistema é 100% autônomo e focado apenas nos dados da Planilha.
 }
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
+
+  // Auto-sincronização no boot do servidor baseada em sheets_config.json de forma não bloqueante
+  const sheetsConfigPath = path.join(process.cwd(), "sheets_config.json");
+  if (fs.existsSync(sheetsConfigPath)) {
+    try {
+      const config = JSON.parse(fs.readFileSync(sheetsConfigPath, "utf-8"));
+      if (config.spreadsheetUrl) {
+        console.log("[AutoWarmup] Inicializando auto-sincronização de dados da planilha oficial...");
+        executeSheetsSynchronization(config.spreadsheetUrl, config.tabName || "")
+          .then((result) => {
+            console.log("[AutoWarmup] Concluído com sucesso!", result.message);
+          })
+          .catch((err) => {
+            console.error("[AutoWarmup Error] Falha na auto-sincronização:", err.message);
+          });
+      }
+    } catch (e: any) {
+      console.error("[AutoWarmup Error] Falha de sintaxe ou IO no sheets_config.json", e.message);
+    }
+  }
 
   // Express parser middlewares
   app.use(express.json());
@@ -413,6 +673,10 @@ async function startServer() {
 
   // Função utilitária para detectar escudos locais em .avif pelo nome do clube ou slug
   function getLocalShieldsMap() {
+    if (cachedLocalShieldsMap !== null) {
+      return cachedLocalShieldsMap;
+    }
+
     const map: Record<string, string> = {};
     const normalize = (str: string) => {
       return str
@@ -443,27 +707,76 @@ async function startServer() {
         }
       }
     }
-    return map;
+    
+    cachedLocalShieldsMap = map;
+    return cachedLocalShieldsMap;
   }
+
+  // Endpoints para salvar e recuperar preferências do Google Sheets
+  app.get("/api/sheets/config", (req, res) => {
+    const configPath = path.join(process.cwd(), "sheets_config.json");
+    try {
+      if (fs.existsSync(configPath)) {
+        const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+        return res.json(config);
+      }
+    } catch (e) {
+      console.error("Erro ao ler sheets_config.json", e);
+    }
+    return res.json({ spreadsheetUrl: "", tabName: "" });
+  });
+
+  app.post("/api/sheets/config", (req, res) => {
+    const { spreadsheetUrl, tabName } = req.body;
+    const configPath = path.join(process.cwd(), "sheets_config.json");
+    try {
+      fs.writeFileSync(configPath, JSON.stringify({ spreadsheetUrl, tabName }, null, 2), "utf-8");
+      return res.json({ success: true });
+    } catch (e: any) {
+      return res.status(500).json({ error: true, message: e.message });
+    }
+  });
+
+  app.post("/api/sheets/sync", async (req, res) => {
+    const { spreadsheetUrl, tabName } = req.body;
+    if (!spreadsheetUrl) {
+      return res.status(400).json({ error: true, message: "A URL ou ID da Planilha é obrigatória." });
+    }
+
+    try {
+      const result = await executeSheetsSynchronization(spreadsheetUrl, tabName || "");
+      return res.json(result);
+    } catch (e: any) {
+      return res.status(500).json({
+        error: true,
+        message: `Ocorreu um erro ao conectar e sincronizar com o Google Sheets: ${e.message}`,
+        logs: [e.message]
+      });
+    }
+  });
+
 
   app.get("/api/cartola", async (req, res) => {
     const glbToken = req.headers["x-glb-token"] || req.query.token;
 
-    // Disparar o raspador de metadados reais de escudo e nomes em background (não bloqueante!)
     backgroundUpdateMetadata().catch(err => {
       console.error("[Background Error Log]", err.message);
     });
 
     let liveMetadata: Record<string, { nome: string; owner: string; shield: string; pontos?: number }> = {};
     try {
-      if (fs.existsSync(METADATA_CACHE_PATH)) {
+      if (cachedLiveMetadata !== null) {
+        liveMetadata = cachedLiveMetadata;
+      } else if (fs.existsSync(METADATA_CACHE_PATH)) {
         liveMetadata = JSON.parse(fs.readFileSync(METADATA_CACHE_PATH, "utf-8"));
+        cachedLiveMetadata = liveMetadata;
       }
     } catch (e) {
       // Ignora se não existir
     }
 
     const { synced: syncedScores, maxRound: activeRound } = getSyncedRounds();
+    const syncedPatrimonios = getSyncedPatrimonios();
     const localShields = getLocalShieldsMap();
     
     let tokenMessage: string | null = null;
@@ -486,43 +799,48 @@ async function startServer() {
       const color = SHIELD_COLORS[index % SHIELD_COLORS.length];
       const timeId = index + 1;
       
-      const rank = getTeamRankServer(team.slug);
-      const { r17, total } = getStaticScoresServer(rank);
-      
       // Obter pontuação da rodada ativa
-      let roundScore = r17;
+      let roundScore = 0;
       if (syncedScores[activeRound]?.[team.slug] !== undefined) {
         roundScore = syncedScores[activeRound][team.slug];
       }
 
-      // Reconstrução matemática do total de pontos a partir da R16 de modo a manter integridade
-      const baseline_r16_total = total - r17;
-      let finalTotal = baseline_r16_total;
-
-      for (const rNumStr of Object.keys(syncedScores)) {
-        const rNum = parseInt(rNumStr);
-        if (syncedScores[rNum]?.[team.slug] !== undefined) {
-          finalTotal += syncedScores[rNum][team.slug];
-        } else if (rNum === 17) {
-          finalTotal += r17; // fallback para manter o valor da R17
+      // Somar pontuação de campeonato baseado puramente nas rodadas sincronizadas no disco
+      let finalTotal = 0;
+      const teamScoresMap: Record<number, number> = {};
+      
+      for (let r = 1; r <= 38; r++) {
+        if (syncedScores[r]?.[team.slug] !== undefined) {
+          const scoreVal = syncedScores[r][team.slug];
+          teamScoresMap[r] = scoreVal;
+          if (r <= activeRound) {
+            finalTotal += scoreVal;
+          }
+        } else {
+          teamScoresMap[r] = 0;
         }
       }
 
-      // Se não há sincronizações no servidor, mantemos os pontos estáticos reais da Rodada 17
-      if (Object.keys(syncedScores).length === 0) {
-        finalTotal = total;
-      }
-
-      // 1. Prioriza o Escudo Local .avif salvo na pasta (pelo Nome ou pelo Slug)
+      // Escudo
       const nameKey = normalize(name);
       const slugKey = normalize(team.slug);
       const defaultNameKey = normalize(team.name);
       
       let shieldUrl = localShields[nameKey] || localShields[slugKey] || localShields[defaultNameKey] || liveTeam?.shield || "";
       
-      // 2. Fallback caso não haja escudo local nem na Globo API
       if (!shieldUrl) {
         shieldUrl = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><circle cx="50" cy="50" r="45" fill="${encodeURIComponent(color.bg)}" stroke="${encodeURIComponent(color.border)}" stroke-width="5"/><text x="50" y="58" font-family="Montserrat, Arial, sans-serif" font-weight="bold" font-size="24" fill="${encodeURIComponent(color.text)}" text-anchor="middle">${encodeURIComponent(name.substring(0, 2).toUpperCase())}</text></svg>`;
+      }
+
+      // Reconstrução de patrimônios
+      const teamPatrimoniosMap: Record<number, number> = {};
+      teamPatrimoniosMap[0] = 100.00;
+      for (let r = 1; r <= 38; r++) {
+        if (syncedPatrimonios[r]?.[team.slug] !== undefined) {
+          teamPatrimoniosMap[r] = syncedPatrimonios[r][team.slug];
+        } else {
+          teamPatrimoniosMap[r] = teamPatrimoniosMap[r - 1] !== undefined ? teamPatrimoniosMap[r - 1] : 100.00;
+        }
       }
 
       return {
@@ -533,7 +851,9 @@ async function startServer() {
         pontos: {
           campeonato: Number(finalTotal.toFixed(2)),
           rodada: Number(roundScore.toFixed(2))
-        }
+        },
+        scores: teamScoresMap,
+        patrimonios: teamPatrimoniosMap
       };
     });
 
