@@ -11,17 +11,17 @@ export interface CartolaTeam {
 }
 
 export const MONTH_TO_ROUNDS: Record<string, number[]> = {
-  "Janeiro": [],
-  "Fevereiro": [],
-  "Março": [1, 2, 3, 4, 5],
-  "Abril": [6, 7, 8, 9, 10],
-  "Maio": [11, 12, 13, 14, 15, 16],
-  "Junho": [17, 18],
-  "Julho": [19, 20],
-  "Agosto": [21, 22, 23, 24, 25, 26],
-  "Setembro": [27, 28, 29, 30],
-  "Outubro": [31, 32, 33, 34],
-  "Novembro": [35, 36, 37],
+  "Janeiro": [1],
+  "Fevereiro": [2, 3, 4],
+  "Março": [5, 6, 7, 8],
+  "Abril": [9, 10, 11, 12, 13],
+  "Maio": [14, 15, 16, 17, 18],
+  "Junho": [19],
+  "Julho": [20, 21],
+  "Agosto": [22, 23, 24, 25],
+  "Setembro": [26, 27, 28, 29],
+  "Outubro": [30, 31, 32, 33],
+  "Novembro": [34, 35, 36, 37],
   "Dezembro": [38]
 };
 

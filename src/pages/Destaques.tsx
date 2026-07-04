@@ -12,7 +12,7 @@ import {
   TrendingDown,
   Zap
 } from "lucide-react";
-import { CartolaTeam } from "../services/cartollaApi";
+import { CartolaTeam, MONTH_TO_ROUNDS } from "../services/cartollaApi";
 import { calculateStandings } from "../services/rankings";
 import SocialCard from "../components/SocialCard";
 import TeamShield from "../components/TeamShield";
@@ -120,14 +120,16 @@ export default function Destaques({ teams, currentRound }: DestaquesProps) {
     };
   }, [teams, selectedRound]);
 
-  // 2.6 Calculate Dynamically "Líder do Mês (Maio)" (Rounds 4, 5, 6, 7)
+  // 2.6 Calculate Dynamically "Líder do Mês (Maio)"
   const monthlyLeaderMaio = useMemo(() => {
     if (teams.length === 0) return { team: null, value: 0 };
     let bestTeam: CartolaTeam | null = null;
     let maxMaio = -Infinity;
+    
+    const maioRounds = MONTH_TO_ROUNDS["Maio"] || [14, 15, 16, 17, 18];
 
     teams.forEach((t) => {
-      const maioScore = [4, 5, 6, 7].reduce((sum, r) => sum + (t.scores[r] || 0), 0);
+      const maioScore = maioRounds.reduce((sum, r) => sum + (t.scores[r] || 0), 0);
       if (maioScore > maxMaio) {
         maxMaio = maioScore;
         bestTeam = t;
