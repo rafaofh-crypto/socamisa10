@@ -454,11 +454,7 @@ export default function Destaques({ teams, currentRound }: DestaquesProps) {
 
               <div className="my-4 flex items-center gap-4 relative z-10">
                 <div className="w-14 h-14 bg-[#121212]/90 p-1 rounded-full border border-gold shadow-lg flex items-center justify-center overflow-hidden shrink-0">
-                  {/* Styled avatar fallback for floripamengao */}
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48">
-                    <circle cx="50" cy="50" r="45" fill="#8B0000" stroke="#D4AF37" strokeWidth="5"/>
-                    <text x="50" y="58" fontFamily="Montserrat, Arial, sans-serif" fontWeight="bold" fontSize="24" fill="#FFFFFF" textAnchor="middle">FL</text>
-                  </svg>
+                  <TeamShield shieldUrl="/escudos/Floripamengao.avif" fallbackText="Floripamengao" />
                 </div>
                 <div className="min-w-0">
                   <h4 className="font-display font-black text-base text-white uppercase tracking-tight leading-tight truncate">Floripamengao</h4>

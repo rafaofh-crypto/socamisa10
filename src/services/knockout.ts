@@ -38,9 +38,11 @@ export function generateGroups(
  */
 export function processCuttingRound(
   round_number: number,
-  allParticipants: CartolaTeam[]
+  allParticipants: CartolaTeam[],
+  isSimulatorsEnabled: boolean = true,
+  currentRound: number = 38
 ): CuttingRoundResult {
-  return originalProcessCuttingRound(round_number, allParticipants);
+  return originalProcessCuttingRound(round_number, allParticipants, isSimulatorsEnabled, currentRound);
 }
 
 /**

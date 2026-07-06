@@ -24,13 +24,15 @@ import {
 interface CopaB10Props {
   teams: CartolaTeam[];
   currentRound: number;
+  isSimulatorsEnabled?: boolean;
 }
 
-const CopaB10 = ({ teams = [], currentRound = 17 }: CopaB10Props) => {
+const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = true }: CopaB10Props) => {
   // Local state for Copa B10 selection of evaluation round (Fase 1: Corte)
   // Default to round 17 (or currentRound if smaller, or up to 38)
   const [b10Round, setB10Round] = useState<number>(() => {
-    return Math.min(18, currentRound > 0 ? currentRound : 18);
+    const defaultRound = isSimulatorsEnabled ? 18 : currentRound;
+    return Math.min(defaultRound, currentRound > 0 ? currentRound : 18);
   });
 
   const [activeSubTab, setActiveSubTab] = useState<'funil' | 'playoffs' | 'fase4' | 'fasefinal' | 'tabela' | 'cronograma' | 'regulamento'>('funil');
@@ -69,7 +71,7 @@ const CopaB10 = ({ teams = [], currentRound = 17 }: CopaB10Props) => {
 
     return [...teamsWithLeagueRank]
       .map(t => {
-        const scoreInRound = typeof t.scores[b10Round] === 'number' ? t.scores[b10Round] : 0;
+        const scoreInRound = (isSimulatorsEnabled || b10Round <= currentRound) && typeof t.scores[b10Round] === 'number' ? t.scores[b10Round] : 0;
         // previous phase pts = 0 (since it is Phase 1: Corte)
         const prevPhaseScore = 0; 
 
@@ -93,7 +95,7 @@ const CopaB10 = ({ teams = [], currentRound = 17 }: CopaB10Props) => {
         // Tertiary criterion: official general league rank on Cartola (smaller number is better)
         return a.leagueRank - b.leagueRank;
       });
-  }, [teamsWithLeagueRank, b10Round]);
+  }, [teamsWithLeagueRank, b10Round, currentRound, isSimulatorsEnabled]);
 
   // 3. Mark destinations for each rank placement (Afunilamento mapping)
   // - 1st to 16th (Indices 0 to 15): ELITE (Fase 4 slot)
@@ -149,9 +151,9 @@ const CopaB10 = ({ teams = [], currentRound = 17 }: CopaB10Props) => {
     const f2Rounds = [b10Round + 1, b10Round + 2, b10Round + 3];
 
     const computedF2Teams = f2TeamsOriginal.map((t) => {
-      const scoreR2 = typeof t.scores[f2Rounds[0]] === 'number' ? t.scores[f2Rounds[0]] : 0;
-      const scoreR3 = typeof t.scores[f2Rounds[1]] === 'number' ? t.scores[f2Rounds[1]] : 0;
-      const scoreR4 = typeof t.scores[f2Rounds[2]] === 'number' ? t.scores[f2Rounds[2]] : 0;
+      const scoreR2 = (isSimulatorsEnabled || f2Rounds[0] <= currentRound) && typeof t.scores[f2Rounds[0]] === 'number' ? t.scores[f2Rounds[0]] : 0;
+      const scoreR3 = (isSimulatorsEnabled || f2Rounds[1] <= currentRound) && typeof t.scores[f2Rounds[1]] === 'number' ? t.scores[f2Rounds[1]] : 0;
+      const scoreR4 = (isSimulatorsEnabled || f2Rounds[2] <= currentRound) && typeof t.scores[f2Rounds[2]] === 'number' ? t.scores[f2Rounds[2]] : 0;
 
       const totalAccumulated = Number((scoreR2 + scoreR3 + scoreR4).toFixed(2));
 
@@ -176,7 +178,7 @@ const CopaB10 = ({ teams = [], currentRound = 17 }: CopaB10Props) => {
       return a.leagueRank - b.leagueRank;
     });
 
-    const isRound4Completed = currentRound >= b10Round + 3;
+    const isRound4Completed = isSimulatorsEnabled || currentRound >= b10Round + 3;
 
     // Mark classification trigger status (Top 2 qualify to Phase 3, bottom 2 are eliminated)
     return sortedF2.map((t, idx) => {
@@ -204,7 +206,7 @@ const CopaB10 = ({ teams = [], currentRound = 17 }: CopaB10Props) => {
         isTop2
       };
     });
-  }, [mappedB10Teams, b10Round, currentRound]);
+  }, [mappedB10Teams, b10Round, currentRound, isSimulatorsEnabled]);
 
   // Filter classified lists based on search parameter
   const filteredB10Teams = useMemo(() => {
@@ -223,7 +225,7 @@ const CopaB10 = ({ teams = [], currentRound = 17 }: CopaB10Props) => {
   // 6. Hook to compute Phase 3 Playoffs (Mata-mata de Acesso)
   const playoffMatches = useMemo(() => {
     const f3Round = b10Round + 4; // Round 5 of Copa B10
-    const isRound5Completed = currentRound >= f3Round;
+    const isRound5Completed = isSimulatorsEnabled || currentRound >= f3Round;
 
     // Filter classified teams from Repescagem (Phase 2)
     const repClassified = repescagemData.filter(t => t.isTop2);
@@ -276,8 +278,8 @@ const CopaB10 = ({ teams = [], currentRound = 17 }: CopaB10Props) => {
 
     // Map matches with dynamic Cartola scores, winner determination and tiebreaking status
     return matchesList.map((m) => {
-      const score1 = typeof m.team1.scores[f3Round] === 'number' ? m.team1.scores[f3Round] : 0;
-      const score2 = typeof m.team2.scores[f3Round] === 'number' ? m.team2.scores[f3Round] : 0;
+      const score1 = (isSimulatorsEnabled || f3Round <= currentRound) && typeof m.team1.scores[f3Round] === 'number' ? m.team1.scores[f3Round] : 0;
+      const score2 = (isSimulatorsEnabled || f3Round <= currentRound) && typeof m.team2.scores[f3Round] === 'number' ? m.team2.scores[f3Round] : 0;
 
       let winner: 'team1' | 'team2' | null = null;
       let tiebreakerApplied = false;
@@ -304,17 +306,17 @@ const CopaB10 = ({ teams = [], currentRound = 17 }: CopaB10Props) => {
         f3Round
       };
     });
-  }, [acessoGroup, repescagemData, b10Round, currentRound]);
+  }, [acessoGroup, repescagemData, b10Round, currentRound, isSimulatorsEnabled]);
 
   // Available rounds for selector
   const availableRounds = useMemo(() => {
     const rounds = [];
-    const limit = Math.max(currentRound, 18);
+    const limit = isSimulatorsEnabled ? Math.max(currentRound, 18) : currentRound;
     for (let r = 1; r <= Math.min(limit, 38); r++) {
       rounds.push(r);
     }
     return rounds;
-  }, [currentRound]);
+  }, [currentRound, isSimulatorsEnabled]);
 
   return (
     <div className="space-y-8 animate-fadeIn text-slate-200">
@@ -1075,6 +1077,7 @@ const CopaB10 = ({ teams = [], currentRound = 17 }: CopaB10Props) => {
           playoffMatches={playoffMatches}
           b10Round={b10Round}
           currentRound={currentRound}
+          isSimulatorsEnabled={isSimulatorsEnabled}
         />
       )}
 
@@ -1086,6 +1089,7 @@ const CopaB10 = ({ teams = [], currentRound = 17 }: CopaB10Props) => {
           playoffMatches={playoffMatches}
           b10Round={b10Round}
           currentRound={currentRound}
+          isSimulatorsEnabled={isSimulatorsEnabled}
         />
       )}
 

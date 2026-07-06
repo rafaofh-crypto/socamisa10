@@ -34,7 +34,7 @@ export default function MonthlySocialCard({
 }: MonthlySocialCardProps) {
 
   // Monthly Cash Prizes configs (Top 3 of the month)
-  const MONTHLY_GOLDEN_AWARDS = ["R$ 80,00", "R$ 50,00", "R$ 30,00"];
+  const MONTHLY_GOLDEN_AWARDS = ["R$ 130,00", "R$ 90,00", "R$ 70,00"];
 
   // Get top 3 of the month
   const top1 = standings[0];

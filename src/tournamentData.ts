@@ -2215,16 +2215,20 @@ export function generateGroups(
 
 export function processCuttingRound(
   round_number: number,
-  allParticipants: CartolaTeam[]
+  allParticipants: CartolaTeam[],
+  isSimulatorsEnabled: boolean = true,
+  currentRound: number = 38
 ): CuttingRoundResult {
   // 1. Extrai pontuação de cada um dos 50 times naquela rodada de corte (Fase 1)
   const scoredTeams = allParticipants.map((t, idx) => {
-    const roundScore = t.scores[round_number] || 0;
+    const roundScore = (isSimulatorsEnabled || round_number <= currentRound) ? (t.scores[round_number] || 0) : 0;
     
     // Calcular a pontuação acumulada até a rodada de corte para o ranking oficial
     let cumulativeScore = 0;
     for (let r = 1; r <= round_number; r++) {
-      cumulativeScore += t.scores[r] || 0;
+      if (isSimulatorsEnabled || r <= currentRound) {
+        cumulativeScore += t.scores[r] || 0;
+      }
     }
 
     return {
@@ -2260,7 +2264,7 @@ export function processCuttingRound(
 
   // 2. RODADA DO ESPERNEIO: rodada extra exclusiva para esses 4 times (R_corte + 1)
   const esperneioScored = esperneioCandidates.map(c => {
-    const rExtraScore = c.team.scores[round_number + 1] || 0;
+    const rExtraScore = (isSimulatorsEnabled || (round_number + 1) <= currentRound) ? (c.team.scores[round_number + 1] || 0) : 0;
     
     // Calcular pontuação acumulada incluindo a rodada extra
     const cumulativeScorePlusExtra = c.cumulativeScore + rExtraScore;

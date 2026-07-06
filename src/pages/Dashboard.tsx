@@ -355,11 +355,6 @@ export default function Dashboard({
                             <div>
                               <div className="flex items-center gap-2">
                                 <p className="font-semibold text-xs text-white uppercase tracking-wide">{t.name}</p>
-                                {t.is_survivor && (
-                                  <span className="px-1.5 py-[1px] rounded text-[9px] font-mono font-black uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/30">
-                                    Sobrevivente
-                                  </span>
-                                )}
                               </div>
                               <p className="text-[10px] text-slate-400 font-mono">{t.owner}</p>
                             </div>

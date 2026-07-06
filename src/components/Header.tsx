@@ -2,8 +2,8 @@ import React from "react";
 import { Trophy, Star, Calendar, Sparkles, Settings, Award, Crown, BookOpen } from "lucide-react";
 
 interface HeaderProps {
-  activeTab: "dashboard" | "rodada" | "mensal" | "copa" | "copa_b10" | "regras" | "admin";
-  setActiveTab: (tab: "dashboard" | "rodada" | "mensal" | "copa" | "copa_b10" | "regras" | "admin") => void;
+  activeTab: "dashboard" | "rodada" | "mensal" | "copa" | "copa_b10" | "calendario" | "regras" | "admin";
+  setActiveTab: (tab: "dashboard" | "rodada" | "mensal" | "copa" | "copa_b10" | "calendario" | "regras" | "admin") => void;
   currentRound: number;
   isM10Enabled?: boolean;
   isB10Enabled?: boolean;
@@ -22,6 +22,7 @@ export default function Header({
     { id: "mensal", label: "Mensal", icon: Calendar },
     ...(isM10Enabled ? [{ id: "copa" as const, label: "Copa M10", icon: Award }] : []),
     ...(isB10Enabled ? [{ id: "copa_b10" as const, label: "Copa B10", icon: Crown }] : []),
+    { id: "calendario", label: "Calendário", icon: Calendar },
     { id: "regras", label: "Regras", icon: BookOpen },
     { id: "admin", label: "Admin", icon: Settings }
   ] as const;

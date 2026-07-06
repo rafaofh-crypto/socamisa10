@@ -9,6 +9,7 @@ interface B10RoundOf32Props {
   playoffMatches: any[];
   b10Round: number;
   currentRound: number;
+  isSimulatorsEnabled?: boolean;
 }
 
 export const B10RoundOf32 = ({
@@ -16,10 +17,11 @@ export const B10RoundOf32 = ({
   mappedB10Teams = [],
   playoffMatches = [],
   b10Round,
-  currentRound
+  currentRound,
+  isSimulatorsEnabled = true
 }: B10RoundOf32Props) => {
   const f4Round = b10Round + 5; // Round 6 of Copa B10
-  const isRound6Completed = currentRound >= f4Round;
+  const isRound6Completed = isSimulatorsEnabled || currentRound >= f4Round;
 
   // 1. Get the 16 Elite teams from Phase 1 (1º to 16º)
   const eliteTeams = useMemo(() => {
@@ -80,8 +82,8 @@ export const B10RoundOf32 = ({
       const away = sortedWinnersDesc[i];
 
       if (home && away) {
-        const scoreHome = typeof home.scores[f4Round] === 'number' ? home.scores[f4Round] : 0;
-        const scoreAway = typeof away.scores[f4Round] === 'number' ? away.scores[f4Round] : 0;
+        const scoreHome = (isSimulatorsEnabled || f4Round <= currentRound) && typeof home.scores[f4Round] === 'number' ? home.scores[f4Round] : 0;
+        const scoreAway = (isSimulatorsEnabled || f4Round <= currentRound) && typeof away.scores[f4Round] === 'number' ? away.scores[f4Round] : 0;
 
         let winner: 'home' | 'away' | null = null;
         let tiebreakerApplied = false;

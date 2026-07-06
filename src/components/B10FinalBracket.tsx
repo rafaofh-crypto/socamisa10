@@ -10,6 +10,7 @@ interface B10FinalBracketProps {
   playoffMatches: any[];
   b10Round: number;
   currentRound: number;
+  isSimulatorsEnabled?: boolean;
 }
 
 export const B10FinalBracket = ({
@@ -17,7 +18,8 @@ export const B10FinalBracket = ({
   mappedB10Teams = [],
   playoffMatches = [],
   b10Round,
-  currentRound
+  currentRound,
+  isSimulatorsEnabled = true
 }: B10FinalBracketProps) => {
   const [activeStage, setActiveStage] = useState<'oitavas' | 'quartas' | 'semis' | 'final'>('oitavas');
   const [sideFilter, setSideFilter] = useState<'all' | 'sideA' | 'sideB'>('all');
@@ -129,13 +131,13 @@ export const B10FinalBracket = ({
       const h = eliteTeams[i];
       const a = sortedPlayoffWinnersDesc[i];
       if (h && a) {
-        const scoreH = typeof h.scores[rR32] === 'number' ? h.scores[rR32] : 0;
-        const scoreA = typeof a.scores[rR32] === 'number' ? a.scores[rR32] : 0;
+        const scoreH = (isSimulatorsEnabled || rR32 <= currentRound) && typeof h.scores[rR32] === 'number' ? h.scores[rR32] : 0;
+        const scoreA = (isSimulatorsEnabled || rR32 <= currentRound) && typeof a.scores[rR32] === 'number' ? a.scores[rR32] : 0;
 
         let winner: 'home' | 'away' | null = null;
         let tiebreakerApplied = false;
 
-        const isPlayed = currentRound >= rR32 && !a.isVirtual;
+        const isPlayed = (isSimulatorsEnabled || currentRound >= rR32) && !a.isVirtual;
         if (isPlayed) {
           if (scoreH > scoreA) {
             winner = 'home';
@@ -214,15 +216,15 @@ export const B10FinalBracket = ({
       const team1 = r32Winners[m.t1Idx];
       const team2 = r32Winners[m.t2Idx];
       
-      const score1_r1 = typeof team1.scores[rOitavasIda] === 'number' ? team1.scores[rOitavasIda] : 0;
-      const score1_r2 = typeof team1.scores[rOitavasVolta] === 'number' ? team1.scores[rOitavasVolta] : 0;
+      const score1_r1 = (isSimulatorsEnabled || rOitavasIda <= currentRound) && typeof team1.scores[rOitavasIda] === 'number' ? team1.scores[rOitavasIda] : 0;
+      const score1_r2 = (isSimulatorsEnabled || rOitavasVolta <= currentRound) && typeof team1.scores[rOitavasVolta] === 'number' ? team1.scores[rOitavasVolta] : 0;
       const totalScore1 = Number((score1_r1 + score1_r2).toFixed(2));
       
-      const score2_r1 = typeof team2.scores[rOitavasIda] === 'number' ? team2.scores[rOitavasIda] : 0;
-      const score2_r2 = typeof team2.scores[rOitavasVolta] === 'number' ? team2.scores[rOitavasVolta] : 0;
+      const score2_r1 = (isSimulatorsEnabled || rOitavasIda <= currentRound) && typeof team2.scores[rOitavasIda] === 'number' ? team2.scores[rOitavasIda] : 0;
+      const score2_r2 = (isSimulatorsEnabled || rOitavasVolta <= currentRound) && typeof team2.scores[rOitavasVolta] === 'number' ? team2.scores[rOitavasVolta] : 0;
       const totalScore2 = Number((score2_r1 + score2_r2).toFixed(2));
       
-      const isPlayed = currentRound >= rOitavasVolta && !team1.isVirtual && !team2.isVirtual;
+      const isPlayed = (isSimulatorsEnabled || currentRound >= rOitavasVolta) && !team1.isVirtual && !team2.isVirtual;
       let winner: 'team1' | 'team2' | null = null;
       let tiebreakerApplied = false;
 
@@ -252,7 +254,7 @@ export const B10FinalBracket = ({
         isPlayed
       };
     });
-  }, [r32Winners, rOitavasIda, rOitavasVolta, currentRound]);
+  }, [r32Winners, rOitavasIda, rOitavasVolta, currentRound, isSimulatorsEnabled]);
 
 
   // ==========================
@@ -286,15 +288,15 @@ export const B10FinalBracket = ({
         team2 = o2.winner === 'team1' ? o2.team1 : o2.team2;
       }
 
-      const score1_r1 = typeof team1.scores[rQuartasIda] === 'number' ? team1.scores[rQuartasIda] : 0;
-      const score1_r2 = typeof team1.scores[rQuartasVolta] === 'number' ? team1.scores[rQuartasVolta] : 0;
+      const score1_r1 = (isSimulatorsEnabled || rQuartasIda <= currentRound) && typeof team1.scores[rQuartasIda] === 'number' ? team1.scores[rQuartasIda] : 0;
+      const score1_r2 = (isSimulatorsEnabled || rQuartasVolta <= currentRound) && typeof team1.scores[rQuartasVolta] === 'number' ? team1.scores[rQuartasVolta] : 0;
       const totalScore1 = Number((score1_r1 + score1_r2).toFixed(2));
 
-      const score2_r1 = typeof team2.scores[rQuartasIda] === 'number' ? team2.scores[rQuartasIda] : 0;
-      const score2_r2 = typeof team2.scores[rQuartasVolta] === 'number' ? team2.scores[rQuartasVolta] : 0;
+      const score2_r1 = (isSimulatorsEnabled || rQuartasIda <= currentRound) && typeof team2.scores[rQuartasIda] === 'number' ? team2.scores[rQuartasIda] : 0;
+      const score2_r2 = (isSimulatorsEnabled || rQuartasVolta <= currentRound) && typeof team2.scores[rQuartasVolta] === 'number' ? team2.scores[rQuartasVolta] : 0;
       const totalScore2 = Number((score2_r1 + score2_r2).toFixed(2));
 
-      const isPlayed = currentRound >= rQuartasVolta && !team1.isVirtual && !team2.isVirtual;
+      const isPlayed = (isSimulatorsEnabled || currentRound >= rQuartasVolta) && !team1.isVirtual && !team2.isVirtual;
       let winner: 'team1' | 'team2' | null = null;
       let tiebreakerApplied = false;
 
@@ -324,7 +326,7 @@ export const B10FinalBracket = ({
         isPlayed
       };
     });
-  }, [oitavasMatches, rQuartasIda, rQuartasVolta, currentRound]);
+  }, [oitavasMatches, rQuartasIda, rQuartasVolta, currentRound, isSimulatorsEnabled]);
 
 
   // ==========================
@@ -354,15 +356,15 @@ export const B10FinalBracket = ({
       }
 
       // Aggregate score Semis (rSemiIda + rSemiVolta)
-      const score1_r1 = typeof team1.scores[rSemiIda] === 'number' ? team1.scores[rSemiIda] : 0;
-      const score1_r2 = typeof team1.scores[rSemiVolta] === 'number' ? team1.scores[rSemiVolta] : 0;
+      const score1_r1 = (isSimulatorsEnabled || rSemiIda <= currentRound) && typeof team1.scores[rSemiIda] === 'number' ? team1.scores[rSemiIda] : 0;
+      const score1_r2 = (isSimulatorsEnabled || rSemiVolta <= currentRound) && typeof team1.scores[rSemiVolta] === 'number' ? team1.scores[rSemiVolta] : 0;
       const totalScore1 = Number((score1_r1 + score1_r2).toFixed(2));
 
-      const score2_r1 = typeof team2.scores[rSemiIda] === 'number' ? team2.scores[rSemiIda] : 0;
-      const score2_r2 = typeof team2.scores[rSemiVolta] === 'number' ? team2.scores[rSemiVolta] : 0;
+      const score2_r1 = (isSimulatorsEnabled || rSemiIda <= currentRound) && typeof team2.scores[rSemiIda] === 'number' ? team2.scores[rSemiIda] : 0;
+      const score2_r2 = (isSimulatorsEnabled || rSemiVolta <= currentRound) && typeof team2.scores[rSemiVolta] === 'number' ? team2.scores[rSemiVolta] : 0;
       const totalScore2 = Number((score2_r1 + score2_r2).toFixed(2));
 
-      const isPlayed = currentRound >= rSemiVolta && !team1.isVirtual && !team2.isVirtual;
+      const isPlayed = (isSimulatorsEnabled || currentRound >= rSemiVolta) && !team1.isVirtual && !team2.isVirtual;
       let winner: 'team1' | 'team2' | null = null;
       let tiebreakerApplied = false;
 
@@ -392,7 +394,7 @@ export const B10FinalBracket = ({
         isPlayed
       };
     });
-  }, [quartasMatches, rSemiIda, rSemiVolta, currentRound]);
+  }, [quartasMatches, rSemiIda, rSemiVolta, currentRound, isSimulatorsEnabled]);
 
 
   // ==========================
@@ -413,10 +415,10 @@ export const B10FinalBracket = ({
     }
 
     // Single match final points in round R37 (rFinalSingle)
-    const score1 = typeof team1.scores[rFinalSingle] === 'number' ? team1.scores[rFinalSingle] : 0;
-    const score2 = typeof team2.scores[rFinalSingle] === 'number' ? team2.scores[rFinalSingle] : 0;
+    const score1 = (isSimulatorsEnabled || rFinalSingle <= currentRound) && typeof team1.scores[rFinalSingle] === 'number' ? team1.scores[rFinalSingle] : 0;
+    const score2 = (isSimulatorsEnabled || rFinalSingle <= currentRound) && typeof team2.scores[rFinalSingle] === 'number' ? team2.scores[rFinalSingle] : 0;
 
-    const isPlayed = currentRound >= rFinalSingle && !team1.isVirtual && !team2.isVirtual;
+    const isPlayed = (isSimulatorsEnabled || currentRound >= rFinalSingle) && !team1.isVirtual && !team2.isVirtual;
     let winner: 'team1' | 'team2' | null = null;
     let tiebreakerApplied = false;
 
@@ -440,7 +442,7 @@ export const B10FinalBracket = ({
       tiebreakerApplied,
       isPlayed
     };
-  }, [semisMatches, rFinalSingle, currentRound]);
+  }, [semisMatches, rFinalSingle, currentRound, isSimulatorsEnabled]);
 
 
   // ==========================
@@ -460,10 +462,10 @@ export const B10FinalBracket = ({
       team2 = s2.winner === 'team1' ? s2.team2 : s2.team1;
     }
 
-    const score1 = typeof team1.scores[rFinalSingle] === 'number' ? team1.scores[rFinalSingle] : 0;
-    const score2 = typeof team2.scores[rFinalSingle] === 'number' ? team2.scores[rFinalSingle] : 0;
+    const score1 = (isSimulatorsEnabled || rFinalSingle <= currentRound) && typeof team1.scores[rFinalSingle] === 'number' ? team1.scores[rFinalSingle] : 0;
+    const score2 = (isSimulatorsEnabled || rFinalSingle <= currentRound) && typeof team2.scores[rFinalSingle] === 'number' ? team2.scores[rFinalSingle] : 0;
 
-    const isPlayed = currentRound >= rFinalSingle && !team1.isVirtual && !team2.isVirtual;
+    const isPlayed = (isSimulatorsEnabled || currentRound >= rFinalSingle) && !team1.isVirtual && !team2.isVirtual;
     let winner: 'team1' | 'team2' | null = null;
     let tiebreakerApplied = false;
 
@@ -487,7 +489,7 @@ export const B10FinalBracket = ({
       tiebreakerApplied,
       isPlayed
     };
-  }, [semisMatches, rFinalSingle, currentRound]);
+  }, [semisMatches, rFinalSingle, currentRound, isSimulatorsEnabled]);
 
   const podium = useMemo(() => {
     let champion: any = null;

@@ -32,12 +32,12 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
   const cuttingResult = useMemo(() => {
     if (teams.length === 0) return null;
     try {
-      return processCuttingRound(cutRound, teams);
+      return processCuttingRound(cutRound, teams, isSimulatorsEnabled, currentRound);
     } catch (e) {
       console.error("Error processing cut round:", e);
       return null;
     }
-  }, [teams, cutRound]);
+  }, [teams, cutRound, isSimulatorsEnabled, currentRound]);
 
   // 2. Standings of all 50 teams at Cutoff Round (including Esperneio of Copa M10)
   const standingsAtCut = useMemo(() => {
@@ -48,7 +48,9 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
       .map((t, idx) => {
         let cumulativePoints = 0;
         for (let r = 1; r <= cutRound; r++) {
-          cumulativePoints += t.scores[r] || 0;
+          if (isSimulatorsEnabled || r <= currentRound) {
+            cumulativePoints += t.scores[r] || 0;
+          }
         }
         return {
           id: t.id,
@@ -84,9 +86,9 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
       result[letter] = (teamList as Team[]).map(t => {
         const match = teams.find(ct => ct.name === t.name);
         // Scores for group stage: cut + 1, cut + 2, cut + 3
-        const r1 = match ? (match.scores[cutRound + 1] || 0) : 0;
-        const r2 = match ? (match.scores[cutRound + 2] || 0) : 0;
-        const r3 = match ? (match.scores[cutRound + 3] || 0) : 0;
+        const r1 = match && (isSimulatorsEnabled || (cutRound + 1) <= currentRound) ? (match.scores[cutRound + 1] || 0) : 0;
+        const r2 = match && (isSimulatorsEnabled || (cutRound + 2) <= currentRound) ? (match.scores[cutRound + 2] || 0) : 0;
+        const r3 = match && (isSimulatorsEnabled || (cutRound + 3) <= currentRound) ? (match.scores[cutRound + 3] || 0) : 0;
         return {
           ...t,
           groupRound1: r1,
@@ -97,7 +99,7 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
       });
     }
     return result;
-  }, [cuttingResult, teams, cutRound]);
+  }, [cuttingResult, teams, cutRound, isSimulatorsEnabled, currentRound]);
 
   // 4. Sort groups results and assemble the initial bracket of 32 teams
   const { initialBracket, allGroupTeams } = useMemo(() => {

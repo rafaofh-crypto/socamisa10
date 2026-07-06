@@ -13,12 +13,13 @@ import CopaB10 from "./pages/CopaB10";
 import Admin from "./pages/Admin";
 import RulesBook from "./pages/RulesBook";
 import CompetitionSelector from "./components/CompetitionSelector";
+import TournamentCalendarView from "./components/TournamentCalendarView";
 
 export default function App() {
   const { data, loading, error, sync, lastSync, progressLog, source } = useCartolaData();
 
   // Application active tab navigation state
-  const [activeTab, setActiveTab ] = useState<"dashboard" | "rodada" | "mensal" | "copa" | "copa_b10" | "regras" | "admin" >("dashboard");
+  const [activeTab, setActiveTab ] = useState<"dashboard" | "rodada" | "mensal" | "copa" | "copa_b10" | "calendario" | "regras" | "admin" >("dashboard");
 
   // Visible components states managed by Admin
   const [isM10Enabled, setIsM10Enabled] = useState<boolean>(() => {
@@ -28,7 +29,7 @@ export default function App() {
     return localStorage.getItem("isB10Enabled") !== "false";
   });
   const [isSimulatorsEnabled, setIsSimulatorsEnabled] = useState<boolean>(() => {
-    return localStorage.getItem("isSimulatorsEnabled") !== "false";
+    return localStorage.getItem("isSimulatorsEnabled") === "true";
   });
 
   const handleM10EnabledChange = (val: boolean) => {
@@ -184,8 +185,15 @@ export default function App() {
                   <CopaB10 
                     teams={teams}
                     currentRound={currentRound}
+                    isSimulatorsEnabled={isSimulatorsEnabled}
                   />
                 )}
+              </div>
+            )}
+
+            {activeTab === "calendario" && (
+              <div className="space-y-6">
+                <TournamentCalendarView currentRound={currentRound} />
               </div>
             )}
 
