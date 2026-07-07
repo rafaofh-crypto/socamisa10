@@ -19,7 +19,7 @@ const RECORD_TEAM = {
   owner: "Dyego",
   points: 138.12,
   round: "RODADA 13",
-  shieldUrl: "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2500/svg' viewBox='0 0 100 100' width='48' height='48'%3E%3Ccircle cx='50' cy='50' r='45' fill='%238B0000' stroke='%23D4AF37' strokeWidth='5'/%3E%3Ctext x='50' y='58' fontFamily='Montserrat, Arial, sans-serif' fontWeight='bold' fontSize='24' fill='%23FFFFFF' textAnchor='middle'%3EFL%3C/text%3E%3C/svg%3E"
+  shieldUrl: "/escudos/Floripamengao.avif"
 };
 
 export default function SocialCard({ 
