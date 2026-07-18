@@ -2216,7 +2216,7 @@ export function generateGroups(
 export function processCuttingRound(
   round_number: number,
   allParticipants: CartolaTeam[],
-  isSimulatorsEnabled: boolean = true,
+  isSimulatorsEnabled: boolean = false,
   currentRound: number = 38
 ): CuttingRoundResult {
   // 1. Extrai pontuação de cada um dos 50 times naquela rodada de corte (Fase 1)

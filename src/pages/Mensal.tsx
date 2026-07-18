@@ -240,7 +240,7 @@ export default function Mensal({ teams, currentRound }: MensalProps) {
           <div className="glass-effect rounded-2xl p-5 border-t border-t-[#ff6b35]">
             <h4 className="text-slate-400 text-[10px] font-mono uppercase tracking-widest font-black">Campeão Mensal ({selectedMonth})</h4>
             <div className="mt-3">
-              <h5 className="font-mono text-2xl font-black text-white">{monthlyStats.bestSum} pts</h5>
+              <h5 className="font-mono text-2xl font-black text-white">{monthlyStats.bestSum.toFixed(2)} pts</h5>
               <p className="text-xs text-slate-200 mt-1 line-clamp-1">🥇 {monthlyStats.bestTeam}</p>
             </div>
           </div>
@@ -248,7 +248,7 @@ export default function Mensal({ teams, currentRound }: MensalProps) {
           <div className="glass-effect rounded-2xl p-5">
             <h4 className="text-slate-405 text-[10px] font-mono uppercase tracking-widest">Lanterna Mensal ({selectedMonth})</h4>
             <div className="mt-3">
-              <h5 className="font-mono text-2xl font-semibold text-slate-400">{monthlyStats.worstSum} pts</h5>
+              <h5 className="font-mono text-2xl font-semibold text-slate-400">{monthlyStats.worstSum.toFixed(2)} pts</h5>
               <p className="text-xs text-slate-300 mt-1 line-clamp-1">💀 {monthlyStats.worstTeam}</p>
             </div>
           </div>
@@ -256,7 +256,7 @@ export default function Mensal({ teams, currentRound }: MensalProps) {
           <div className="glass-effect rounded-2xl p-5">
             <h4 className="text-slate-415 text-[10px] font-mono uppercase tracking-widest">Ritmo de Jogo ({selectedMonth})</h4>
             <div className="mt-3">
-              <h5 className="font-mono text-2xl font-black text-white">{monthlyStats.avgPerRound} pts</h5>
+              <h5 className="font-mono text-2xl font-black text-white">{monthlyStats.avgPerRound.toFixed(2)} pts</h5>
               <p className="text-xs text-slate-400 mt-1 font-mono">Média calculada no mês.</p>
             </div>
           </div>
@@ -367,7 +367,7 @@ export default function Mensal({ teams, currentRound }: MensalProps) {
                           </td>
                           <td className="py-3 px-4 text-right">
                             <span className="font-mono text-xs font-black text-[#ff6b35]">
-                              {t.monthlyPoints} pts
+                              {t.monthlyPoints.toFixed(2)} pts
                             </span>
                           </td>
                         </tr>

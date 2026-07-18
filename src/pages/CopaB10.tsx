@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { CartolaTeam } from '../services/cartolaService';
 import TeamShield from '../components/TeamShield';
 import { B10RoundOf32 } from '../components/B10RoundOf32';
@@ -27,16 +27,25 @@ interface CopaB10Props {
   isSimulatorsEnabled?: boolean;
 }
 
-const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = true }: CopaB10Props) => {
-  // Local state for Copa B10 selection of evaluation round (Fase 1: Corte)
-  // Default to round 17 (or currentRound if smaller, or up to 38)
-  const [b10Round, setB10Round] = useState<number>(() => {
-    const defaultRound = isSimulatorsEnabled ? 18 : currentRound;
-    return Math.min(defaultRound, currentRound > 0 ? currentRound : 18);
-  });
+const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }: CopaB10Props) => {
+  const isAwaitingRound25 = !isSimulatorsEnabled && currentRound < 25;
 
-  const [activeSubTab, setActiveSubTab] = useState<'funil' | 'playoffs' | 'fase4' | 'fasefinal' | 'tabela' | 'cronograma' | 'regulamento'>('funil');
+  // Local state for Copa B10 selection of evaluation round (Fase 1: Corte)
+  // Default to round 25 (or currentRound if smaller, or up to 38)
+  const [b10Round, setB10Round] = useState<number>(25);
+
+  const [activeSubTab, setActiveSubTab] = useState<'funil' | 'playoffs' | 'fase4' | 'fasefinal' | 'tabela' | 'cronograma' | 'regulamento'>('tabela');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Sync or lock b10Round when awaiting or currentRound changes
+  useEffect(() => {
+    if (isAwaitingRound25) {
+      setB10Round(25);
+    } else {
+      const defaultRound = isSimulatorsEnabled ? 25 : currentRound;
+      setB10Round(Math.min(defaultRound, currentRound > 0 ? currentRound : 25));
+    }
+  }, [isAwaitingRound25, currentRound, isSimulatorsEnabled]);
 
   // 1. Calculate the General Cartola League Ranking for all teams (to serve as Tiebreaker #2)
   // Summing all round scores up to currentRound
@@ -69,6 +78,17 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = true }: 
   const sortedB10Standings = useMemo(() => {
     if (teamsWithLeagueRank.length === 0) return [];
 
+    if (isAwaitingRound25) {
+      // Under awaiting state (no simulators, round < 25), return teams in alphabetical order with 0.00 score
+      return [...teamsWithLeagueRank]
+        .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"))
+        .map((t, idx) => ({
+          ...t,
+          b10RoundScore: 0,
+          prevPhaseScore: 0
+        }));
+    }
+
     return [...teamsWithLeagueRank]
       .map(t => {
         const scoreInRound = (isSimulatorsEnabled || b10Round <= currentRound) && typeof t.scores[b10Round] === 'number' ? t.scores[b10Round] : 0;
@@ -95,7 +115,7 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = true }: 
         // Tertiary criterion: official general league rank on Cartola (smaller number is better)
         return a.leagueRank - b.leagueRank;
       });
-  }, [teamsWithLeagueRank, b10Round, currentRound, isSimulatorsEnabled]);
+  }, [teamsWithLeagueRank, b10Round, currentRound, isSimulatorsEnabled, isAwaitingRound25]);
 
   // 3. Mark destinations for each rank placement (Afunilamento mapping)
   // - 1st to 16th (Indices 0 to 15): ELITE (Fase 4 slot)
@@ -139,11 +159,59 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = true }: 
 
   // 4. Derive Top 3 Elite Teams for the selected round
   const top3Elite = useMemo(() => {
+    if (isAwaitingRound25) {
+      return [
+        {
+          id: 'mock-elite-1',
+          name: 'Aguardando 1º Lugar',
+          owner: 'A definir',
+          shieldUrl: '',
+          b10RoundScore: 0,
+        },
+        {
+          id: 'mock-elite-2',
+          name: 'Aguardando 2º Lugar',
+          owner: 'A definir',
+          shieldUrl: '',
+          b10RoundScore: 0,
+        },
+        {
+          id: 'mock-elite-3',
+          name: 'Aguardando 3º Lugar',
+          owner: 'A definir',
+          shieldUrl: '',
+          b10RoundScore: 0,
+        },
+      ];
+    }
     return mappedB10Teams.slice(0, 3);
-  }, [mappedB10Teams]);
+  }, [mappedB10Teams, isAwaitingRound25]);
 
   // 5. Phase 2 (Repescagem) scoring and qualification logic
   const repescagemData = useMemo(() => {
+    if (isAwaitingRound25) {
+      // Return 4 placeholder teams under awaiting state
+      return Array.from({ length: 4 }, (_, idx) => ({
+        id: `mock-rep-${idx}`,
+        name: `Aguardando Classificado #${47 + idx}`,
+        owner: "Pendente",
+        shieldUrl: "",
+        totalLeaguePoints: 0,
+        b10RoundScore: 0,
+        leagueRank: 47 + idx,
+        scoreR2: 0,
+        scoreR3: 0,
+        scoreR4: 0,
+        totalAccumulated: 0,
+        f2Rounds: [26, 27, 28],
+        f2Rank: idx + 1,
+        status: 'classifying' as const,
+        statusLabel: 'Pendente',
+        statusBadgeStyle: 'bg-zinc-500/15 text-zinc-400 border-zinc-500/30',
+        isTop2: idx < 2
+      }));
+    }
+
     // Identify the 4 teams destined to Phase 2 (rank 47th to 50th from Phase 1, category REPESCAGEM)
     const f2TeamsOriginal = mappedB10Teams.filter(t => t.category === 'REPESCAGEM');
     
@@ -206,7 +274,7 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = true }: 
         isTop2
       };
     });
-  }, [mappedB10Teams, b10Round, currentRound, isSimulatorsEnabled]);
+  }, [mappedB10Teams, b10Round, currentRound, isSimulatorsEnabled, isAwaitingRound25]);
 
   // Filter classified lists based on search parameter
   const filteredB10Teams = useMemo(() => {
@@ -226,6 +294,41 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = true }: 
   const playoffMatches = useMemo(() => {
     const f3Round = b10Round + 4; // Round 5 of Copa B10
     const isRound5Completed = isSimulatorsEnabled || currentRound >= f3Round;
+
+    if (isAwaitingRound25) {
+      return Array.from({ length: 16 }, (_, idx) => ({
+        id: idx + 1,
+        team1: {
+          id: `mock-playoff-1-${idx}`,
+          name: `Aguardando #${idx + 17}`,
+          owner: "Pendente",
+          shieldUrl: "",
+          b10RoundScore: 0,
+          totalLeaguePoints: 0,
+          leagueRank: idx + 17,
+          isVirtual: true,
+          scores: {}
+        },
+        team2: {
+          id: `mock-playoff-2-${idx}`,
+          name: idx === 0 ? "Aguardando 2º Repescagem" : idx === 1 ? "Aguardando 1º Repescagem" : `Aguardando #${50 - idx + 1}`,
+          owner: "Pendente",
+          shieldUrl: "",
+          b10RoundScore: 0,
+          totalLeaguePoints: 0,
+          leagueRank: 50 - idx + 1,
+          isVirtual: true,
+          scores: {}
+        },
+        title: `Confronto ${idx + 1}`,
+        score1: 0,
+        score2: 0,
+        winner: null,
+        tiebreakerApplied: false,
+        isPlayed: false,
+        f3Round
+      }));
+    }
 
     // Filter classified teams from Repescagem (Phase 2)
     const repClassified = repescagemData.filter(t => t.isTop2);
@@ -306,17 +409,20 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = true }: 
         f3Round
       };
     });
-  }, [acessoGroup, repescagemData, b10Round, currentRound, isSimulatorsEnabled]);
+  }, [acessoGroup, repescagemData, b10Round, currentRound, isSimulatorsEnabled, isAwaitingRound25]);
 
   // Available rounds for selector
   const availableRounds = useMemo(() => {
+    if (isAwaitingRound25) {
+      return [25];
+    }
     const rounds = [];
     const limit = isSimulatorsEnabled ? Math.max(currentRound, 18) : currentRound;
     for (let r = 1; r <= Math.min(limit, 38); r++) {
       rounds.push(r);
     }
     return rounds;
-  }, [currentRound, isSimulatorsEnabled]);
+  }, [currentRound, isSimulatorsEnabled, isAwaitingRound25]);
 
   return (
     <div className="space-y-8 animate-fadeIn text-slate-200">
@@ -347,7 +453,8 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = true }: 
             <select
               value={b10Round}
               onChange={(e) => setB10Round(Number(e.target.value))}
-              className="bg-transparent text-xs font-mono font-bold text-white pr-8 focus:ring-0 focus:outline-none cursor-pointer w-full"
+              className="bg-transparent text-xs font-mono font-bold text-white pr-8 focus:ring-0 focus:outline-none cursor-pointer w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isAwaitingRound25}
             >
               {availableRounds.map((r) => (
                 <option key={r} value={r} className="bg-[#121212] text-white font-mono text-xs">
@@ -610,6 +717,16 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = true }: 
       {/* Sub Navigation Tabs */}
       <div className="flex border-b border-white/10 text-xs font-mono overflow-x-auto scrollbar-none">
         <button
+          onClick={() => setActiveSubTab('tabela')}
+          className={`px-5 py-3 border-b-2 font-bold tracking-wider uppercase transition-colors flex-shrink-0 flex items-center gap-2 ${
+            activeSubTab === 'tabela' 
+              ? 'border-[#D4AF37] text-[#D4AF37]' 
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <Trophy className="w-4 h-4" /> Tabela de Classificação
+        </button>
+        <button
           onClick={() => setActiveSubTab('funil')}
           className={`px-5 py-3 border-b-2 font-bold tracking-wider uppercase transition-colors flex-shrink-0 flex items-center gap-2 ${
             activeSubTab === 'funil' 
@@ -650,16 +767,6 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = true }: 
           <Trophy className="w-4 h-4 text-[#D4AF37]" /> Fase Final (Chaves)
         </button>
         <button
-          onClick={() => setActiveSubTab('tabela')}
-          className={`px-5 py-3 border-b-2 font-bold tracking-wider uppercase transition-colors flex-shrink-0 flex items-center gap-2 ${
-            activeSubTab === 'tabela' 
-              ? 'border-[#D4AF37] text-[#D4AF37]' 
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Trophy className="w-4 h-4" /> Tabela de Classificação
-        </button>
-        <button
           onClick={() => setActiveSubTab('cronograma')}
           className={`px-5 py-3 border-b-2 font-bold tracking-wider uppercase transition-colors flex-shrink-0 flex items-center gap-2 ${
             activeSubTab === 'cronograma' 
@@ -680,6 +787,25 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = true }: 
           <HelpCircle className="w-4 h-4" /> Regulamento & Desempate
         </button>
       </div>
+
+      {/* Warning banner when awaiting Round 25 */}
+      {isAwaitingRound25 && activeSubTab !== 'cronograma' && activeSubTab !== 'regulamento' && (
+        <div className="p-4 bg-gradient-to-r from-amber-500/10 via-[#D4AF37]/5 to-transparent border border-[#D4AF37]/20 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fadeIn">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-[#D4AF37]/10 rounded-xl border border-[#D4AF37]/20 text-[#D4AF37] animate-pulse">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-xs font-mono font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                Aguardando Rodada de Corte (R25) da Copa B10
+              </h3>
+              <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                A rodada oficial de corte é a Rodada 25. Como os simuladores estão desativados no momento, as fases e divisões exibem times pendentes. Você pode ativar os simuladores no menu superior/Administração para simular projeções.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* RENDER ACTIVE TAB CONTENT */}
 
@@ -1212,7 +1338,7 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = true }: 
                             #{t.leagueRank} Colocado
                           </div>
                           <div className="text-[9px] text-slate-500">
-                            {t.totalLeaguePoints.toFixed(1)} pts acumulados
+                            {t.totalLeaguePoints.toFixed(2)} pts acumulados
                           </div>
                         </td>
 

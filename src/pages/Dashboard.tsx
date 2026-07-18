@@ -424,7 +424,7 @@ export default function Dashboard({
                   </div>
 
                   <div className="mt-3 bg-gold/10 px-3 py-1 rounded-full border border-gold/15">
-                    <span className="font-mono text-xs font-bold text-gold">{t.calculatedPoints} pts</span>
+                    <span className="font-mono text-xs font-bold text-gold">{t.calculatedPoints.toFixed(2)} pts</span>
                   </div>
                 </div>
               ))}
@@ -442,7 +442,7 @@ export default function Dashboard({
                 <Award className="w-5 h-5 text-gold opacity-80" />
               </div>
               <div className="mt-4">
-                <h5 className="font-mono text-2xl font-black text-white">{stats.bestScore} pts</h5>
+                <h5 className="font-mono text-2xl font-black text-white">{stats.bestScore.toFixed(2)} pts</h5>
                 <p className="text-[11px] text-slate-300 mt-2 font-display bg-gold/10 px-2 py-1 rounded border border-gold/10 inline-block max-w-full truncate">
                   🚀 {stats.bestTeam} na Rodada {stats.bestRound}
                 </p>
@@ -458,7 +458,7 @@ export default function Dashboard({
                 <Calendar className="w-5 h-5 text-red-400 opacity-80" />
               </div>
               <div className="mt-4">
-                <h5 className="font-mono text-2xl text-red-400">{stats.worstScore} pts</h5>
+                <h5 className="font-mono text-2xl text-red-400">{stats.worstScore.toFixed(2)} pts</h5>
                 <p className="text-[11px] text-slate-400 mt-2 bg-red-950/20 px-2 py-1 rounded border border-red-950/30 inline-block max-w-full truncate">
                   📉 {stats.worstTeam} na R{stats.worstRound}
                 </p>
@@ -474,7 +474,7 @@ export default function Dashboard({
                 <TrendingUp className="w-5 h-5 text-green-400 opacity-80" />
               </div>
               <div className="mt-4">
-                <h5 className="font-mono text-2xl font-black text-white">{stats.average} pts</h5>
+                <h5 className="font-mono text-2xl font-black text-white">{stats.average.toFixed(2)} pts</h5>
                 <p className="text-[11px] text-slate-450 mt-2 font-mono">
                   Calculada com base em todas as rodadas analisadas.
                 </p>

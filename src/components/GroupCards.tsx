@@ -5,9 +5,10 @@ import TeamShield from "./TeamShield";
 
 interface GroupCardsProps {
   groups: Record<string, Team[]>;
+  isAwaitingRound20?: boolean;
 }
 
-export default function GroupCards({ groups }: GroupCardsProps) {
+export default function GroupCards({ groups, isAwaitingRound20 = false }: GroupCardsProps) {
   const letters = Object.keys(groups).sort();
 
   if (letters.length === 0) {
@@ -91,13 +92,15 @@ export default function GroupCards({ groups }: GroupCardsProps) {
                       const isAdvancedThird = isThird && bestThirdsNamesSet.has(t.name);
 
                       // Style rows based on classification status
-                      const rowClass = isTopTwo
-                        ? "bg-green-500/10 text-green-300 border-l-2 border-l-green-500 font-semibold"
-                        : isAdvancedThird
-                        ? "bg-yellow-500/10 text-yellow-300 border-l-2 border-l-yellow-500 font-semibold"
-                        : isThird
-                        ? "bg-[#3A3A3A] text-slate-500 opacity-60 border-l-2 border-l-stone-600"
-                        : "text-slate-500 opacity-50 border-l-2 border-l-transparent";
+                      const rowClass = isAwaitingRound20
+                        ? "text-slate-400 opacity-80 border-l-2 border-l-transparent"
+                        : (isTopTwo
+                          ? "bg-green-500/10 text-green-300 border-l-2 border-l-green-500 font-semibold"
+                          : isAdvancedThird
+                          ? "bg-yellow-500/10 text-yellow-300 border-l-2 border-l-yellow-500 font-semibold"
+                          : isThird
+                          ? "bg-[#3A3A3A] text-slate-500 opacity-60 border-l-2 border-l-stone-600"
+                          : "text-slate-500 opacity-50 border-l-2 border-l-transparent");
 
                       const r1Str = typeof t.groupRound1 === "number" && t.groupRound1 > 0 ? t.groupRound1.toFixed(2) : "-";
                       const r2Str = typeof t.groupRound2 === "number" && t.groupRound2 > 0 ? t.groupRound2.toFixed(2) : "-";
@@ -161,12 +164,12 @@ export default function GroupCards({ groups }: GroupCardsProps) {
                           <td className="py-2 px-1 text-center font-bold select-none text-[10px]">
                             <div className="flex flex-col items-center justify-center">
                               <span>{index + 1}º</span>
-                              {variation > 0 && (
+                              {!isAwaitingRound20 && variation > 0 && (
                                 <span className="text-emerald-400 text-[8px] font-bold flex items-center justify-center gap-0.5 leading-none">
                                   ▲{variation}
                                 </span>
                               )}
-                              {variation < 0 && (
+                              {!isAwaitingRound20 && variation < 0 && (
                                 <span className="text-red-400 text-[8px] font-bold flex items-center justify-center gap-0.5 leading-none">
                                   ▼{Math.abs(variation)}
                                 </span>
@@ -188,7 +191,7 @@ export default function GroupCards({ groups }: GroupCardsProps) {
                                 {t.name}
                               </span>
                               <span className="text-[8px] text-slate-400 font-mono lower-case font-light truncate">
-                                {t.qualifyingPosition ? `Corte #${t.qualifyingPosition}` : ""}
+                                {t.qualifyingPosition && !isAwaitingRound20 ? `Corte #${t.qualifyingPosition}` : ""}
                               </span>
                             </div>
                           </td>

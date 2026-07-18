@@ -29,7 +29,7 @@ export default function App() {
     return localStorage.getItem("isB10Enabled") !== "false";
   });
   const [isSimulatorsEnabled, setIsSimulatorsEnabled] = useState<boolean>(() => {
-    return localStorage.getItem("isSimulatorsEnabled") === "true";
+    return sessionStorage.getItem("isSimulatorsEnabled") === "true";
   });
 
   const handleM10EnabledChange = (val: boolean) => {
@@ -50,7 +50,8 @@ export default function App() {
 
   const handleSimulatorsEnabledChange = (val: boolean) => {
     setIsSimulatorsEnabled(val);
-    localStorage.setItem("isSimulatorsEnabled", val ? "true" : "false");
+    sessionStorage.setItem("isSimulatorsEnabled", val ? "true" : "false");
+    localStorage.removeItem("isSimulatorsEnabled");
   };
 
   // Derived states from the useCartolaData hook

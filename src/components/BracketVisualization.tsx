@@ -18,7 +18,7 @@ export default function BracketVisualization({
   manualScores,
   onMatchScoreChange,
   onSimulateCompleteBracket,
-  isSimulatorsEnabled = true
+  isSimulatorsEnabled = false
 }: BracketProps) {
 
   if (!bracket) {

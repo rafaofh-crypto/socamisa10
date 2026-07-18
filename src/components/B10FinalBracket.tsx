@@ -19,10 +19,11 @@ export const B10FinalBracket = ({
   playoffMatches = [],
   b10Round,
   currentRound,
-  isSimulatorsEnabled = true
+  isSimulatorsEnabled = false
 }: B10FinalBracketProps) => {
   const [activeStage, setActiveStage] = useState<'oitavas' | 'quartas' | 'semis' | 'final'>('oitavas');
   const [sideFilter, setSideFilter] = useState<'all' | 'sideA' | 'sideB'>('all');
+  const isAwaitingRound25 = !isSimulatorsEnabled && currentRound < 25;
 
   // Round numbers
   const rPlayoff = b10Round + 4; // Round 5 (R29)
@@ -82,11 +83,23 @@ export const B10FinalBracket = ({
 
   // 1. Recompute R32 (Fase 4) internally to stay self-contained & high-perf
   const eliteTeams = useMemo(() => {
+    if (isAwaitingRound25) {
+      return Array.from({ length: 16 }, (_, idx) => ({
+        id: `mock-elite-team-${idx}`,
+        name: `Aguardando Rod 25`,
+        owner: 'Pendente',
+        shieldUrl: null,
+        rank: idx + 1,
+        category: 'ELITE',
+        leagueRank: 99,
+        scores: {}
+      }));
+    }
     return [...mappedB10Teams]
       .filter(t => t.category === 'ELITE')
       .sort((a, b) => a.rank - b.rank)
       .slice(0, 16);
-  }, [mappedB10Teams]);
+  }, [mappedB10Teams, isAwaitingRound25]);
 
   const playoffWinners = useMemo(() => {
     return playoffMatches.map(match => {
@@ -825,11 +838,11 @@ export const B10FinalBracket = ({
                         <div className="bg-black/60 border border-white/5 py-1 px-1.5 rounded-lg w-full flex flex-col items-center">
                           <div className="flex items-center justify-center gap-1 text-[11px] font-mono font-black">
                             <span className={winner === 'team1' ? 'text-[#D4AF37]' : 'text-slate-400'}>
-                              {score1Value.toFixed(1)}
+                              {score1Value.toFixed(2)}
                             </span>
                             <span className="text-slate-700 text-[8px]">:</span>
                             <span className={winner === 'team2' ? 'text-[#D4AF37]' : 'text-slate-400'}>
-                              {score2Value.toFixed(1)}
+                              {score2Value.toFixed(2)}
                             </span>
                           </div>
                         </div>
@@ -889,7 +902,7 @@ export const B10FinalBracket = ({
                       <div className="bg-black/45 border border-white/5 rounded-xl p-2 flex flex-col justify-between">
                         <span className="text-[7.5px] uppercase tracking-widest text-slate-500 block mb-1">Ida</span>
                         <div className="font-extrabold text-white text-xs tracking-wider">
-                          {(match.score1_r1 || 0).toFixed(1)} <span className="text-slate-600 text-[9px]">:</span> {(match.score2_r1 || 0).toFixed(1)}
+                          {(match.score1_r1 || 0).toFixed(2)} <span className="text-slate-600 text-[9px]">:</span> {(match.score2_r1 || 0).toFixed(2)}
                         </div>
                       </div>
 
@@ -898,7 +911,7 @@ export const B10FinalBracket = ({
                         <span className="text-[7.5px] uppercase tracking-widest text-slate-500 block mb-1">Volta</span>
                         {isPlayed ? (
                           <div className="font-extrabold text-white text-xs tracking-wider">
-                            {(match.score1_r2 || 0).toFixed(1)} <span className="text-slate-600 text-[9px]">:</span> {(match.score2_r2 || 0).toFixed(1)}
+                            {(match.score1_r2 || 0).toFixed(2)} <span className="text-slate-600 text-[9px]">:</span> {(match.score2_r2 || 0).toFixed(2)}
                           </div>
                         ) : (
                           <span className="text-[8.5px] text-amber-500/90 font-mono font-bold animate-pulse leading-none py-1">Iniciando</span>
@@ -913,7 +926,7 @@ export const B10FinalBracket = ({
                         AGREGADO
                       </span>
                       <div className="text-sm font-mono font-black tracking-wider text-white mt-0.5">
-                        {score1Value.toFixed(1)} <span className="text-emerald-500/60">:</span> {score2Value.toFixed(1)}
+                        {score1Value.toFixed(2)} <span className="text-emerald-500/60">:</span> {score2Value.toFixed(2)}
                       </div>
                       {tiebreakerApplied && (
                         <span className="text-[6.5px] uppercase font-mono font-bold text-[#D4AF37] block mt-0.5">

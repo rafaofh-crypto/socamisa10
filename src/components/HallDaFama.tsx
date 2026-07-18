@@ -369,7 +369,7 @@ export default function HallDaFama({ teams, currentRound }: HallDaFamaProps) {
                 </h4>
                 <p className="text-xs text-slate-400 font-medium">{generalPodium.champion.owner}</p>
                 <div className="mt-3 bg-amber-500/10 border border-amber-500/25 px-3 py-1 rounded-full">
-                  <span className="font-mono text-[11px] font-extrabold text-amber-400">{generalPodium.champion.calculatedPoints} pts</span>
+                  <span className="font-mono text-[11px] font-extrabold text-amber-400">{generalPodium.champion.calculatedPoints.toFixed(2)} pts</span>
                 </div>
               </div>
 
@@ -386,7 +386,7 @@ export default function HallDaFama({ teams, currentRound }: HallDaFamaProps) {
                       <p className="text-[10px] text-slate-400">{generalPodium.runnerUp.owner}</p>
                     </div>
                   </div>
-                  <span className="font-mono text-xs font-bold text-slate-300">{generalPodium.runnerUp.calculatedPoints} pts</span>
+                  <span className="font-mono text-xs font-bold text-slate-300">{generalPodium.runnerUp.calculatedPoints.toFixed(2)} pts</span>
                 </div>
 
                 <div className="flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/5">
@@ -400,7 +400,7 @@ export default function HallDaFama({ teams, currentRound }: HallDaFamaProps) {
                       <p className="text-[10px] text-slate-400">{generalPodium.third.owner}</p>
                     </div>
                   </div>
-                  <span className="font-mono text-xs font-bold text-amber-600">{generalPodium.third.calculatedPoints} pts</span>
+                  <span className="font-mono text-xs font-bold text-amber-600">{generalPodium.third.calculatedPoints.toFixed(2)} pts</span>
                 </div>
               </div>
             </div>

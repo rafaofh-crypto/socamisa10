@@ -196,11 +196,11 @@ export default function MainEvent({ finalMatch, thirdPlaceMatch, round, titleOve
                 <div className="text-center w-full space-y-1.5">
                   <div className="bg-black/95 border border-[#D4AF37]/45 rounded-2xl px-3 py-2.5 shadow-2xl">
                     <p className="text-lg sm:text-2xl font-mono font-black text-[#D4AF37] tracking-wider leading-none">
-                      {finalMatch.score1.toFixed(1)}
+                      {finalMatch.score1.toFixed(2)}
                     </p>
                     <div className="h-[1px] bg-white/10 my-1.5" />
                     <p className="text-lg sm:text-2xl font-mono font-black text-slate-200 tracking-wider leading-none">
-                      {finalMatch.score2.toFixed(1)}
+                      {finalMatch.score2.toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -306,11 +306,11 @@ export default function MainEvent({ finalMatch, thirdPlaceMatch, round, titleOve
                 <div className="text-center w-full space-y-1">
                   <div className="bg-black/90 border border-slate-500/30 rounded-xl px-2.5 py-2 shadow-inner">
                     <p className="text-base font-mono font-black text-amber-500 tracking-wider leading-none">
-                      {thirdPlaceMatch.score1.toFixed(1)}
+                      {thirdPlaceMatch.score1.toFixed(2)}
                     </p>
                     <div className="h-[1px] bg-white/10 my-1" />
                     <p className="text-base font-mono font-black text-slate-350 tracking-wider leading-none">
-                      {thirdPlaceMatch.score2.toFixed(1)}
+                      {thirdPlaceMatch.score2.toFixed(2)}
                     </p>
                   </div>
                 </div>

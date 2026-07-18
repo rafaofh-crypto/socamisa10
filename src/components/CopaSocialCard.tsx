@@ -16,6 +16,7 @@ interface CopaSocialCardProps {
   standingsAtCut: Participant[];
   finalRankings: any; // FinalRankings | null
   groups: Record<string, any[]>;
+  isAwaitingRound20?: boolean;
 }
 
 export default function CopaSocialCard({
@@ -23,7 +24,8 @@ export default function CopaSocialCard({
   cutRound,
   standingsAtCut,
   finalRankings,
-  groups
+  groups,
+  isAwaitingRound20 = false
 }: CopaSocialCardProps) {
 
   const getTeamInitials = (name: string) => {
@@ -45,6 +47,19 @@ export default function CopaSocialCard({
 
   // Render PREMIUM PODIUM FOR BRACKET VIEW (The ultimate tournament champions showcase)
   if (subTab === "bracket") {
+    if (isAwaitingRound20) {
+      return (
+        <div className="w-full bg-[#121212]/80 backdrop-blur-xl rounded-3xl border border-[#D4AF37]/30 p-6 sm:p-8 relative overflow-hidden shadow-2xl text-center">
+          <Trophy className="w-12 h-12 text-[#D4AF37]/40 mx-auto mb-4 animate-pulse" />
+          <h3 className="font-display font-black text-lg text-white uppercase tracking-tight">
+            Galeria da Glória Eterna
+          </h3>
+          <p className="text-xs text-slate-400 max-w-md mx-auto mt-2">
+            A galeria de campeões será aberta assim que a fase final do mata-mata for iniciada, após a consolidação da rodada 20.
+          </p>
+        </div>
+      );
+    }
     const champ = finalRankings?.champion || { name: "DOIS VIZINHOS SA", owner: "Angelo Cassol" };
     const runner = finalRankings?.runner_up || { name: "CRF GALO", owner: "Renato Galo" };
     const third = finalRankings?.third_place || { name: "DUDUMATHIAS FC", owner: "Evandro Rebelatto" };
@@ -225,10 +240,27 @@ export default function CopaSocialCard({
   // Render CLASSIFICATION/GROUPS PRE-CUTOFF VIEW (Qualifiers List template)
   const isGroups = subTab === "groups";
 
-  const cabecasDeChave = standingsAtCut.slice(0, 12);
-  const eliminados = standingsAtCut.length >= 50
-    ? standingsAtCut.slice(48, 50)
-    : standingsAtCut.slice(-2);
+  const cabecasDeChave = isAwaitingRound20
+    ? Array.from({ length: 12 }, (_, i) => ({
+        id: `placeholder-head-${i}`,
+        name: "Aguardando Rod 20",
+        owner: "—",
+        points: 0,
+        shieldUrl: ""
+      }))
+    : standingsAtCut.slice(0, 12);
+
+  const eliminados = isAwaitingRound20
+    ? Array.from({ length: 2 }, (_, i) => ({
+        id: `placeholder-elim-${i}`,
+        name: "Aguardando Rod 20",
+        owner: "—",
+        points: 0,
+        shieldUrl: ""
+      }))
+    : (standingsAtCut.length >= 50
+        ? standingsAtCut.slice(48, 50)
+        : standingsAtCut.slice(-2));
   
   return (
     <div className="w-full bg-[#121212]/80 backdrop-blur-xl rounded-3xl border border-[#D4AF37]/30 p-6 sm:p-8 relative overflow-hidden shadow-2xl transition-all duration-300">
@@ -290,7 +322,7 @@ export default function CopaSocialCard({
                   </h5>
                   <p className="text-[9.5px] text-slate-400 truncate">Téc: {team.owner}</p>
                   <p className="text-[10px] text-[#D4AF37] font-mono font-black mt-0.5 flex flex-wrap items-center gap-1">
-                    <span>{team.points} pts</span>
+                    <span>{team.points.toFixed(2)} pts</span>
                     <span className="text-[8px] bg-[#D4AF37]/20 px-1 py-0.2 rounded font-sans uppercase font-extrabold tracking-wide">CABEÇA</span>
                   </p>
                 </div>
@@ -334,7 +366,7 @@ export default function CopaSocialCard({
                     </h5>
                     <p className="text-[9.5px] text-slate-400 truncate">Téc: {team.owner}</p>
                     <p className="text-[10px] text-red-450 font-mono font-bold mt-0.5 flex items-center gap-1.5">
-                      <span>{team.points} pts</span>
+                      <span>{team.points.toFixed(2)} pts</span>
                       <span className="text-[8.5px] bg-red-950/80 text-red-450 border border-red-500/20 px-1.5 py-0.2 rounded font-sans uppercase font-black tracking-wider leading-none">ELIMINADO NA CORTE</span>
                     </p>
                   </div>

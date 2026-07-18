@@ -169,7 +169,7 @@ export default function MonthlySocialCard({
             </div>
 
             <div className="mt-4 pt-3.5 border-t border-white/5 flex items-baseline justify-between">
-              <span className="text-[10px] font-mono font-bold text-slate-400">{top1.monthlyPoints} pts</span>
+              <span className="text-[10px] font-mono font-bold text-slate-400">{top1.monthlyPoints.toFixed(2)} pts</span>
               <span className="text-xs font-display font-black text-white bg-[#D4AF37]/25 px-2.5 py-1 rounded border border-[#D4AF37]/45">
                 {MONTHLY_GOLDEN_AWARDS[0]}
               </span>
@@ -202,7 +202,7 @@ export default function MonthlySocialCard({
             </div>
 
             <div className="mt-4 pt-3.5 border-t border-white/5 flex items-baseline justify-between">
-              <span className="text-[10px] font-mono font-bold text-slate-400">{top2.monthlyPoints} pts</span>
+              <span className="text-[10px] font-mono font-bold text-slate-400">{top2.monthlyPoints.toFixed(2)} pts</span>
               <span className="text-xs font-display font-black text-white bg-slate-400/15 px-2.5 py-1 rounded border border-slate-400/30">
                 {MONTHLY_GOLDEN_AWARDS[1]}
               </span>
@@ -235,7 +235,7 @@ export default function MonthlySocialCard({
             </div>
 
             <div className="mt-4 pt-3.5 border-t border-white/5 flex items-baseline justify-between">
-              <span className="text-[10px] font-mono font-bold text-slate-400">{top3.monthlyPoints} pts</span>
+              <span className="text-[10px] font-mono font-bold text-slate-400">{top3.monthlyPoints.toFixed(2)} pts</span>
               <span className="text-xs font-display font-black text-white bg-amber-750/15 px-2.5 py-1 rounded border border-amber-700/30">
                 {MONTHLY_GOLDEN_AWARDS[2]}
               </span>

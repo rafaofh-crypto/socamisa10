@@ -23,10 +23,12 @@ interface MataMataProps {
   isSimulatorsEnabled?: boolean;
 }
 
-export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEnabled = true }: MataMataProps) {
+export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEnabled = false }: MataMataProps) {
   const [subTab, setSubTab] = useState<"classification" | "groups" | "bracket" | "calendar">("classification");
   const [manualScores, setManualScores] = useState<Record<string, { home: number; away: number }>>({});
   const [searchTerm, setSearchTerm] = useState("");
+
+  const isAwaitingRound20 = !isSimulatorsEnabled && currentRound < 20;
 
   // 1. Compute the cutting round and original unpopulated groups
   const cuttingResult = useMemo(() => {
@@ -41,6 +43,20 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
 
   // 2. Standings of all 50 teams at Cutoff Round (including Esperneio of Copa M10)
   const standingsAtCut = useMemo(() => {
+    if (isAwaitingRound20) {
+      return [...teams]
+        .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"))
+        .map((t, idx) => ({
+          id: t.id,
+          name: t.name,
+          owner: t.owner,
+          shieldUrl: t.shieldUrl,
+          points: 0,
+          esperneioScore: undefined as number | undefined,
+          rank: idx + 1,
+          status: "direct" as "seeded" | "direct" | "esperneio_win" | "esperneio_lost"
+        }));
+    }
     if (cuttingResult?.allRanked) {
       return cuttingResult.allRanked;
     }
@@ -65,7 +81,7 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
       })
       .sort((a, b) => b.points - a.points)
       .map((t, i) => ({ ...t, rank: i + 1 }));
-  }, [teams, cutRound, cuttingResult]);
+  }, [teams, cutRound, cuttingResult, isAwaitingRound20, isSimulatorsEnabled, currentRound]);
 
   // Filter standings based on search query
   const filteredStandings = useMemo(() => {
@@ -78,6 +94,30 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
 
   // 3. Populate groups with real round scores (R22, R23, R24 after cutRound)
   const populatedGroups = useMemo(() => {
+    if (isAwaitingRound20) {
+      const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
+      const mockGroups: Record<string, Team[]> = {};
+      letters.forEach((letter) => {
+        mockGroups[letter] = Array.from({ length: 4 }, (_, idx) => ({
+          group: letters.indexOf(letter),
+          name: "Aguardando Rod 20",
+          owner: "—",
+          shieldUrl: "",
+          points: 0,
+          groupRound1: 0,
+          groupRound2: 0,
+          groupRound3: 0,
+          position: idx + 1,
+          qualifyingPosition: idx + 1,
+          originalIndex: idx,
+          goalsFor: 0,
+          goalsAgainst: 0,
+          goalDifference: 0,
+          matchesPlayed: 0
+        }));
+      });
+      return mockGroups;
+    }
     if (!cuttingResult) return {};
     const groupsToPopulate = cuttingResult.groups as Record<string, Team[]>;
     const result: Record<string, Team[]> = {};
@@ -99,10 +139,16 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
       });
     }
     return result;
-  }, [cuttingResult, teams, cutRound, isSimulatorsEnabled, currentRound]);
+  }, [cuttingResult, teams, cutRound, isSimulatorsEnabled, currentRound, isAwaitingRound20]);
 
   // 4. Sort groups results and assemble the initial bracket of 32 teams
   const { initialBracket, allGroupTeams } = useMemo(() => {
+    if (isAwaitingRound20) {
+      return {
+        initialBracket: buildFullBracket({}, {}),
+        allGroupTeams: []
+      };
+    }
     if (!populatedGroups || Object.keys(populatedGroups).length === 0) {
       return { initialBracket: null, allGroupTeams: [] };
     }
@@ -295,13 +341,14 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
           standingsAtCut={standingsAtCut} 
           finalRankings={finalRankings} 
           groups={populatedGroups} 
+          isAwaitingRound20={isAwaitingRound20}
         />
       )}
 
       {/* Classification table for the cutting/cutoff stage */}
       {subTab === "classification" && (
         <div className="space-y-4 animate-fadeIn">
-          {cuttingResult?.esperneioTeams && cuttingResult.esperneioTeams.length > 0 && (
+          {!isAwaitingRound20 && cuttingResult?.esperneioTeams && cuttingResult.esperneioTeams.length > 0 && (
             <div className="p-4 bg-gradient-to-br from-[#c5a880]/10 via-black/40 to-black/60 border border-[#c5a880]/20 rounded-2xl space-y-3.5 shadow-lg backdrop-blur-md">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#c5a880]/15 pb-2.5">
                 <div className="flex items-center gap-2.5">
@@ -399,12 +446,15 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
                 <tbody className="divide-y divide-white/5 bg-[#121212]/40 text-slate-200">
                   {filteredStandings.map((t) => {
                     const idx = t.rank - 1;
-                    const isSeeded = t.status === "seeded";
-                    const isEsperneioWin = t.status === "esperneio_win";
-                    const isEliminated = t.status === "esperneio_lost";
+                    const isSeeded = !isAwaitingRound20 && t.status === "seeded";
+                    const isEsperneioWin = !isAwaitingRound20 && t.status === "esperneio_win";
+                    const isEliminated = !isAwaitingRound20 && t.status === "esperneio_lost";
                     
-                    let badgeColor = "bg-white/5 text-slate-300 border-white/10";
-                    let badgeLabel = "Classificado";
+                    let badgeColor = isAwaitingRound20 
+                      ? "bg-white/5 text-slate-400 border-white/5" 
+                      : "bg-white/5 text-slate-300 border-white/10";
+                    let badgeLabel = isAwaitingRound20 ? "Aguardando Rodada 20" : "Classificado";
+                    
                     if (isSeeded) {
                       badgeColor = "bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/25";
                       badgeLabel = "Cabeça de Chave";
@@ -478,7 +528,7 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
       {/* Group Phase Cards */}
       {subTab === "groups" && (
         <div className="mt-6">
-          <GroupCards groups={populatedGroups} />
+          <GroupCards groups={populatedGroups} isAwaitingRound20={isAwaitingRound20} />
         </div>
       )}
 

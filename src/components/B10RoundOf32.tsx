@@ -18,18 +18,31 @@ export const B10RoundOf32 = ({
   playoffMatches = [],
   b10Round,
   currentRound,
-  isSimulatorsEnabled = true
+  isSimulatorsEnabled = false
 }: B10RoundOf32Props) => {
   const f4Round = b10Round + 5; // Round 6 of Copa B10
   const isRound6Completed = isSimulatorsEnabled || currentRound >= f4Round;
+  const isAwaitingRound25 = !isSimulatorsEnabled && currentRound < 25;
 
   // 1. Get the 16 Elite teams from Phase 1 (1º to 16º)
   const eliteTeams = useMemo(() => {
+    if (isAwaitingRound25) {
+      return Array.from({ length: 16 }, (_, idx) => ({
+        id: `mock-elite-team-${idx}`,
+        name: `Aguardando Rod 25`,
+        owner: 'Pendente',
+        shieldUrl: null,
+        rank: idx + 1,
+        category: 'ELITE',
+        leagueRank: 99,
+        scores: {}
+      }));
+    }
     return [...mappedB10Teams]
       .filter(t => t.category === 'ELITE')
       .sort((a, b) => a.rank - b.rank)
       .slice(0, 16);
-  }, [mappedB10Teams]);
+  }, [mappedB10Teams, isAwaitingRound25]);
 
   // 2. Compute the playoff winners from Phase 3 (Playoffs - Round 5)
   const playoffWinners = useMemo(() => {
@@ -228,11 +241,11 @@ export const B10RoundOf32 = ({
                     <div className="flex flex-col items-center gap-1 w-full">
                       <div className="flex items-center justify-center gap-1 text-[11px] font-mono font-black w-full bg-black/60 border border-white/5 py-1 px-1.5 rounded-lg">
                         <span className={winner === 'home' ? 'text-[#D4AF37] font-black' : 'text-slate-400'}>
-                          {scoreHome.toFixed(0)}
+                          {scoreHome.toFixed(2)}
                         </span>
                         <span className="text-[8px] text-slate-600">:</span>
                         <span className={winner === 'away' ? 'text-[#D4AF37] font-black' : 'text-slate-400'}>
-                          {scoreAway.toFixed(0)}
+                          {scoreAway.toFixed(2)}
                         </span>
                       </div>
                       

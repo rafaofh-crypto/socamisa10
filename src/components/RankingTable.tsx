@@ -87,7 +87,7 @@ export default function RankingTable({ standings, activeRounds, selectedTurno }:
                       )}
                     </td>
                     <td className="py-3 px-4 text-right font-mono text-xs font-extrabold tracking-wide text-[#ff6b35]">
-                      {t.calculatedPoints} pts
+                      {t.calculatedPoints.toFixed(2)} pts
                     </td>
                   </tr>
                 </React.Fragment>

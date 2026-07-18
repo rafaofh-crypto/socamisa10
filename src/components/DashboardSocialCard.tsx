@@ -191,7 +191,7 @@ export default function DashboardSocialCard({ turnoType, standings, currentRound
                   </div>
 
                   <div className="mt-3 pt-3 border-t border-white/5 flex items-baseline justify-between">
-                    <span className="text-[10px] font-mono text-[#D4AF37] font-bold">{team.calculatedPoints} pts</span>
+                    <span className="text-[10px] font-mono text-[#D4AF37] font-bold">{team.calculatedPoints.toFixed(2)} pts</span>
                     <span className="text-sm font-display font-black text-white shrink-0 bg-white/5 px-2.5 py-1 rounded border border-white/10">
                       {award}
                     </span>
@@ -234,7 +234,7 @@ export default function DashboardSocialCard({ turnoType, standings, currentRound
                       <h5 className={`uppercase font-display tracking-tight text-white leading-tight ${getFontSizeClass(team.name)}`}>
                         {team.name}
                       </h5>
-                      <p className="text-[10px] text-slate-400 font-semibold truncate">Téc. {team.owner} &bull; <span className="font-mono font-bold text-slate-350">{team.calculatedPoints} pts</span></p>
+                      <p className="text-[10px] text-slate-400 font-semibold truncate">Téc. {team.owner} &bull; <span className="font-mono font-bold text-slate-350">{team.calculatedPoints.toFixed(2)} pts</span></p>
                     </div>
                   </div>
 
