@@ -11,16 +11,10 @@ interface SocialCardProps {
   magnata: CartolaTeam | null;
   magnataValue: number;
   round: number;
+  recordeTeam?: CartolaTeam | null;
+  recordeValue?: number;
+  recordeRound?: number;
 }
-
-// Constants for the historic league record
-const RECORD_TEAM = {
-  name: "Floripamengao",
-  owner: "Dyego",
-  points: 138.12,
-  round: "RODADA 13",
-  shieldUrl: "/escudos/Floripamengao.avif"
-};
 
 export default function SocialCard({ 
   mito, 
@@ -29,8 +23,17 @@ export default function SocialCard({
   lanternaScore, 
   magnata, 
   magnataValue, 
-  round 
+  round,
+  recordeTeam,
+  recordeValue,
+  recordeRound
 }: SocialCardProps) {
+
+  const recTeamName = recordeTeam?.name || "Floripamengao";
+  const recTeamOwner = recordeTeam?.owner || "Dyego";
+  const recShieldUrl = recordeTeam?.shieldUrl || "/escudos/Floripamengao.avif";
+  const recPoints = recordeValue !== undefined ? recordeValue : 138.12;
+  const recRoundNum = recordeRound || 13;
 
   // Dynamic Font Scaling helper to prevent text breaks or overflow for names > 16 chars
   const getFontSizeClass = (name: string) => {
@@ -201,19 +204,19 @@ export default function SocialCard({
                 Liga Recorde
               </span>
               <span className="text-[8px] font-mono font-black text-purple-450 bg-purple-500/15 px-2 py-0.5 rounded uppercase tracking-wider">
-                👑 R13 Record
+                👑 R{recRoundNum} Record
               </span>
             </div>
 
             <div className="flex items-center gap-3 py-1">
               <div className="w-12 h-12 bg-black/40 p-1.5 rounded-full border border-purple-500/20 shadow-inner flex items-center justify-center shrink-0">
-                <TeamShield shieldUrl={RECORD_TEAM.shieldUrl} fallbackText={RECORD_TEAM.name} />
+                <TeamShield shieldUrl={recShieldUrl} fallbackText={recTeamName} />
               </div>
               <div className="min-w-0">
-                <h4 className={`uppercase font-display tracking-tight text-white ${getFontSizeClass(RECORD_TEAM.name)}`}>
-                  {RECORD_TEAM.name}
+                <h4 className={`uppercase font-display tracking-tight text-white ${getFontSizeClass(recTeamName)}`}>
+                  {recTeamName}
                 </h4>
-                <p className="text-[10.5px] text-slate-400 truncate font-semibold">Téc. {RECORD_TEAM.owner}</p>
+                <p className="text-[10.5px] text-slate-400 truncate font-semibold">Téc. {recTeamOwner}</p>
               </div>
             </div>
           </div>
@@ -222,7 +225,7 @@ export default function SocialCard({
             <span className="text-[10px] font-mono uppercase text-slate-400">Recorde Geral</span>
             <div className="text-right">
               <span className="font-mono text-2.5xl sm:text-3xl font-black text-purple-450 tracking-tight">
-                {RECORD_TEAM.points.toFixed(2).replace(".", ",")}
+                {recPoints.toFixed(2).replace(".", ",")}
               </span>
               <span className="text-[10px] font-mono text-purple-400 font-bold uppercase ml-1">pts</span>
             </div>

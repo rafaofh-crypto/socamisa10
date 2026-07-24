@@ -142,6 +142,35 @@ export default function Destaques({ teams, currentRound }: DestaquesProps) {
     };
   }, [teams]);
 
+  // 2.7 Calculate Dynamically "Recorde Histórico" (Highest single-round score up to selectedRound)
+  const recordeHistorico = useMemo(() => {
+    if (teams.length === 0) return { team: null, value: 0, round: 1 };
+
+    let maxScore = -Infinity;
+    let bestTeam: CartolaTeam | null = null;
+    let bestRound = 1;
+
+    // Scan all completed rounds up to selectedRound (or currentRound if selectedRound > currentRound)
+    const maxRoundToScan = Math.min(selectedRound, currentRound);
+
+    teams.forEach((t) => {
+      for (let r = 1; r <= maxRoundToScan; r++) {
+        const score = t.scores[r];
+        if (typeof score === "number" && score > maxScore) {
+          maxScore = score;
+          bestTeam = t;
+          bestRound = r;
+        }
+      }
+    });
+
+    return {
+      team: bestTeam,
+      value: maxScore > -Infinity ? maxScore : 0,
+      round: bestRound
+    };
+  }, [teams, selectedRound, currentRound]);
+
   // 3. Calculate Dynamically "O Foguete" and "A Âncora" (Table climbers and sinkers)
   const resenha = useMemo(() => {
     if (teams.length === 0) {
@@ -452,25 +481,31 @@ export default function Destaques({ teams, currentRound }: DestaquesProps) {
                 </span>
               </div>
 
-              <div className="my-4 flex items-center gap-4 relative z-10">
-                <div className="w-14 h-14 bg-[#121212]/90 p-1 rounded-full border border-gold shadow-lg flex items-center justify-center overflow-hidden shrink-0">
-                  <TeamShield shieldUrl="/escudos/Floripamengao.avif" fallbackText="Floripamengao" />
-                </div>
-                <div className="min-w-0">
-                  <h4 className="font-display font-black text-base text-white uppercase tracking-tight leading-tight truncate">Floripamengao</h4>
-                  <p className="text-[11px] text-slate-350 truncate mt-0.5">Dono: Dyego</p>
-                </div>
-              </div>
+              {recordeHistorico.team ? (
+                <>
+                  <div className="my-4 flex items-center gap-4 relative z-10">
+                    <div className="w-14 h-14 bg-[#121212]/90 p-1 rounded-full border border-gold shadow-lg flex items-center justify-center overflow-hidden shrink-0">
+                      <TeamShield shieldUrl={recordeHistorico.team.shieldUrl} fallbackText={recordeHistorico.team.name} />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="font-display font-black text-base text-white uppercase tracking-tight leading-tight truncate">{recordeHistorico.team.name}</h4>
+                      <p className="text-[11px] text-slate-350 truncate mt-0.5">Dono: {recordeHistorico.team.owner}</p>
+                    </div>
+                  </div>
 
-              <div className="mt-2 flex justify-between items-end relative z-10 gap-1">
-                <div>
-                  <span className="font-mono text-2xl font-black text-gold tracking-tight">138,12</span>
-                  <span className="text-[10px] uppercase text-[#D4AF37] font-mono font-bold ml-1">pts</span>
-                </div>
-                <span className="text-[9.5px] uppercase font-mono bg-gold/10 text-gold px-2 py-0.5 rounded border border-gold/20 font-bold">
-                  Rodada 13
-                </span>
-              </div>
+                  <div className="mt-2 flex justify-between items-end relative z-10 gap-1">
+                    <div>
+                      <span className="font-mono text-2xl font-black text-gold tracking-tight">{recordeHistorico.value.toFixed(2).replace(".", ",")}</span>
+                      <span className="text-[10px] uppercase text-[#D4AF37] font-mono font-bold ml-1">pts</span>
+                    </div>
+                    <span className="text-[9.5px] uppercase font-mono bg-gold/10 text-gold px-2 py-0.5 rounded border border-gold/20 font-bold">
+                      Rodada {recordeHistorico.round}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <p className="text-slate-400 text-xs my-4">Sem dados</p>
+              )}
             </div>
 
           </div>
@@ -488,7 +523,10 @@ export default function Destaques({ teams, currentRound }: DestaquesProps) {
                   lanternaScore={roundMitoAndLanterna.lanternaScore}
                   magnata={magnata.team}
                   magnataValue={magnata.value}
-                  round={selectedRound} 
+                  round={selectedRound}
+                  recordeTeam={recordeHistorico.team}
+                  recordeValue={recordeHistorico.value}
+                  recordeRound={recordeHistorico.round}
                 />
               </div>
             )}
