@@ -26,8 +26,11 @@ export const B10FinalBracket = ({
   const isAwaitingRound25 = !isSimulatorsEnabled && currentRound < 25;
 
   // Round numbers
-  const rPlayoff = b10Round + 4; // Round 5 (R29)
-  const rR32 = b10Round + 5;     // Round 6 (R30)
+  const rPlayoffLeg1 = b10Round + 2; // R27
+  const rPlayoffLeg2 = b10Round + 3; // R28
+  
+  const rR32Leg1 = b10Round + 4; // R29
+  const rR32Leg2 = b10Round + 5; // R30
   
   // Oitavas (Fase 5) - Ida & Volta
   const rOitavasIda = b10Round + 6;   // Round 7 (R31)
@@ -144,13 +147,18 @@ export const B10FinalBracket = ({
       const h = eliteTeams[i];
       const a = sortedPlayoffWinnersDesc[i];
       if (h && a) {
-        const scoreH = (isSimulatorsEnabled || rR32 <= currentRound) && typeof h.scores[rR32] === 'number' ? h.scores[rR32] : 0;
-        const scoreA = (isSimulatorsEnabled || rR32 <= currentRound) && typeof a.scores[rR32] === 'number' ? a.scores[rR32] : 0;
+        const scoreHLeg1 = (isSimulatorsEnabled || rR32Leg1 <= currentRound) && typeof h.scores[rR32Leg1] === 'number' ? h.scores[rR32Leg1] : 0;
+        const scoreHLeg2 = (isSimulatorsEnabled || rR32Leg2 <= currentRound) && typeof h.scores[rR32Leg2] === 'number' ? h.scores[rR32Leg2] : 0;
+        const scoreH = Number((scoreHLeg1 + scoreHLeg2).toFixed(2));
+
+        const scoreALeg1 = (isSimulatorsEnabled || rR32Leg1 <= currentRound) && typeof a.scores[rR32Leg1] === 'number' ? a.scores[rR32Leg1] : 0;
+        const scoreALeg2 = (isSimulatorsEnabled || rR32Leg2 <= currentRound) && typeof a.scores[rR32Leg2] === 'number' ? a.scores[rR32Leg2] : 0;
+        const scoreA = Number((scoreALeg1 + scoreALeg2).toFixed(2));
 
         let winner: 'home' | 'away' | null = null;
         let tiebreakerApplied = false;
 
-        const isPlayed = (isSimulatorsEnabled || currentRound >= rR32) && !a.isVirtual;
+        const isPlayed = (isSimulatorsEnabled || currentRound >= rR32Leg2) && !a.isVirtual;
         if (isPlayed) {
           if (scoreH > scoreA) {
             winner = 'home';
@@ -167,7 +175,11 @@ export const B10FinalBracket = ({
           id: i + 1,
           home: h,
           away: a,
+          scoreHomeLeg1: scoreHLeg1,
+          scoreHomeLeg2: scoreHLeg2,
           scoreHome: scoreH,
+          scoreAwayLeg1: scoreALeg1,
+          scoreAwayLeg2: scoreALeg2,
           scoreAway: scoreA,
           winner,
           tiebreakerApplied,
@@ -176,7 +188,7 @@ export const B10FinalBracket = ({
       }
     }
     return list;
-  }, [eliteTeams, sortedPlayoffWinnersDesc, rR32, currentRound]);
+  }, [eliteTeams, sortedPlayoffWinnersDesc, rR32Leg1, rR32Leg2, currentRound, isSimulatorsEnabled]);
 
   // Extract the 16 Round of 32 Winners (each has seed position 1 to 16)
   const r32Winners = useMemo(() => {

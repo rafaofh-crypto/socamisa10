@@ -209,11 +209,11 @@ export const B10RoundOf32 = ({
                 </span>
                 {isPlayed ? (
                   <span className="text-[8px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-black tracking-widest uppercase px-2 py-0.5 rounded-full">
-                    Finalizado
+                    Finalizado (R{match.f4Leg1Round} e R{match.f4Leg2Round})
                   </span>
                 ) : (
                   <span className="text-[8px] bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/25 font-black tracking-widest uppercase px-1.5 py-0.5 rounded">
-                    A confirmar (R{match.f4Round})
+                    A confirmar (R{match.f4Leg1Round} e R{match.f4Leg2Round})
                   </span>
                 )}
               </div>

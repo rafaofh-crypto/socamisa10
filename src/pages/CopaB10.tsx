@@ -634,7 +634,7 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
                 </div>
 
                 <p className="text-[9px] font-mono text-slate-400 mb-2.5 leading-normal">
-                  Soma de R2, R3 e R4 da Copa B10 (R{b10Round+1} a R{b10Round+3})
+                  Jogo Único de Sobrevivência (Rodada 26 do Cartola)
                 </p>
 
                 <div className="space-y-2">
@@ -680,11 +680,7 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
 
                         <div className="flex items-center justify-between text-[8px] font-mono text-slate-500">
                           <div className="flex gap-1 text-[8px] text-slate-400">
-                            <span>R2:{team.scoreR2.toFixed(0)}</span>
-                            <span>•</span>
-                            <span>R3:{team.scoreR3.toFixed(0)}</span>
-                            <span>•</span>
-                            <span>R4:{team.scoreR4.toFixed(0)}</span>
+                            <span>R26: {(team.scoreR26 ?? 0).toFixed(2)} pts</span>
                           </div>
                           
                           <span className={`font-black tracking-widest text-[7px] uppercase px-1 rounded ${
@@ -960,7 +956,7 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
               
               <div className="bg-black/35 border-x border-b border-white/5 rounded-b-2xl p-4 space-y-2.5 max-h-[480px] overflow-y-auto custom-scrollbar">
                 <div className="text-[9px] font-mono text-red-300/90 leading-relaxed mb-3 p-2 bg-red-500/5 border border-red-500/10 rounded-lg">
-                  Estes 4 times ficam na zona crítica e disputam a <strong>Repescagem na Fase 2 (Rounds B10 2, 3 e 4)</strong>. Apenas os 2 melhores avançam!
+                  Estes 4 times ficam na zona crítica e disputam o <strong>Esperneio em Jogo Único (Rodada 26)</strong>. Apenas os 2 melhores avançam!
                 </div>
                 
                 {repescagemData.map((t) => (
@@ -989,18 +985,14 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
                         <p className={`font-mono text-xs font-black ${t.isTop2 ? 'text-emerald-400' : 'text-red-400'}`}>
                           {t.totalAccumulated.toFixed(2)}
                         </p>
-                        <p className="text-[8px] text-slate-500 font-mono">Acumulado</p>
+                        <p className="text-[8px] text-slate-500 font-mono">Pontos R26</p>
                       </div>
                     </div>
 
                     {/* Breakdown pill */}
                     <div className="flex items-center justify-between text-[8px] font-mono border-t border-white/5 pt-1.5 mt-0.5 text-slate-400">
                       <div className="flex gap-1 bg-black/25 px-1.5 py-0.5 rounded border border-white/5">
-                        <span>R2:{t.scoreR2.toFixed(0)}</span>
-                        <span>•</span>
-                        <span>R3:{t.scoreR3.toFixed(0)}</span>
-                        <span>•</span>
-                        <span>R4:{t.scoreR4.toFixed(0)}</span>
+                        <span>R26: {(t.scoreR26 ?? 0).toFixed(2)} pts</span>
                       </div>
                       <span className={`px-1.5 py-0.5 rounded uppercase font-black text-[7px] ${
                         t.isTop2 ? 'text-emerald-400 bg-emerald-500/15' : 'text-red-400 bg-red-500/15'
@@ -1027,13 +1019,13 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
               <div>
                 <span className="inline-flex items-center gap-1.5 bg-[#D4AF37]/20 border border-[#D4AF37]/30 text-[#D4AF37] px-2.5 py-0.5 rounded text-[9px] font-mono uppercase font-black tracking-widest mb-2">
-                  <Sparkles className="w-2.5 h-2.5" /> Fase 3 (Play-offs) • Mata-mata de Acesso
+                  <Sparkles className="w-2.5 h-2.5" /> Fase 3 (Play-offs) • Mata-mata de Acesso (180 Min)
                 </span>
                 <h2 className="text-xl font-display font-black text-white uppercase tracking-wider">
-                  Jogos de Sobrevivência — Rodada {b10Round + 4}
+                  Jogos de Sobrevivência — Rodadas {b10Round + 2} e {b10Round + 3}
                 </h2>
                 <p className="text-xs text-slate-300 font-mono mt-1">
-                  Os 30 times do Grupo Acesso competem com os 2 times que escaparam da Repescagem em 16 duelos diretos de semente espelhada.
+                  Os 30 times do Grupo Acesso competem com os 2 sobreviventes do Esperneio em 16 duelos diretos de ida e volta.
                 </p>
               </div>
               
@@ -1043,7 +1035,7 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
                 </div>
                 <div>
                   <span className="text-[9px] text-slate-500 uppercase tracking-widest block">Recompensa</span>
-                  <span className="text-[#D4AF37] font-extrabold uppercase text-[10px]">Vaga na Fase 4 (Elite)</span>
+                  <span className="text-[#D4AF37] font-extrabold uppercase text-[10px]">Vaga na Fase 4 (16-avos)</span>
                 </div>
               </div>
             </div>
@@ -1056,7 +1048,7 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
                 <span className="w-2 h-2 rounded-full bg-blue-400" /> Critério de Desempate: Rank Geral na Liga
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" /> Vencedor garante permanência e joga Fase de Grupos da Elite (Fase 4)
+                <span className="w-2 h-2 rounded-full bg-emerald-400" /> Vencedores garantem vaga na Fase 4 (16-avos de Final)
               </span>
             </div>
           </div>
@@ -1082,11 +1074,11 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
                     </span>
                     {isPlayed ? (
                       <span className="text-[8px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-black tracking-widest uppercase px-2 py-0.5 rounded-full">
-                        Finalizado (R{match.f3Round})
+                        Finalizado (R{match.f3Leg1Round} e R{match.f3Leg2Round})
                       </span>
                     ) : (
                       <span className="text-[8px] bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/20 font-black tracking-widest uppercase px-2 py-0.5 rounded-full animate-pulse">
-                        A realizar (R{match.f3Round})
+                        A realizar (R{match.f3Leg1Round} e R{match.f3Leg2Round})
                       </span>
                     )}
                   </div>
