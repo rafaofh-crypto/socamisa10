@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guia Explicativo Ilustrado - Copa B10 (M10)</title>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-card: #131a2a;
+      --bg-card-hover: #1a233a;
+      --border-color: #23304a;
+      
+      --pote1-gold: #f59e0b;
+      --pote1-bg: rgba(245, 158, 11, 0.12);
+      --pote2-cyan: #06b6d4;
+      --pote2-bg: rgba(6, 182, 212, 0.12);
+      --pote3-purple: #a855f7;
+      --pote3-bg: rgba(168, 85, 247, 0.12);
+      --pote4-emerald: #10b981;
+      --pote4-bg: rgba(16, 185, 129, 0.12);
+      --esperneio-orange: #f97316;
+      --esperneio-bg: rgba(249, 115, 22, 0.15);
+
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #6366f1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    body {
+      padding-bottom: 60px;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header / Hero */
+    header {
+      background: linear-gradient(180deg, #181f33 0%, #0b0f19 100%);
+      border-bottom: 1px solid var(--border-color);
+      padding: 50px 0 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .badge-top {
+      display: inline-block;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #818cf8;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.6rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 24px;
+    }
+
+    /* Quick Nav */
+    .nav-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .nav-link {
+      color: #cbd5e1;
+      text-decoration: none;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Main Sections */
+    section {
+      margin-top: 40px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .icon-box {
+      width: 38px;
+      height: 38px;
+      background: rgba(99, 102, 241, 0.15);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #818cf8;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: #cbd5e1;
+      font-size: 0.98rem;
+    }
+
+    /* Highlight Cards Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .info-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .info-card h4 {
+      font-size: 1.05rem;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    /* Potes Legend & Visual Balls */
+    .pote-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .ball {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 12px;
+      color: #0b0f19;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+
+    .ball-p1 { background: var(--pote1-gold); }
+    .ball-p2 { background: var(--pote2-cyan); }
+    .ball-p3 { background: var(--pote3-purple); color: #fff; }
+    .ball-p4 { background: var(--pote4-emerald); }
+    .ball-esp { background: var(--esperneio-orange); color: #fff; }
+
+    /* Group Box Visualizer */
+    .group-box {
+      background: #0d1322;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .group-header {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #fff;
+      margin-bottom: 12px;
+      text-align: center;
+      background: rgba(255,255,255,0.05);
+      padding: 6px;
+      border-radius: 6px;
+    }
+
+    .team-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .team-item:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Timeline / Rodadas */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-color);
+      padding: 14px 18px;
+      border-radius: 12px;
+    }
+
+    .round-tag {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      white-space: nowrap;
+      min-width: 100px;
+      text-align: center;
+    }
+
+    /* FAQ Accordion */
+    .faq-item {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.01);
+    }
+
+    .faq-question {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      padding: 16px 20px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .faq-question:hover {
+      background: rgba(255,255,255,0.03);
+    }
+
+    .faq-answer {
+      padding: 0 20px 16px;
+      display: none;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 12px;
+    }
+
+    .faq-item.active .faq-answer {
+      display: block;
+    }
+
+    .faq-item.active .faq-icon {
+      transform: rotate(180deg);
+    }
+
+    .faq-icon {
+      transition: transform 0.2s ease;
+      font-size: 14px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      h1 { font-size: 1.8rem; }
+      section { padding: 20px; }
+      .timeline-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="container">
+      <span class="badge-top">🏆 Guia Oficial Didático</span>
+      <h1>Como Funciona a Copa B10 (M10)?</h1>
+      <p class="subtitle">
+        Entenda o passo a passo completo da competição mais charmosa do nosso Cartola: o Esperneio na Rodada 20, a formação dos 4 potes, a Fase de Grupos e o Chaveamento Final do Mata-Mata!
+      </p>
+      
+      <div class="nav-bar">
+        <a href="#premiacao" class="nav-link">💰 Premiação</a>
+        <a href="#esperneio" class="nav-link">🔥 Esperneio (R20)</a>
+        <a href="#potes" class="nav-link">🎨 Os 4 Potes</a>
+        <a href="#grupos" class="nav-link">⚔️ Fase de Grupos</a>
+        <a href="#matamata" class="nav-link">🏆 Mata-Mata</a>
+        <a href="#calendario" class="nav-link">📅 Calendário</a>
+        <a href="#faq" class="nav-link">❓ Dúvidas (FAQ)</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- SEÇÃO 1: PREMIAÇÃO -->
+    <section id="premiacao">
+      <div class="section-title">
+        <div class="icon-box">💰</div>
+        <h2>1. Visão Geral & Premiação</h2>
+      </div>
+      <p>
+        A <strong>Copa B10</strong> é um torneio mata-mata paralelo que movimenta toda a liga a partir do meio da temporada. Além do prestígio, a copa distribui <strong>R$ 1.500,00</strong> em prêmios em dinheiro:
+      </p>
+
+      <div class="grid-4">
+        <div class="info-card" style="border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.05);">
+          <h4 style="color: #f59e0b;">🥇 Campeão</h4>
+          <p style="font-size: 1.4rem; font-weight: 800; color: #fff; margin: 4px 0;">R$ 800,00</p>
+          <p style="font-size: 0.8rem; color: #94a3b8; margin: 0;">+ Troféu Oficial + Vaga na Recopa B10</p>
+        </div>
+
+        <div class="info-card" style="border-color: rgba(148, 163, 184, 0.4);">
+          <h4 style="color: #cbd5e1;">🥈 Vice-Campeão</h4>
+          <p style="font-size: 1.4rem; font-weight: 800; color: #fff; margin: 4px 0;">R$ 400,00</p>
+          <p style="font-size: 0.8rem; color: #94a3b8; margin: 0;">Prêmio direto em PIX</p>
+        </div>
+
+        <div class="info-card" style="border-color: rgba(202, 138, 4, 0.4);">
+          <h4 style="color: #eab308;">🥉 3º Lugar</h4>
+          <p style="font-size: 1.4rem; font-weight: 800; color: #fff; margin: 4px 0;">R$ 200,00</p>
+          <p style="font-size: 0.8rem; color: #94a3b8; margin: 0;">Vencedor da pequena final</p>
+        </div>
+
+        <div class="info-card" style="border-color: rgba(148, 163, 184, 0.2);">
+          <h4 style="color: #94a3b8;">🏅 4º Lugar</h4>
+          <p style="font-size: 1.4rem; font-weight: 800; color: #fff; margin: 4px 0;">R$ 100,00</p>
+          <p style="font-size: 0.8rem; color: #94a3b8; margin: 0;">Quarto colocado no geral</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 2: O ESPERNEIO (R20) -->
+    <section id="esperneio">
+      <div class="section-title">
+        <div class="icon-box">🔥</div>
+        <h2>2. A Repescagem: O Esperneio (Rodada 20)</h2>
+      </div>
+      <p>
+        Antes da Fase de Grupos começar, é disputada a <strong>Rodada de Repescagem ("Esperneio")</strong> exclusivamente na <strong>Rodada 20</strong> do Cartola.
+      </p>
+
+      <div class="info-card" style="background: var(--esperneio-bg); border-color: rgba(249, 115, 22, 0.4); margin-bottom: 20px;">
+        <h3 style="color: #f97316; margin-bottom: 8px;">Quem Disputa o Esperneio?</h3>
+        <p style="color: #f8fafc; margin-bottom: 8px;">
+          Os <strong>4 times</strong> que terminaram o Turno (Rodadas 1 a 19) nas últimas posições da tabela de qualificação:
+        </p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+          <span class="pote-badge" style="background: rgba(249, 115, 22, 0.2); color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.4);">
+            <span class="ball ball-esp">31</span> 31º Colocado
+          </span>
+          <span class="pote-badge" style="background: rgba(249, 115, 22, 0.2); color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.4);">
+            <span class="ball ball-esp">32</span> 32º Colocado
+          </span>
+          <span class="pote-badge" style="background: rgba(249, 115, 22, 0.2); color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.4);">
+            <span class="ball ball-esp">33</span> 33º Colocado
+          </span>
+          <span class="pote-badge" style="background: rgba(249, 115, 22, 0.2); color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.4);">
+            <span class="ball ball-esp">34</span> 34º Colocado
+          </span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="info-card">
+          <h4 style="color: #10b981;">✅ Quem Passa? (Top 2 da R20)</h4>
+          <p>
+            Os <strong>2 maiores pontuadores da Rodada 20</strong> conquistam as últimas 2 vagas no Pote 4. Eles entram diretamente nos <strong>Grupos G e H</strong> (posições G4 e H4).
+          </p>
+        </div>
+        <div class="info-card">
+          <h4 style="color: #ef4444;">❌ Quem É Eliminado?</h4>
+          <p>
+            Os <strong>2 piores pontuadores da Rodada 20</strong> são eliminados imediatamente e dão adeus à Copa B10 nesta temporada.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 3: OS 4 POTES -->
+    <section id="potes">
+      <div class="section-title">
+        <div class="icon-box">🎨</div>
+        <h2>3. A Divisão dos 4 Potes pelo Turno</h2>
+      </div>
+      <p>
+        Todos os 32 times qualificados para a Fase de Grupos são divididos em <strong>4 Potes</strong> com base no seu desempenho no Turno (Rodadas 1 a 19):
+      </p>
+
+      <div class="grid-2" style="margin-bottom: 24px;">
+        <div class="info-card" style="background: var(--pote1-bg); border-color: rgba(245, 158, 11, 0.3);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <span class="ball ball-p1">P1</span>
+            <h4 style="color: var(--pote1-gold); margin: 0;">Pote 1 (Cabeças de Chave)</h4>
+          </div>
+          <p style="font-size: 0.9rem; margin: 0;">Times do <strong>1º ao 8º lugar</strong> no Turno. Ocupam as posições A1, B1, C1, D1, E1, F1, G1 e H1.</p>
+        </div>
+
+        <div class="info-card" style="background: var(--pote2-bg); border-color: rgba(6, 182, 212, 0.3);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <span class="ball ball-p2">P2</span>
+            <h4 style="color: var(--pote2-cyan); margin: 0;">Pote 2</h4>
+          </div>
+          <p style="font-size: 0.9rem; margin: 0;">Times do <strong>9º ao 16º lugar</strong> no Turno. Ocupam as posições A2, B2, C2, D2, E2, F2, G2 e H2.</p>
+        </div>
+
+        <div class="info-card" style="background: var(--pote3-bg); border-color: rgba(168, 85, 247, 0.3);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <span class="ball ball-p3">P3</span>
+            <h4 style="color: var(--pote3-purple); margin: 0;">Pote 3</h4>
+          </div>
+          <p style="font-size: 0.9rem; margin: 0;">Times do <strong>17º ao 24º lugar</strong> no Turno. Ocupam as posições A3, B3, C3, D3, E3, F3, G3 e H3.</p>
+        </div>
+
+        <div class="info-card" style="background: var(--pote4-bg); border-color: rgba(16, 185, 129, 0.3);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <span class="ball ball-p4">P4</span>
+            <h4 style="color: var(--pote4-emerald); margin: 0;">Pote 4</h4>
+          </div>
+          <p style="font-size: 0.9rem; margin: 0;">Times do <strong>25º ao 30º</strong> do Turno + <strong>2 Vagas do Esperneio (G4 e H4)</strong>.</p>
+        </div>
+      </div>
+
+      <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 12px;">Exemplo de Alocação Visual nos Grupos (A até H):</h3>
+      <p style="font-size: 0.9rem;">
+        Cada grupo é composto por exatamente 1 time de cada pote (1 do Pote 1, 1 do Pote 2, 1 do Pote 3 e 1 do Pote 4):
+      </p>
+
+      <div class="grid-4" style="margin-top: 16px;">
+        <!-- Grupo Exemplo A -->
+        <div class="group-box">
+          <div class="group-header">GRUPO A</div>
+          <div class="team-item">
+            <span>A1 (1º do Turno)</span>
+            <span class="ball ball-p1">P1</span>
+          </div>
+          <div class="team-item">
+            <span>A2 (9º do Turno)</span>
+            <span class="ball ball-p2">P2</span>
+          </div>
+          <div class="team-item">
+            <span>A3 (17º do Turno)</span>
+            <span class="ball ball-p3">P3</span>
+          </div>
+          <div class="team-item">
+            <span>A4 (25º do Turno)</span>
+            <span class="ball ball-p4">P4</span>
+          </div>
+        </div>
+
+        <!-- Grupo Exemplo B -->
+        <div class="group-box">
+          <div class="group-header">GRUPO B</div>
+          <div class="team-item">
+            <span>B1 (2º do Turno)</span>
+            <span class="ball ball-p1">P1</span>
+          </div>
+          <div class="team-item">
+            <span>B2 (10º do Turno)</span>
+            <span class="ball ball-p2">P2</span>
+          </div>
+          <div class="team-item">
+            <span>B3 (18º do Turno)</span>
+            <span class="ball ball-p3">P3</span>
+          </div>
+          <div class="team-item">
+            <span>B4 (26º do Turno)</span>
+            <span class="ball ball-p4">P4</span>
+          </div>
+        </div>
+
+        <!-- Grupo Exemplo G (Com Esperneio) -->
+        <div class="group-box" style="border-color: rgba(249, 115, 22, 0.4);">
+          <div class="group-header" style="background: rgba(249, 115, 22, 0.15); color: #fdba74;">GRUPO G</div>
+          <div class="team-item">
+            <span>G1 (7º do Turno)</span>
+            <span class="ball ball-p1">P1</span>
+          </div>
+          <div class="team-item">
+            <span>G2 (15º do Turno)</span>
+            <span class="ball ball-p2">P2</span>
+          </div>
+          <div class="team-item">
+            <span>G3 (23º do Turno)</span>
+            <span class="ball ball-p3">P3</span>
+          </div>
+          <div class="team-item" style="border-color: rgba(249, 115, 22, 0.4); background: rgba(249, 115, 22, 0.08);">
+            <span>G4 (1º do Esperneio)</span>
+            <span class="ball ball-esp">ESP</span>
+          </div>
+        </div>
+
+        <!-- Grupo Exemplo H (Com Esperneio) -->
+        <div class="group-box" style="border-color: rgba(249, 115, 22, 0.4);">
+          <div class="group-header" style="background: rgba(249, 115, 22, 0.15); color: #fdba74;">GRUPO H</div>
+          <div class="team-item">
+            <span>H1 (8º do Turno)</span>
+            <span class="ball ball-p1">P1</span>
+          </div>
+          <div class="team-item">
+            <span>H2 (16º do Turno)</span>
+            <span class="ball ball-p2">P2</span>
+          </div>
+          <div class="team-item">
+            <span>H3 (24º do Turno)</span>
+            <span class="ball ball-p3">P3</span>
+          </div>
+          <div class="team-item" style="border-color: rgba(249, 115, 22, 0.4); background: rgba(249, 115, 22, 0.08);">
+            <span>H4 (2º do Esperneio)</span>
+            <span class="ball ball-esp">ESP</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 4: FASE DE GRUPOS -->
+    <section id="grupos">
+      <div class="section-title">
+        <div class="icon-box">⚔️</div>
+        <h2>4. Fase de Grupos (Rodadas 21, 22 e 23)</h2>
+      </div>
+      <p>
+        A Fase de Grupos dura <strong>3 rodadas corridas</strong> (R21, R22 e R23). A pontuação do time no grupo é dada pela <strong>SOMA TOTAL dos pontos</strong> conquistados nessas 3 rodadas no Cartola.
+      </p>
+
+      <div class="info-card" style="background: rgba(99, 102, 241, 0.05); border-color: rgba(99, 102, 241, 0.3); margin-top: 16px;">
+        <h4 style="color: #818cf8;">Regra de Classificação para o Mata-Mata:</h4>
+        <ul style="padding-left: 20px; color: #cbd5e1; font-size: 0.95rem; margin-top: 8px;">
+          <li style="margin-bottom: 6px;">🥇 <strong>1º Lugar de cada grupo (8 times)</strong> -> Avança direto para o Mata-Mata.</li>
+          <li style="margin-bottom: 6px;">🥈 <strong>2º Lugar de cada grupo (8 times)</strong> -> Avança direto para o Mata-Mata.</li>
+          <li style="margin-bottom: 6px;">⭐ <strong>Os 2 Melhores 3ºs Colocados do Geral (2 times)</strong> -> Todos os 8 times que ficarem em 3º lugar entram em uma tabela de comparação. Os <strong>2 com maior pontuação total nas R21-R23</strong> também avançam!</li>
+          <li>❌ <strong>Eliminados</strong> -> Os outros 6 terceiros colocados e todos os 4ºs colocados (lanternas) de cada grupo dão adeus à Copa.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 5: MATA-MATA -->
+    <section id="matamata">
+      <div class="section-title">
+        <div class="icon-box">🏆</div>
+        <h2>5. O Mata-Mata & Chaveamento Final</h2>
+      </div>
+      <p>
+        A fase eliminatória é disputada em <strong>jogos de IDA e VOLTA</strong> (soma dos pontos acumulados nas duas rodadas de cada fase).
+      </p>
+
+      <div class="grid-2">
+        <div class="info-card">
+          <h4>⚔️ Jogos de Ida e Volta</h4>
+          <p style="font-size: 0.9rem;">
+            O placar do confronto é a soma exata dos pontos do seu time na rodada de Ida + rodada de Volta. Quem somar mais pontos avança!
+          </p>
+        </div>
+
+        <div class="info-card">
+          <h4>⚖️ Critérios de Desempate no Mata-Mata</h4>
+          <ol style="padding-left: 18px; font-size: 0.88rem; color: #cbd5e1;">
+            <li>Maior pontuação na rodada individual de VOLTA do confronto.</li>
+            <li>Melhor campanha na Fase de Grupos.</li>
+            <li>Melhor colocação obtida no Turno Geral.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 6: CALENDÁRIO COMPLETO -->
+    <section id="calendario">
+      <div class="section-title">
+        <div class="icon-box">📅</div>
+        <h2>6. Calendário Oficial das Rodadas</h2>
+      </div>
+      <p>
+        Confira em quais rodadas do Cartola acontece cada fase da Copa B10:
+      </p>
+
+      <div class="timeline">
+        <div class="timeline-item" style="border-color: rgba(249, 115, 22, 0.4);">
+          <span class="round-tag" style="background: var(--esperneio-orange);">Rodada 20</span>
+          <div>
+            <h4 style="color: #fff;">Fase de Qualificação / Esperneio (Repescagem)</h4>
+            <p style="font-size: 0.85rem; margin: 0; color: #94a3b8;">Duelo único entre os 4 lanternas do Turno (31º ao 34º). Os 2 melhores garantem as últimas vagas.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <span class="round-tag">R21, R22, R23</span>
+          <div>
+            <h4 style="color: #fff;">Fase de Grupos (3 Rodadas)</h4>
+            <p style="font-size: 0.85rem; margin: 0; color: #94a3b8;">Soma de pontos dos 4 times em cada grupo ao longo de 3 rodadas.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <span class="round-tag">R25 e R26</span>
+          <div>
+            <h4 style="color: #fff;">16 avos de Final (32-avos) - Ida e Volta</h4>
+            <p style="font-size: 0.85rem; margin: 0; color: #94a3b8;">Primeiro mata-mata eliminatório.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <span class="round-tag">R28 e R29</span>
+          <div>
+            <h4 style="color: #fff;">Oitavas de Final - Ida e Volta</h4>
+            <p style="font-size: 0.85rem; margin: 0; color: #94a3b8;">16 melhores times em duelos decisivos.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <span class="round-tag">R31 e R32</span>
+          <div>
+            <h4 style="color: #fff;">Quartas de Final - Ida e Volta</h4>
+            <p style="font-size: 0.85rem; margin: 0; color: #94a3b8;">8 melhores times em busca da semifinal.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <span class="round-tag">R34 e R35</span>
+          <div>
+            <h4 style="color: #fff;">Semifinais - Ida e Volta</h4>
+            <p style="font-size: 0.85rem; margin: 0; color: #94a3b8;">Duelos que valem vaga na grande final e garantem premiação.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item" style="border-color: rgba(245, 158, 11, 0.4);">
+          <span class="round-tag" style="background: var(--pote1-gold); color: #000;">R37 e R38</span>
+          <div>
+            <h4 style="color: #fff;">Grande Final & Disputa do 3º Lugar</h4>
+            <p style="font-size: 0.85rem; margin: 0; color: #94a3b8;">Disputa do título, do troféu e da premiação de R$ 800,00.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 7: FAQ -->
+    <section id="faq">
+      <div class="section-title">
+        <div class="icon-box">❓</div>
+        <h2>7. Perguntas Frequentes (Tire suas Dúvidas)</h2>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span> As vagas do Esperneio nos Grupos G e H são fixas?</span>
+          <span class="faq-icon">▼</span>
+        </button>
+        <div class="faq-answer">
+          Sim! O 1º colocado da Repescagem (Esperneio) assume a posição <strong>G4</strong> (Grupo G) e o 2º colocado assume a posição <strong>H4</strong> (Grupo H).
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span> O que acontece em caso de empate na soma de pontos no Esperneio?</span>
+          <span class="faq-icon">▼</span>
+        </button>
+        <div class="faq-answer">
+          Em caso de empate na pontuação simples da Rodada 20, o critério de desempate é a melhor posição obtida na tabela do Turno (Rodadas 1 a 19).
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span> Como são escolhidos os 2 melhores 3ºs colocados para o Mata-Mata?</span>
+          <span class="faq-icon">▼</span>
+        </button>
+        <div class="faq-answer">
+          Ao final das Rodadas 21, 22 e 23, pega-se a soma de pontos dos 8 times que ficaram em 3º lugar em cada grupo. Os dois times que tiverem a maior quantidade de pontos somados garantem a classificação.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span> Este guia altera alguma coisa no sistema da nossa liga?</span>
+          <span class="faq-icon">▼</span>
+        </button>
+        <div class="faq-answer">
+          Não! Este guia é uma página informativa independente criada para explicar de forma visual e simples as regras para todos os participantes.
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer style="text-align: center; margin-top: 40px; color: var(--text-muted); font-size: 0.85rem;">
+      <p>🏆 Liga B10 — Guia Oficial da Copa B10 (M10)</p>
+    </footer>
+
+  </div>
+
+  <script>
+    // FAQ Accordion Script
+    document.querySelectorAll('.faq-question').forEach(button => {
+      button.addEventListener('click', () => {
+        const item = button.parentElement;
+        item.classList.toggle('active');
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -187,8 +187,10 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
     return mappedB10Teams.slice(0, 3);
   }, [mappedB10Teams, isAwaitingRound25]);
 
-  // 5. Phase 2 (Repescagem) scoring and qualification logic
+  // 5. Phase 2 (Esperneio / Repescagem) scoring and qualification logic - JOGO ÚNICO na Rodada 26
   const repescagemData = useMemo(() => {
+    const f2Round = b10Round + 1; // Rodada 26 do Cartola (Rodada Única do Esperneio)
+
     if (isAwaitingRound25) {
       // Return 4 placeholder teams under awaiting state
       return Array.from({ length: 4 }, (_, idx) => ({
@@ -199,11 +201,9 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
         totalLeaguePoints: 0,
         b10RoundScore: 0,
         leagueRank: 47 + idx,
-        scoreR2: 0,
-        scoreR3: 0,
-        scoreR4: 0,
+        scoreR26: 0,
         totalAccumulated: 0,
-        f2Rounds: [26, 27, 28],
+        f2Round,
         f2Rank: idx + 1,
         status: 'classifying' as const,
         statusLabel: 'Pendente',
@@ -214,30 +214,22 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
 
     // Identify the 4 teams destined to Phase 2 (rank 47th to 50th from Phase 1, category REPESCAGEM)
     const f2TeamsOriginal = mappedB10Teams.filter(t => t.category === 'REPESCAGEM');
-    
-    // Map of Cartola FC rounds that corresponds to Phase 2 (Rounds 2, 3 and 4 of Copa B10, corresponding to b10Round + 1, b10Round + 2, b10Round + 3)
-    const f2Rounds = [b10Round + 1, b10Round + 2, b10Round + 3];
 
     const computedF2Teams = f2TeamsOriginal.map((t) => {
-      const scoreR2 = (isSimulatorsEnabled || f2Rounds[0] <= currentRound) && typeof t.scores[f2Rounds[0]] === 'number' ? t.scores[f2Rounds[0]] : 0;
-      const scoreR3 = (isSimulatorsEnabled || f2Rounds[1] <= currentRound) && typeof t.scores[f2Rounds[1]] === 'number' ? t.scores[f2Rounds[1]] : 0;
-      const scoreR4 = (isSimulatorsEnabled || f2Rounds[2] <= currentRound) && typeof t.scores[f2Rounds[2]] === 'number' ? t.scores[f2Rounds[2]] : 0;
-
-      const totalAccumulated = Number((scoreR2 + scoreR3 + scoreR4).toFixed(2));
+      const scoreR26 = (isSimulatorsEnabled || f2Round <= currentRound) && typeof t.scores[f2Round] === 'number' ? t.scores[f2Round] : 0;
+      const totalAccumulated = Number(scoreR26.toFixed(2));
 
       return {
         ...t,
-        scoreR2,
-        scoreR3,
-        scoreR4,
+        scoreR26,
         totalAccumulated,
-        f2Rounds
+        f2Round
       };
     });
 
-    // Sort them by Phase 2 Accumulated Points
+    // Sort them by Esperneio Score in R26
     // Tiebreaker:
-    // - Primary: totalAccumulated points in Phase 2
+    // - Primary: totalAccumulated (R26 score)
     // - Secondary: leagueRank in General Liga (lower rank is better)
     const sortedF2 = [...computedF2Teams].sort((a, b) => {
       if (Math.abs(b.totalAccumulated - a.totalAccumulated) > 0.001) {
@@ -246,9 +238,9 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
       return a.leagueRank - b.leagueRank;
     });
 
-    const isRound4Completed = isSimulatorsEnabled || currentRound >= b10Round + 3;
+    const isRound26Completed = isSimulatorsEnabled || currentRound >= f2Round;
 
-    // Mark classification trigger status (Top 2 qualify to Phase 3, bottom 2 are eliminated)
+    // Mark classification trigger status (Top 2 qualify to Phase 3 Play-offs, bottom 2 are eliminated)
     return sortedF2.map((t, idx) => {
       const isTop2 = idx < 2;
       let status: 'classifying' | 'classified' | 'eliminating' | 'eliminated';
@@ -256,12 +248,12 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
       let statusBadgeStyle = '';
 
       if (isTop2) {
-        status = isRound4Completed ? 'classified' : 'classifying';
-        statusLabel = isRound4Completed ? 'Classificado' : 'Sendo Classificado (G2)';
+        status = isRound26Completed ? 'classified' : 'classifying';
+        statusLabel = isRound26Completed ? 'Classificado' : 'Sendo Classificado (G2)';
         statusBadgeStyle = 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
       } else {
-        status = isRound4Completed ? 'eliminated' : 'eliminating';
-        statusLabel = isRound4Completed ? 'Eliminado' : 'Sendo Eliminado';
+        status = isRound26Completed ? 'eliminated' : 'eliminating';
+        statusLabel = isRound26Completed ? 'Eliminado' : 'Sendo Eliminado';
         statusBadgeStyle = 'bg-red-500/15 text-red-400 border-red-500/30';
       }
 
@@ -290,10 +282,11 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
   const acessoGroup = useMemo(() => mappedB10Teams.filter(t => t.category === 'ACESSO'), [mappedB10Teams]);
   const repescagemGroup = useMemo(() => mappedB10Teams.filter(t => t.category === 'REPESCAGEM'), [mappedB10Teams]);
 
-  // 6. Hook to compute Phase 3 Playoffs (Mata-mata de Acesso)
+  // 6. Hook to compute Phase 3 Playoffs (Mata-mata de Acesso) - IDA E VOLTA nas Rodadas 27 e 28 (180 Minutos)
   const playoffMatches = useMemo(() => {
-    const f3Round = b10Round + 4; // Round 5 of Copa B10
-    const isRound5Completed = isSimulatorsEnabled || currentRound >= f3Round;
+    const f3Leg1Round = b10Round + 2; // Rodada 27 (Ida)
+    const f3Leg2Round = b10Round + 3; // Rodada 28 (Volta)
+    const isPlayoffCompleted = isSimulatorsEnabled || currentRound >= f3Leg2Round;
 
     if (isAwaitingRound25) {
       return Array.from({ length: 16 }, (_, idx) => ({
@@ -321,23 +314,26 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
           scores: {}
         },
         title: `Confronto ${idx + 1}`,
+        score1Leg1: 0,
+        score1Leg2: 0,
         score1: 0,
+        score2Leg1: 0,
+        score2Leg2: 0,
         score2: 0,
         winner: null,
         tiebreakerApplied: false,
         isPlayed: false,
-        f3Round
+        f3Leg1Round,
+        f3Leg2Round
       }));
     }
 
     // Filter classified teams from Repescagem (Phase 2)
     const repClassified = repescagemData.filter(t => t.isTop2);
-    // Note: repClassified[0] is the top team (1º da Repescagem), repClassified[1] is the runner-up (2º da Repescagem)
 
     const matchesList = [];
 
     // Match 1: 17º Colocado vs 2º da Repescagem
-    // acessoGroup[0] represents the 17th placed team (first in acessoGroup)
     if (acessoGroup[0] && repClassified[1]) {
       matchesList.push({
         id: 1,
@@ -348,7 +344,6 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
     }
 
     // Match 2: 18º Colocado vs 1º da Repescagem
-    // acessoGroup[1] represents the 18th placed team
     if (acessoGroup[1] && repClassified[0]) {
       matchesList.push({
         id: 2,
@@ -359,13 +354,9 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
     }
 
     // Matches 3 to 16: Mirror pairing format
-    // acessoGroup length is 30 (from index 0 to 29)
-    // 19º is index 2, 46º is index 29 (mirror index)
-    // 20º is index 3, 45º is index 28, etc.
-    // loops 14 times
     for (let i = 0; i < 14; i++) {
-      const idx1 = 2 + i; // starts at 19º (index 2) up to 32º (index 15)
-      const idx2 = 29 - i; // starts at 46º (index 29) down to 33º (index 16)
+      const idx1 = 2 + i; // starts at 19º up to 32º
+      const idx2 = 29 - i; // starts at 46º down to 33º
       const team1 = acessoGroup[idx1];
       const team2 = acessoGroup[idx2];
 
@@ -379,21 +370,26 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
       }
     }
 
-    // Map matches with dynamic Cartola scores, winner determination and tiebreaking status
+    // Map matches with dynamic Cartola scores for Ida (R27) e Volta (R28) - Agregado de 180 min
     return matchesList.map((m) => {
-      const score1 = (isSimulatorsEnabled || f3Round <= currentRound) && typeof m.team1.scores[f3Round] === 'number' ? m.team1.scores[f3Round] : 0;
-      const score2 = (isSimulatorsEnabled || f3Round <= currentRound) && typeof m.team2.scores[f3Round] === 'number' ? m.team2.scores[f3Round] : 0;
+      const score1Leg1 = (isSimulatorsEnabled || f3Leg1Round <= currentRound) && typeof m.team1.scores[f3Leg1Round] === 'number' ? m.team1.scores[f3Leg1Round] : 0;
+      const score1Leg2 = (isSimulatorsEnabled || f3Leg2Round <= currentRound) && typeof m.team1.scores[f3Leg2Round] === 'number' ? m.team1.scores[f3Leg2Round] : 0;
+      const score1 = Number((score1Leg1 + score1Leg2).toFixed(2));
+
+      const score2Leg1 = (isSimulatorsEnabled || f3Leg1Round <= currentRound) && typeof m.team2.scores[f3Leg1Round] === 'number' ? m.team2.scores[f3Leg1Round] : 0;
+      const score2Leg2 = (isSimulatorsEnabled || f3Leg2Round <= currentRound) && typeof m.team2.scores[f3Leg2Round] === 'number' ? m.team2.scores[f3Leg2Round] : 0;
+      const score2 = Number((score2Leg1 + score2Leg2).toFixed(2));
 
       let winner: 'team1' | 'team2' | null = null;
       let tiebreakerApplied = false;
 
-      if (isRound5Completed) {
+      if (isPlayoffCompleted) {
         if (score1 > score2) {
           winner = 'team1';
         } else if (score2 > score1) {
           winner = 'team2';
         } else {
-          // Tiebreaker rule: Better Cartola FC General League Rank is preferred (smaller rank is better)
+          // Tiebreaker rule: Better Cartola FC General League Rank is preferred
           winner = m.team1.leagueRank < m.team2.leagueRank ? 'team1' : 'team2';
           tiebreakerApplied = true;
         }
@@ -401,12 +397,17 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
 
       return {
         ...m,
+        score1Leg1,
+        score1Leg2,
         score1,
+        score2Leg1,
+        score2Leg2,
         score2,
         winner,
         tiebreakerApplied,
-        isPlayed: isRound5Completed,
-        f3Round
+        isPlayed: isPlayoffCompleted,
+        f3Leg1Round,
+        f3Leg2Round
       };
     });
   }, [acessoGroup, repescagemData, b10Round, currentRound, isSimulatorsEnabled, isAwaitingRound25]);

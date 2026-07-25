@@ -96,8 +96,8 @@ export function getTournamentCalendar(currentRound: number): TournamentCalendarE
       },
       copaB10: {
         phase: "Fase 1 (Corte)",
-        description: "Corte (Jogo Único) - Mapeamento para Elite, Acesso e Repescagem.",
-        rules: "Do 1º ao 16º avançam à Fase 4 (Elite direto). Do 17º ao 46º avançam ao Play-offs (Fase 3). Do 47º ao 50º vão para a Repescagem (Fase 2)."
+        description: "Corte (Jogo Único) - Mapeamento para Elite (1º-16º), Acesso (17º-46º) e Esperneio (47º-50º).",
+        rules: "Do 1º ao 16º avançam à Fase 4 (Elite direto). Do 17º ao 46º avançam ao Play-offs (Fase 3). Do 47º ao 50º vão para o Esperneio (Fase 2)."
       }
     },
     {
@@ -108,9 +108,9 @@ export function getTournamentCalendar(currentRound: number): TournamentCalendarE
         rules: "Os 16 vencedores duelam em partida única."
       },
       copaB10: {
-        phase: "Rodada do Esperneio",
-        description: "Esperneio (Jogo Único) - Repescagem preliminar de sobrevivência.",
-        rules: "Os 4 times da repescagem jogam em rodada única; apenas os melhores continuam na copa B10."
+        phase: "Fase 2 (Esperneio / Repescagem)",
+        description: "Esperneio (Jogo Único) - Combate direto entre os 4 lanternas.",
+        rules: "Disputa em rodada única entre o 47º e 50º colocados. Os 2 melhores asseguram as vagas finais dos Play-offs. Os 2 piores são eliminados."
       }
     },
     {
@@ -121,9 +121,9 @@ export function getTournamentCalendar(currentRound: number): TournamentCalendarE
         rules: "Os 8 vencedores duelam em partida única para o G4."
       },
       copaB10: {
-        phase: "Fase 2 (Repescagem) - Ida",
-        description: "Repescagem do Acesso - Jogo de Ida.",
-        rules: "Confrontos de ida para os times em recuperação."
+        phase: "Fase 3 (Play-offs do Acesso) - Ida",
+        description: "Play-offs do Acesso - Jogo de Ida (180 Minutos).",
+        rules: "16 duelos diretos entre os 30 clubes do Acesso e os 2 sobreviventes do Esperneio."
       }
     },
     {
@@ -134,9 +134,9 @@ export function getTournamentCalendar(currentRound: number): TournamentCalendarE
         rules: "Penúltima etapa definindo os postulantes ao título do Mundo."
       },
       copaB10: {
-        phase: "Fase 2 (Repescagem) - Volta",
-        description: "Repescagem do Acesso - Jogo de Volta (Acumulado de 2 Rodadas).",
-        rules: "Soma das notas das Rodadas 27 e 28. O vencedor agregado sobrevive no certame."
+        phase: "Fase 3 (Play-offs do Acesso) - Volta",
+        description: "Play-offs do Acesso - Jogo de Volta (Decisão Agregada).",
+        rules: "Placar acumulado das Rodadas 27 e 28. Os 16 vencedores garantem vaga na Fase 4 (16 avos de final)."
       }
     },
     {
@@ -147,9 +147,9 @@ export function getTournamentCalendar(currentRound: number): TournamentCalendarE
         rules: "Os dois gigantes finalistas se enfrentam na rodada de gala da Copa M10. Decisão simultânea do 3º lugar."
       },
       copaB10: {
-        phase: "Fase 3 (Play-offs)",
-        description: "Play-offs do Acesso (Jogo Único).",
-        rules: "Confrontos de morte súbita definindo os guerreiros que avançam à Fase 4."
+        phase: "Fase 4 (16 avos de Final) - Ida",
+        description: "Mata-mata Principal - Jogo de Ida (180 Minutos).",
+        rules: "Os 16 clubes da Elite enfrentam os 16 classificados dos Play-offs em duelo de ida."
       }
     },
     {
@@ -160,9 +160,9 @@ export function getTournamentCalendar(currentRound: number): TournamentCalendarE
         rules: "Campeão consagrado."
       },
       copaB10: {
-        phase: "Fase 4 (Round of 32)",
-        description: "Mata-mata Central B10 - Jogo Único.",
-        rules: "Chaveamento principal de 32 clubes em partida de caráter eliminatório único."
+        phase: "Fase 4 (16 avos de Final) - Volta",
+        description: "Mata-mata Principal - Jogo de Volta (Decisão Agregada).",
+        rules: "Placar acumulado das Rodadas 29 e 30. Os 16 vencedores avançam às Oitavas de Final."
       }
     },
     {

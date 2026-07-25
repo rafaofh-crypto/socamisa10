@@ -20,8 +20,9 @@ export const B10RoundOf32 = ({
   currentRound,
   isSimulatorsEnabled = false
 }: B10RoundOf32Props) => {
-  const f4Round = b10Round + 5; // Round 6 of Copa B10
-  const isRound6Completed = isSimulatorsEnabled || currentRound >= f4Round;
+  const f4Leg1Round = b10Round + 4; // Rodada 29 (Ida da Fase 4)
+  const f4Leg2Round = b10Round + 5; // Rodada 30 (Volta da Fase 4)
+  const isRound6Completed = isSimulatorsEnabled || currentRound >= f4Leg2Round;
   const isAwaitingRound25 = !isSimulatorsEnabled && currentRound < 25;
 
   // 1. Get the 16 Elite teams from Phase 1 (1º to 16º)
@@ -95,8 +96,13 @@ export const B10RoundOf32 = ({
       const away = sortedWinnersDesc[i];
 
       if (home && away) {
-        const scoreHome = (isSimulatorsEnabled || f4Round <= currentRound) && typeof home.scores[f4Round] === 'number' ? home.scores[f4Round] : 0;
-        const scoreAway = (isSimulatorsEnabled || f4Round <= currentRound) && typeof away.scores[f4Round] === 'number' ? away.scores[f4Round] : 0;
+        const scoreHomeLeg1 = (isSimulatorsEnabled || f4Leg1Round <= currentRound) && typeof home.scores[f4Leg1Round] === 'number' ? home.scores[f4Leg1Round] : 0;
+        const scoreHomeLeg2 = (isSimulatorsEnabled || f4Leg2Round <= currentRound) && typeof home.scores[f4Leg2Round] === 'number' ? home.scores[f4Leg2Round] : 0;
+        const scoreHome = Number((scoreHomeLeg1 + scoreHomeLeg2).toFixed(2));
+
+        const scoreAwayLeg1 = (isSimulatorsEnabled || f4Leg1Round <= currentRound) && typeof away.scores[f4Leg1Round] === 'number' ? away.scores[f4Leg1Round] : 0;
+        const scoreAwayLeg2 = (isSimulatorsEnabled || f4Leg2Round <= currentRound) && typeof away.scores[f4Leg2Round] === 'number' ? away.scores[f4Leg2Round] : 0;
+        const scoreAway = Number((scoreAwayLeg1 + scoreAwayLeg2).toFixed(2));
 
         let winner: 'home' | 'away' | null = null;
         let tiebreakerApplied = false;
@@ -118,18 +124,23 @@ export const B10RoundOf32 = ({
           id: i + 1,
           home,
           away,
+          scoreHomeLeg1,
+          scoreHomeLeg2,
           scoreHome,
+          scoreAwayLeg1,
+          scoreAwayLeg2,
           scoreAway,
           winner,
           tiebreakerApplied,
           isPlayed: isRound6Completed && !away.isVirtual,
-          f4Round
+          f4Leg1Round,
+          f4Leg2Round
         });
       }
     }
 
     return matchesList;
-  }, [eliteTeams, sortedWinnersDesc, f4Round, isRound6Completed]);
+  }, [eliteTeams, sortedWinnersDesc, f4Leg1Round, f4Leg2Round, isRound6Completed]);
 
   // Helper for dynamic font scaling on long names
   const formatNameClass = (name: string) => {
@@ -153,7 +164,7 @@ export const B10RoundOf32 = ({
               <Crown className="w-2.5 h-2.5" /> Fase 4 (Elite) • 16-avos de Final
             </span>
             <h2 className="text-xl font-display font-black text-white uppercase tracking-wider">
-              Copa de Elite — Rodada {f4Round}
+              Copa de Elite — Rodadas {f4Leg1Round} e {f4Leg2Round} (Agregado de 180 Min)
             </h2>
             <p className="text-xs text-slate-300 font-mono mt-1">
               Os 16 times da elite (1º ao 16º da Fase 1) encaram os 16 sobreviventes dos Play-offs em cruzamentos de puro mérito.

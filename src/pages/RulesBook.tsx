@@ -109,27 +109,37 @@ export default function RulesBook() {
           <div className="space-y-3 pl-2 border-l-2 border-emerald-500/30">
             <div>
               <h5 className="font-semibold text-white flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono font-bold">A</span>
+                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono font-bold">1</span>
                 Rodada de Corte de Elite (R25)
               </h5>
               <p className="text-xs text-slate-400 mt-1 pl-7">
-                Com base na Rodada 25 do Cartola, os 50 clubes são fatiados em 3 categorias: **Elite** (Ranks 1-16), **Acesso** (Ranks 17-45) e **Repescagem** (Ranks 46-50).
+                Com base na Rodada 25 do Cartola, os 50 clubes são fatiados em 3 categorias: **Elite** (Ranks 1-16, vaga direta na Fase 4), **Acesso** (Ranks 17-46, vão para os Play-offs) e **Esperneio** (Ranks 47-50, vão para a repescagem).
               </p>
             </div>
 
             <div>
               <h5 className="font-semibold text-white flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono font-bold">B</span>
-                O Agregado de 180 Minutos
+                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono font-bold">2</span>
+                O Esperneio de Jogo Único (R26)
               </h5>
               <p className="text-xs text-slate-400 mt-1 pl-7">
-                A partir das Oitavas de Final, todas as fases ocorrem em confrontos com jogos de ida e volta (Ida na rodada X, Volta na rodada Y). O score total para classificação é a **soma simples das parciais conquistadas em ambas as rodadas**.
+                A repescagem da B10 é um tiro curto de sobrevivência de **jogo único (Rodada 26)**. Os 4 lanternas disputam pontuação direta; os **2 melhores** ficam com as últimas vagas nos Play-offs e os 2 piores são eliminados.
               </p>
             </div>
 
             <div>
               <h5 className="font-semibold text-white flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono font-bold">C</span>
+                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono font-bold">3</span>
+                Mata-Mata Integral de 180 Minutos (Play-offs até a Final)
+              </h5>
+              <p className="text-xs text-slate-400 mt-1 pl-7">
+                Dos Play-offs do Acesso (R27/R28) até a Grande Final (R37/R38), **todas as fases de mata-mata da Copa B10 ocorrem em confrontos de Ida e Volta (180 minutos)**. O placar final é a soma simples dos pontos do Cartola obtidos em ambas as partidas.
+              </p>
+            </div>
+
+            <div>
+              <h5 className="font-semibold text-white flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono font-bold">4</span>
                 A Sagrada Hierarquia de Desempates
               </h5>
               <p className="text-xs text-slate-400 mt-1 pl-7">
