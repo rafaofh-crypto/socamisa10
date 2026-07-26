@@ -130,10 +130,10 @@ export default function RulesBook() {
             <div>
               <h5 className="font-semibold text-white flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-mono font-bold">3</span>
-                Mata-Mata Integral de 180 Minutos (Play-offs até a Final)
+                Mata-Mata de 180 Minutos e Finalíssima em Jogo Único na R37
               </h5>
               <p className="text-xs text-slate-400 mt-1 pl-7">
-                Dos Play-offs do Acesso (R27/R28) até a Grande Final (R37/R38), **todas as fases de mata-mata da Copa B10 ocorrem em confrontos de Ida e Volta (180 minutos)**. O placar final é a soma simples dos pontos do Cartola obtidos em ambas as partidas.
+                Dos Play-offs (R27/R28) até as Semifinais (R35/R36), todos os confrontos da Copa B10 ocorrem em **Ida e Volta (180 minutos)**. A **Grande Final e a Disputa de 3º Lugar são disputadas em Jogo Único na Rodada 37**, consagrando o Campeão da B10 com chave de ouro antes do encerramento do Cartola.
               </p>
             </div>
 

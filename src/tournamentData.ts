@@ -240,7 +240,7 @@ export function getTournamentCalendar(currentRound: number): TournamentCalendarE
       copaB10: {
         phase: "Fase 7 (Semifinal) - Volta",
         description: "Fases de Elite - Semifinais (Volta).",
-        rules: "Decisão de quem avança para a Supercopa Brasil."
+        rules: "Decisão dos 2 finalistas e dos disputantes do 3º lugar."
       }
     },
     {
