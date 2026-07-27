@@ -2333,11 +2333,20 @@ export function processCuttingRound(
   const pot3 = finalAdvancingEntries.slice(24, 36); // Pote 3 (Posição 3)
   const pot4 = finalAdvancingEntries.slice(36, 48); // Pote 4 (Posição 4 - onde estão as Vagas 47 e 48)
 
-  // 5. Função de embaralhamento com Fisher-Yates
-  const shuffle = <T>(array: T[]): T[] => {
+  // 5. Função de embaralhamento DETERMINÍSTICA com SEED fixa (Sorteio oficial travado e imutável)
+  const seededRandom = (s: number) => {
+    let t = (s += 0x6D2B79F5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+
+  const shuffle = <T>(array: T[], potSeed: number): T[] => {
     const arr = [...array];
+    let s = potSeed;
     for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      s += 1;
+      const j = Math.floor(seededRandom(s) * (i + 1));
       const temp = arr[i];
       arr[i] = arr[j];
       arr[j] = temp;
@@ -2345,10 +2354,10 @@ export function processCuttingRound(
     return arr;
   };
 
-  // Cada Pote é sorteado de forma independente para definir quem vai para qual grupo
-  const shuffledPot2 = shuffle(pot2);
-  const shuffledPot3 = shuffle(pot3);
-  const shuffledPot4 = shuffle(pot4);
+  // Cada Pote é sorteado com uma seed fixa e imutável (ex: Pote 2 = 202402, Pote 3 = 202403, Pote 4 = 202404)
+  const shuffledPot2 = shuffle(pot2, 202402);
+  const shuffledPot3 = shuffle(pot3, 202403);
+  const shuffledPot4 = shuffle(pot4, 202404);
 
   // Concatena Pote 2, Pote 3 e Pote 4 mantendo a estrutura de Potes (0..11 -> Pos 2, 12..23 -> Pos 3, 24..35 -> Pos 4)
   const shuffledRemaining = [...shuffledPot2, ...shuffledPot3, ...shuffledPot4];
