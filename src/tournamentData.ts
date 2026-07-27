@@ -2239,13 +2239,13 @@ export function processCuttingRound(
     };
   });
 
-  // Ordenar por acumulado desc (Classificação até R20), depois pontuação da rodada desc, depois originalIndex asc
+  // Ordenar por pontuação da rodada de corte DESC (R20), depois acumulado DESC, depois originalIndex ASC
   scoredTeams.sort((a, b) => {
-    if (b.cumulativeScore !== a.cumulativeScore) {
-      return b.cumulativeScore - a.cumulativeScore;
-    }
-    if (b.roundScore !== a.roundScore) {
+    if (Math.abs(b.roundScore - a.roundScore) > 0.001) {
       return b.roundScore - a.roundScore;
+    }
+    if (Math.abs(b.cumulativeScore - a.cumulativeScore) > 0.001) {
+      return b.cumulativeScore - a.cumulativeScore;
     }
     return a.originalIndex - b.originalIndex;
   });
@@ -2360,40 +2360,42 @@ export function processCuttingRound(
   }));
 
   // Montar tabela consolidada de classificação final (1 a 50) para visualização impecável
-  const allRanked = [
-    ...directAdvancingEntries.map((e, idx) => ({
+  // A classificação DEVE seguir estritamente a pontuação da Rodada de Corte (R20)
+  const allRanked = rankedEntriesBeforeEsperneio.map((e, idx) => {
+    const survivorMatch = esperneioSurvivors.find(s => s.team.id === e.team.id);
+    const eliminatedMatch = esperneioEliminated.find(el => el.team.id === e.team.id);
+
+    let status: "seeded" | "direct" | "esperneio_win" | "esperneio_lost" = "direct";
+    let is_survivor = false;
+    let esperneioScore: number | undefined = undefined;
+
+    if (idx < 12) {
+      status = "seeded";
+    } else if (idx < 46) {
+      status = "direct";
+    } else if (survivorMatch) {
+      status = "esperneio_win";
+      is_survivor = true;
+      esperneioScore = survivorMatch.esperneioScore;
+    } else if (eliminatedMatch) {
+      status = "esperneio_lost";
+      is_survivor = false;
+      esperneioScore = eliminatedMatch.esperneioScore;
+    }
+
+    return {
       id: e.team.id,
       name: e.team.name,
       owner: e.team.owner,
       shieldUrl: e.team.shieldUrl,
-      points: e.cumulativeScore,
-      rank: idx + 1,
-      status: (idx < 12 ? "seeded" : "direct") as "seeded" | "direct",
-      is_survivor: false
-    })),
-    ...esperneioSurvivors.map(e => ({
-      id: e.team.id,
-      name: e.team.name,
-      owner: e.team.owner,
-      shieldUrl: e.team.shieldUrl,
-      points: e.cumulativeScore,
-      esperneioScore: e.esperneioScore,
-      rank: e.rankAfter,
-      status: "esperneio_win" as const,
-      is_survivor: true
-    })),
-    ...esperneioEliminated.map(e => ({
-      id: e.team.id,
-      name: e.team.name,
-      owner: e.team.owner,
-      shieldUrl: e.team.shieldUrl,
-      points: e.cumulativeScore,
-      esperneioScore: e.esperneioScore,
-      rank: e.rankAfter,
-      status: "esperneio_lost" as const,
-      is_survivor: false
-    }))
-  ].sort((a, b) => a.rank - b.rank);
+      points: e.roundScore,
+      cumulativeScore: e.cumulativeScore,
+      esperneioScore,
+      rank: idx + 1, // 1º ao 50º lugar mantido rigidamente de acordo com a pontuação da Rodada de Corte
+      status,
+      is_survivor
+    };
+  });
 
   return {
     advancing,

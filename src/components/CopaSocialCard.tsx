@@ -280,7 +280,7 @@ export default function CopaSocialCard({
           <p className="text-xs text-slate-400">
             {isGroups 
               ? "Exibindo os classificados oficiais alocados nos grupos." 
-              : `Consolidado dos 12 Cabeças de Chave principais e os 2 times cortados da copa.`}
+              : `Consolidado dos 12 Cabeças de Chave principais e os times na disputa do Esperneio.`}
           </p>
         </div>
 
@@ -332,13 +332,13 @@ export default function CopaSocialCard({
         </div>
       </div>
 
-      {/* Section listing the Cutoff Eliminated elements */}
+      {/* Section listing the Cutoff Esperneio elements */}
       {!isGroups && eliminados.length > 0 && (
         <div className="relative z-10 pt-6 border-t border-white/10 mb-2">
           <div className="flex items-center gap-2 mb-4">
-            <AlertCircle className="w-4.5 h-4.5 text-red-500 animate-pulse" />
-            <h4 className="text-xs font-mono font-black text-red-400 uppercase tracking-wider">
-              🚨 ELIMINADOS DA COPA (LINHA DE CORTE - 49º & 50º)
+            <AlertCircle className="w-4.5 h-4.5 text-[#c5a880] animate-pulse" />
+            <h4 className="text-xs font-mono font-black text-[#c5a880] uppercase tracking-wider">
+              ⚔️ DISPUTA DO ESPERNEIO (LINHA DE CORTE - 49º & 50º)
             </h4>
           </div>
 
@@ -349,25 +349,19 @@ export default function CopaSocialCard({
               
               return (
                 <div 
-                  key={team.id} 
-                  className="rounded-xl p-4 border flex items-center gap-3 transition-all duration-300 hover:border-red-500/40 hover:bg-red-950/10 border-red-500/25 bg-red-950/20"
+                  key={team.id || idx} 
+                  className="rounded-xl p-4 border flex items-center gap-3 transition-all duration-300 hover:border-[#c5a880]/40 hover:bg-[#c5a880]/15 border-[#c5a880]/25 bg-[#c5a880]/10"
                 >
-                  <div className="w-6 text-center shrink-0 font-mono text-xs font-black text-red-400">
+                  <div className="w-6 text-center shrink-0 font-mono text-xs font-black text-[#c5a880]">
                     <span>{displayRank}º</span>
                   </div>
 
-                  <div className="w-8 h-8 bg-black/40 p-1 rounded-full border border-red-500/35 flex items-center justify-center shrink-0">
-                    <TeamShield shieldUrl={team.shieldUrl} fallbackText={team.name} />
-                  </div>
-
                   <div className="min-w-0 flex-1">
-                    <h5 className={`uppercase font-display tracking-tight text-slate-300 line-through decoration-red-700/60 leading-tight ${getFontSizeClass(team.name)}`}>
-                      {team.name}
+                    <h5 className="uppercase font-display tracking-tight text-white font-bold leading-tight text-xs sm:text-sm">
+                      AGUARDANDO ROD. DO ESPERNEIO
                     </h5>
-                    <p className="text-[9.5px] text-slate-400 truncate">Téc: {team.owner}</p>
-                    <p className="text-[10px] text-red-450 font-mono font-bold mt-0.5 flex items-center gap-1.5">
-                      <span>{team.points.toFixed(2)} pts</span>
-                      <span className="text-[8.5px] bg-red-950/80 text-red-450 border border-red-500/20 px-1.5 py-0.2 rounded font-sans uppercase font-black tracking-wider leading-none">ELIMINADO NA CORTE</span>
+                    <p className="text-[10px] text-[#c5a880] font-mono font-bold mt-0.5 flex items-center gap-1.5">
+                      <span>Pontuação R20: {team.points.toFixed(2)} pts</span>
                     </p>
                   </div>
                 </div>
@@ -381,7 +375,7 @@ export default function CopaSocialCard({
       <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between gap-3 text-slate-500 font-mono text-[9px] relative z-10 w-full">
         <div className="flex items-center gap-1.5">
           <Award className="w-3.5 h-3.5 text-[#D4AF37]" />
-          <span>VITRINE OFICIAL DE CLASSIFICAÇÃO &bull; EXIBINDO OS 12 CABEÇAS DE CHAVE PRINCIPAIS E OS EXCLUÍDOS DO MATAMATA</span>
+          <span>VITRINE OFICIAL DE CLASSIFICAÇÃO &bull; EXIBINDO OS 12 CABEÇAS DE CHAVE PRINCIPAIS E OS TIMES DA RODADA DO ESPERNEIO</span>
         </div>
       </div>
     </div>

@@ -62,6 +62,7 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
     }
     return [...teams]
       .map((t, idx) => {
+        const scoreInCutRound = (isSimulatorsEnabled || cutRound <= currentRound) ? (t.scores[cutRound] || 0) : 0;
         let cumulativePoints = 0;
         for (let r = 1; r <= cutRound; r++) {
           if (isSimulatorsEnabled || r <= currentRound) {
@@ -73,13 +74,17 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
           name: t.name,
           owner: t.owner,
           shieldUrl: t.shieldUrl,
-          points: Number(cumulativePoints.toFixed(2)),
+          points: Number(scoreInCutRound.toFixed(2)),
+          cumulativePoints: Number(cumulativePoints.toFixed(2)),
           esperneioScore: undefined as number | undefined,
           rank: idx + 1,
           status: (idx < 12 ? "seeded" : idx >= 48 ? "esperneio_lost" : "direct") as "seeded" | "direct" | "esperneio_win" | "esperneio_lost"
         };
       })
-      .sort((a, b) => b.points - a.points)
+      .sort((a, b) => {
+        if (Math.abs(b.points - a.points) > 0.001) return b.points - a.points;
+        return b.cumulativePoints - a.cumulativePoints;
+      })
       .map((t, i) => ({ ...t, rank: i + 1 }));
   }, [teams, cutRound, cuttingResult, isAwaitingRound20, isSimulatorsEnabled, currentRound]);
 
@@ -369,14 +374,17 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
 
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                 {cuttingResult.esperneioTeams.map((cand) => {
-                  const isWinner = cand.status === "vencedor";
+                  const hasPlayed = cand.esperneioScore > 0;
+                  const isWinner = hasPlayed && cand.status === "vencedor";
                   return (
                     <div 
                       key={cand.team.id} 
                       className={`p-3 rounded-xl border flex flex-col justify-between transition-all duration-300 ${
-                        isWinner 
-                          ? "bg-gradient-to-b from-[#c5a880]/10 to-[#c5a880]/2 border-[#c5a880]/30 shadow-[0_0_12px_rgba(197,168,128,0.05)]" 
-                          : "bg-[#121212]/50 border-white/5 opacity-65"
+                        !hasPlayed
+                          ? "bg-[#121212]/80 border-[#c5a880]/20"
+                          : isWinner 
+                            ? "bg-gradient-to-b from-[#c5a880]/10 to-[#c5a880]/2 border-[#c5a880]/30 shadow-[0_0_12px_rgba(197,168,128,0.05)]" 
+                            : "bg-[#121212]/50 border-white/5 opacity-65"
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -391,16 +399,22 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
                       <div className="mt-3.5 pt-2 border-t border-white/5 flex justify-between items-end">
                         <div>
                           <p className="text-[8px] text-slate-500 font-mono uppercase">Pontos Esperneio</p>
-                          <p className={`text-xs font-black font-mono ${isWinner ? "text-[#c5a880]" : "text-slate-400"}`}>
+                          <p className={`text-xs font-black font-mono ${hasPlayed && isWinner ? "text-[#c5a880]" : "text-slate-400"}`}>
                             {cand.esperneioScore.toFixed(2)} pts
                           </p>
                         </div>
                         <span className={`px-2 py-0.5 rounded text-[8px] font-mono font-black uppercase tracking-wider ${
-                          isWinner 
-                            ? "bg-[#c5a880]/15 text-[#c5a880] border border-[#c5a880]/20" 
-                            : "bg-white/5 text-slate-400"
+                          !hasPlayed
+                            ? "bg-[#c5a880]/15 text-[#c5a880] border border-[#c5a880]/25"
+                            : isWinner 
+                              ? "bg-[#c5a880]/15 text-[#c5a880] border border-[#c5a880]/20" 
+                              : "bg-white/5 text-slate-400"
                         }`}>
-                          {isWinner ? `Avançou (Vaga ${cand.rankAfter})` : "Eliminado"}
+                          {!hasPlayed 
+                            ? "Em disputa" 
+                            : isWinner 
+                              ? `Avançou (Vaga ${cand.rankAfter})` 
+                              : "Eliminado"}
                         </span>
                       </div>
                     </div>
@@ -448,7 +462,10 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
                     const idx = t.rank - 1;
                     const isSeeded = !isAwaitingRound20 && t.status === "seeded";
                     const isEsperneioWin = !isAwaitingRound20 && t.status === "esperneio_win";
-                    const isEliminated = !isAwaitingRound20 && t.status === "esperneio_lost";
+                    const isEsperneioLost = !isAwaitingRound20 && t.status === "esperneio_lost";
+                    const hasPlayedEsperneio = t.esperneioScore !== undefined && t.esperneioScore > 0;
+                    const isEliminated = isEsperneioLost && hasPlayedEsperneio;
+                    const isAwaitingEsperneio = isEsperneioLost && !hasPlayedEsperneio;
                     
                     let badgeColor = isAwaitingRound20 
                       ? "bg-white/5 text-slate-400 border-white/5" 
@@ -461,6 +478,9 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
                     } else if (isEsperneioWin) {
                       badgeColor = "bg-[#c5a880]/15 text-[#c5a880] border-[#c5a880]/30 shadow-[0_0_10px_rgba(197,168,128,0.05)]";
                       badgeLabel = "Sobrevivente do Esperneio";
+                    } else if (isAwaitingEsperneio) {
+                      badgeColor = "bg-[#c5a880]/15 text-[#c5a880] border-[#c5a880]/30 shadow-[0_0_10px_rgba(197,168,128,0.05)]";
+                      badgeLabel = "Aguardando Rod. do Esperneio";
                     } else if (isEliminated) {
                       badgeColor = "bg-red-500/10 text-red-400 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.05)]";
                       badgeLabel = "Cortado / Eliminado";
