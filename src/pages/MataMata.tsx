@@ -148,7 +148,13 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
 
   // 4. Sort groups results and assemble the initial bracket of 32 teams
   const { initialBracket, allGroupTeams } = useMemo(() => {
-    if (isAwaitingRound20) {
+    // Check if group classification has completed (round > cutRound + 3 or simulators active with simulated scores)
+    const hasGroupStageCompleted = !isAwaitingRound20 && (
+      currentRound >= (cutRound + 3) ||
+      (isSimulatorsEnabled && Object.keys(manualScores).length > 0)
+    );
+
+    if (isAwaitingRound20 || !hasGroupStageCompleted) {
       return {
         initialBracket: buildFullBracket({}, {}),
         allGroupTeams: []
@@ -185,7 +191,7 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
       initialBracket: bracket,
       allGroupTeams: allTeamsList
     };
-  }, [populatedGroups]);
+  }, [populatedGroups, isAwaitingRound20, currentRound, cutRound, isSimulatorsEnabled, manualScores]);
 
   // 5. Computed bracket of knockout results from manual edits or simulations
   const { computedBracket, finalRankings } = useMemo(() => {

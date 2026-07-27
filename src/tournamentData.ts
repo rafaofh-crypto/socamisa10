@@ -2172,9 +2172,11 @@ export function generateGroups(
     const originalIndex = typeof entry?.originalIndex === 'number' 
       ? entry.originalIndex 
       : (typeof entry?.team?.originalIndex === 'number' ? entry.team.originalIndex : 0);
-    const qualifyingPosition = typeof entry?.rank === 'number' 
-      ? entry.rank 
-      : (typeof entry?.qualifyingPosition === 'number' ? entry.qualifyingPosition : position);
+    const qualifyingPosition = typeof entry?.rankAfter === 'number'
+      ? entry.rankAfter
+      : (typeof entry?.rank === 'number' 
+        ? entry.rank 
+        : (typeof entry?.qualifyingPosition === 'number' ? entry.qualifyingPosition : position));
     const shieldUrl = entry?.team?.shieldUrl || entry?.shieldUrl || "";
 
     return {
@@ -2325,11 +2327,13 @@ export function processCuttingRound(
     is_survivor: false
   }));
 
-  // 4. PROTEÇÃO DOS CABEÇAS DE CHAVE: Os 12 primeiros da Fase 1 viram cabeças de chave intocáveis (ranks 1 a 12)
-  const heads = finalAdvancingEntries.slice(0, 12);
-  const remaining = finalAdvancingEntries.slice(12, 48);
+  // 4. PROTEÇÃO DOS CABEÇAS DE CHAVE: Os 12 primeiros da Fase 1 viram cabeças de chave intocáveis (ranks 1 a 12 -> Pote 1)
+  const heads = finalAdvancingEntries.slice(0, 12); // Pote 1 (Posição 1)
+  const pot2 = finalAdvancingEntries.slice(12, 24); // Pote 2 (Posição 2)
+  const pot3 = finalAdvancingEntries.slice(24, 36); // Pote 3 (Posição 3)
+  const pot4 = finalAdvancingEntries.slice(36, 48); // Pote 4 (Posição 4 - onde estão as Vagas 47 e 48)
 
-  // 5. Os 36 restantes são sorteados aleatoriamente com Fisher-Yates
+  // 5. Função de embaralhamento com Fisher-Yates
   const shuffle = <T>(array: T[]): T[] => {
     const arr = [...array];
     for (let i = arr.length - 1; i > 0; i--) {
@@ -2341,7 +2345,13 @@ export function processCuttingRound(
     return arr;
   };
 
-  const shuffledRemaining = shuffle(remaining);
+  // Cada Pote é sorteado de forma independente para definir quem vai para qual grupo
+  const shuffledPot2 = shuffle(pot2);
+  const shuffledPot3 = shuffle(pot3);
+  const shuffledPot4 = shuffle(pot4);
+
+  // Concatena Pote 2, Pote 3 e Pote 4 mantendo a estrutura de Potes (0..11 -> Pos 2, 12..23 -> Pos 3, 24..35 -> Pos 4)
+  const shuffledRemaining = [...shuffledPot2, ...shuffledPot3, ...shuffledPot4];
 
   // Inicializar e gerar os grupos A-L usando o novo método centralizado generateGroups
   const groups = generateGroups(heads, shuffledRemaining);

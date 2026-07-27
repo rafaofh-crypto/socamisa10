@@ -91,6 +91,11 @@ export default function GroupCards({ groups, isAwaitingRound20 = false }: GroupC
                       const isThird = index === 2;
                       const isAdvancedThird = isThird && bestThirdsNamesSet.has(t.name);
 
+                      const isVaga47 = t.qualifyingPosition === 47;
+                      const isVaga48 = t.qualifyingPosition === 48;
+                      const isPendingEsperneioSlot = isVaga47 || isVaga48;
+                      const displayName = isVaga47 ? "Vaga 47" : isVaga48 ? "Vaga 48" : t.name;
+
                       // Style rows based on classification status
                       const rowClass = isAwaitingRound20
                         ? "text-slate-400 opacity-80 border-l-2 border-l-transparent"
@@ -157,7 +162,7 @@ export default function GroupCards({ groups, isAwaitingRound20 = false }: GroupC
 
                       return (
                         <tr
-                          key={t.name}
+                          key={isPendingEsperneioSlot ? `esperneio_vaga_${t.qualifyingPosition}` : t.name}
                           className={`${rowClass} hover:bg-gold/5 transition-all text-[11px]`}
                         >
                           {/* Position Badge */}
@@ -180,18 +185,26 @@ export default function GroupCards({ groups, isAwaitingRound20 = false }: GroupC
                           {/* Render Shield SVG */}
                           <td className="py-1 px-1 text-center select-none">
                             <div className="w-7 h-7 bg-black/10 rounded-lg p-1 flex items-center justify-center mx-auto overflow-hidden">
-                              <TeamShield shieldUrl={t.shieldUrl} fallbackText={t.name} />
+                              {isPendingEsperneioSlot ? (
+                                <span className="font-mono text-[9.5px] font-black text-[#c5a880] bg-[#c5a880]/15 px-1 py-0.5 rounded border border-[#c5a880]/30">
+                                  {isVaga47 ? "47" : "48"}
+                                </span>
+                              ) : (
+                                <TeamShield shieldUrl={t.shieldUrl} fallbackText={t.name} />
+                              )}
                             </div>
                           </td>
 
                           {/* Team Name */}
                           <td className="py-2 px-2 text-left font-display font-medium text-slate-100 truncate max-w-[130px] sm:max-w-none">
                             <div className="flex flex-col">
-                              <span className="font-semibold uppercase tracking-wide truncate">
-                                {t.name}
+                              <span className={`font-semibold uppercase tracking-wide truncate ${isPendingEsperneioSlot ? "text-[#c5a880] font-black" : ""}`}>
+                                {displayName}
                               </span>
                               <span className="text-[8px] text-slate-400 font-mono lower-case font-light truncate">
-                                {t.qualifyingPosition && !isAwaitingRound20 ? `Corte #${t.qualifyingPosition}` : ""}
+                                {isPendingEsperneioSlot 
+                                  ? "Aguardando Rod. do Esperneio" 
+                                  : (t.qualifyingPosition && !isAwaitingRound20 ? `Corte #${t.qualifyingPosition}` : "")}
                               </span>
                             </div>
                           </td>
