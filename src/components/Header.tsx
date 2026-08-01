@@ -46,7 +46,7 @@ export default function Header({
         </div>
 
         {/* Navigation links (5 Tabs) */}
-        <nav className="flex bg-charcoal-dark/95 border border-gold/10 p-1 rounded-xl scrollbar-none overflow-x-auto max-w-full">
+        <nav className="flex bg-charcoal-dark/95 border border-gold/10 p-1 rounded-xl scrollbar-none overflow-x-auto max-w-full notranslate" translate="no">
           {navItems.map((tab) => {
             const TabIcon = tab.icon;
             const active = activeTab === tab.id;
@@ -55,14 +55,15 @@ export default function Header({
                 id={`tab-${tab.id}`}
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap cursor-pointer uppercase tracking-wider ${
+                title={tab.label}
+                className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap cursor-pointer uppercase tracking-wider shrink-0 ${
                   active 
                     ? "bg-gold text-charcoal-dark font-display font-black active-glow shadow-md shadow-gold/10" 
                     : "text-slate-400 hover:text-white hover:bg-gold/5"
                 }`}
               >
-                <TabIcon className="w-3.5 h-3.5" />
-                <span>{tab.label}</span>
+                <TabIcon className="w-3.5 h-3.5 shrink-0" />
+                <span className="notranslate whitespace-nowrap" translate="no">{tab.label}</span>
               </button>
             );
           })}

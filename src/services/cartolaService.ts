@@ -145,7 +145,7 @@ export function processarDadosCartola(data: any): CartolaData {
   }
 
   const times = data.times || rawLiga.times || [];
-  const rodadaAtual = data.rodada_atual || rawLiga.rodada_atual || 17;
+  const rodadaAtual = data.rodada_atual || rawLiga.rodada_atual || 21;
 
   return {
     liga: {
@@ -542,7 +542,7 @@ export async function syncCartolaData(onProgress?: (msg: string) => void, token?
         temporada: 2026
       },
       times: TEAM_MEMBERS,
-      rodadaAtual: 17,
+      rodadaAtual: 21,
       rodadas: []
     };
 

@@ -130,10 +130,15 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
     for (const [letter, teamList] of Object.entries(groupsToPopulate)) {
       result[letter] = (teamList as Team[]).map(t => {
         const match = teams.find(ct => ct.name === t.name);
-        // Scores for group stage: cut + 1, cut + 2, cut + 3
-        const r1 = match && (isSimulatorsEnabled || (cutRound + 1) <= currentRound) ? (match.scores[cutRound + 1] || 0) : 0;
-        const r2 = match && (isSimulatorsEnabled || (cutRound + 2) <= currentRound) ? (match.scores[cutRound + 2] || 0) : 0;
-        const r3 = match && (isSimulatorsEnabled || (cutRound + 3) <= currentRound) ? (match.scores[cutRound + 3] || 0) : 0;
+        // Scores for group stage: R22 (cutRound + 2), R23 (cutRound + 3), R24 (cutRound + 4)
+        // R21 is exclusively the Esperneio round
+        const r1Round = cutRound + 2; // R22
+        const r2Round = cutRound + 3; // R23
+        const r3Round = cutRound + 4; // R24
+
+        const r1 = match && (isSimulatorsEnabled || r1Round <= currentRound) ? (match.scores[r1Round] || 0) : 0;
+        const r2 = match && (isSimulatorsEnabled || r2Round <= currentRound) ? (match.scores[r2Round] || 0) : 0;
+        const r3 = match && (isSimulatorsEnabled || r3Round <= currentRound) ? (match.scores[r3Round] || 0) : 0;
         return {
           ...t,
           groupRound1: r1,
@@ -148,9 +153,9 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
 
   // 4. Sort groups results and assemble the initial bracket of 32 teams
   const { initialBracket, allGroupTeams } = useMemo(() => {
-    // Check if group classification has completed (round > cutRound + 3 or simulators active with simulated scores)
+    // Check if group classification has completed (round >= cutRound + 4 i.e. R24 or simulators active with simulated scores)
     const hasGroupStageCompleted = !isAwaitingRound20 && (
-      currentRound >= (cutRound + 3) ||
+      currentRound >= (cutRound + 4) ||
       (isSimulatorsEnabled && Object.keys(manualScores).length > 0)
     );
 
@@ -353,6 +358,7 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
           finalRankings={finalRankings} 
           groups={populatedGroups} 
           isAwaitingRound20={isAwaitingRound20}
+          esperneioTeams={cuttingResult?.esperneioTeams}
         />
       )}
 

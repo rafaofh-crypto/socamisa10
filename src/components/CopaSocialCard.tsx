@@ -17,6 +17,7 @@ interface CopaSocialCardProps {
   finalRankings: any; // FinalRankings | null
   groups: Record<string, any[]>;
   isAwaitingRound20?: boolean;
+  esperneioTeams?: any[];
 }
 
 export default function CopaSocialCard({
@@ -25,7 +26,8 @@ export default function CopaSocialCard({
   standingsAtCut,
   finalRankings,
   groups,
-  isAwaitingRound20 = false
+  isAwaitingRound20 = false,
+  esperneioTeams = []
 }: CopaSocialCardProps) {
 
   const getTeamInitials = (name: string) => {
@@ -60,11 +62,68 @@ export default function CopaSocialCard({
         </div>
       );
     }
-    const champ = finalRankings?.champion || { name: "DOIS VIZINHOS SA", owner: "Angelo Cassol" };
-    const runner = finalRankings?.runner_up || { name: "CRF GALO", owner: "Renato Galo" };
-    const third = finalRankings?.third_place || { name: "DUDUMATHIAS FC", owner: "Evandro Rebelatto" };
-    const fourth = finalRankings?.fourth_place || { name: "MARIXCO FC", owner: "dudu" };
-    const fifth = finalRankings?.fifth_place || { name: "DIDA82 FC", owner: "Anderson D da Rosa" };
+
+    const hasChampion = Boolean(finalRankings && finalRankings.champion && finalRankings.champion.name);
+
+    if (!hasChampion) {
+      return (
+        <div className="w-full bg-[#121212]/80 backdrop-blur-xl rounded-3xl border border-[#D4AF37]/30 p-6 sm:p-8 relative overflow-hidden shadow-2xl transition-all duration-300">
+          {/* Aesthetic Overlay glows */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-[#D4AF37]/5 blur-[100px] rounded-full pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-500/5 blur-[100px] rounded-full pointer-events-none" />
+
+          {/* Header segment */}
+          <div className="border-b border-white/10 pb-5 mb-6 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 rounded-full text-[10px] font-mono font-black uppercase tracking-wider">
+                <Trophy className="w-3.5 h-3.5" />
+                Consagração dos Campeões • Copa M10
+              </div>
+              <h3 className="font-display font-black text-xl text-white uppercase tracking-tight">
+                Galeria da Glória Eterna
+              </h3>
+              <p className="text-xs text-slate-400">
+                O pódio oficial consagrando os titãs que aniquilarem seus oponentes no chaveamento mata-mata.
+              </p>
+            </div>
+
+            <div className="flex items-center">
+              <span className="text-[11px] font-mono font-black text-amber-400 bg-amber-500/10 px-4 py-2 rounded-lg border border-amber-500/20 tracking-widest uppercase shadow-md flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                COMPETIÇÃO EM ANDAMENTO
+              </span>
+            </div>
+          </div>
+
+          {/* Notice box */}
+          <div className="relative z-10 py-10 px-6 text-center bg-black/40 border border-white/5 rounded-2xl flex flex-col items-center justify-center space-y-3">
+            <div className="w-14 h-14 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37] mb-1">
+              <Trophy className="w-7 h-7 text-[#D4AF37]" />
+            </div>
+            <h4 className="font-display font-black text-base text-white uppercase tracking-tight">
+              Aguardando Definição dos Campeões
+            </h4>
+            <p className="text-xs text-slate-400 max-w-lg leading-relaxed">
+              A Copa M10 está em andamento. A Galeria da Glória Eterna será preenchida automaticamente com o Campeão, Vice e Pódio conforme os confrontos forem concluídos.
+            </p>
+            <div className="pt-2 text-[10px] font-mono text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/20 px-3.5 py-1.5 rounded-full uppercase font-bold">
+              💡 Dica: Você pode simular os confrontos da chave abaixo para testar os resultados
+            </div>
+          </div>
+
+          {/* Bottom banner seal */}
+          <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-slate-500 font-mono text-[9px] relative z-10">
+            <Award className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <span>PAINEL DOS CAMPEÕES COPA M10 &bull; AGUARDANDO RESULTADOS FINAIS DO MATA-MATA</span>
+          </div>
+        </div>
+      );
+    }
+
+    const champ = finalRankings.champion;
+    const runner = finalRankings.runner_up;
+    const third = finalRankings.third_place || { name: "—", owner: "—" };
+    const fourth = finalRankings.fourth_place || { name: "—", owner: "—" };
 
     const initials = getTeamInitials(champ.name);
 
@@ -333,36 +392,70 @@ export default function CopaSocialCard({
       </div>
 
       {/* Section listing the Cutoff Esperneio elements */}
-      {!isGroups && eliminados.length > 0 && (
+      {!isGroups && (
         <div className="relative z-10 pt-6 border-t border-white/10 mb-2">
-          <div className="flex items-center gap-2 mb-4">
-            <AlertCircle className="w-4.5 h-4.5 text-[#c5a880] animate-pulse" />
-            <h4 className="text-xs font-mono font-black text-[#c5a880] uppercase tracking-wider">
-              ⚔️ DISPUTA DO ESPERNEIO (LINHA DE CORTE - 49º & 50º)
-            </h4>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4.5 h-4.5 text-[#c5a880] animate-pulse" />
+              <h4 className="text-xs font-mono font-black text-[#c5a880] uppercase tracking-wider">
+                ⚔️ RESULTADO DA RODADA DO ESPERNEIO (RODADA 21)
+              </h4>
+            </div>
+            <span className="text-[10px] font-mono font-black text-[#c5a880] bg-[#c5a880]/10 border border-[#c5a880]/30 px-3 py-1 rounded-full uppercase tracking-wider self-start sm:self-center">
+              VAGAS 47 & 48 CLASSIFICADAS
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {eliminados.map((team, idx) => {
-              const realRank = standingsAtCut.findIndex(t => t.id === team.id) + 1;
-              const displayRank = realRank > 0 ? realRank : 49 + idx;
-              
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {((esperneioTeams && esperneioTeams.length > 0) ? esperneioTeams.map(cand => ({
+              id: cand.team?.id || cand.team?.name || cand.name,
+              name: cand.team?.name || cand.name || "",
+              owner: cand.team?.owner || cand.owner || "",
+              shieldUrl: cand.team?.shieldUrl || cand.shieldUrl || "",
+              score: typeof cand.esperneioScore === "number" ? cand.esperneioScore : (cand.score || 0),
+              status: cand.status || (cand.esperneioScore > 55 ? "vencedor" : "eliminado"),
+              rankAfter: cand.rankAfter || 47
+            })) : [
+              { id: "teampimenta", name: "TeamPimenta", owner: "Chico Pimenta", shieldUrl: "/escudos/TeamPimenta.avif", score: 70.65, status: "vencedor", rankAfter: 47 },
+              { id: "gui-fifla", name: "Gui FiFla", owner: "Agnaldo Garceis", shieldUrl: "/escudos/Gui FiFla.avif", score: 64.93, status: "vencedor", rankAfter: 48 },
+              { id: "onodi-floripa", name: "Onodi Floripa", owner: "Rafael Fattori", shieldUrl: "/escudos/Onodi Floripa.avif", score: 50.86, status: "eliminado", rankAfter: 49 },
+              { id: "brazzers-mkl-fc", name: "Brazzers MKL FC", owner: "Maykel Jesus Silva", shieldUrl: "/escudos/Brazzers MKL FC.avif", score: 41.85, status: "eliminado", rankAfter: 50 }
+            ]).map((item) => {
+              const isWinner = item.status === "vencedor" || item.rankAfter <= 48;
               return (
                 <div 
-                  key={team.id || idx} 
-                  className="rounded-xl p-4 border flex items-center gap-3 transition-all duration-300 hover:border-[#c5a880]/40 hover:bg-[#c5a880]/15 border-[#c5a880]/25 bg-[#c5a880]/10"
+                  key={item.id} 
+                  className={`p-3.5 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${
+                    isWinner
+                      ? "bg-gradient-to-b from-[#c5a880]/20 via-black/80 to-black/95 border-[#c5a880]/40 shadow-[0_0_15px_rgba(197,168,128,0.15)]"
+                      : "bg-[#121212]/60 border-white/5 opacity-70 hover:opacity-95"
+                  }`}
                 >
-                  <div className="w-6 text-center shrink-0 font-mono text-xs font-black text-[#c5a880]">
-                    <span>{displayRank}º</span>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 flex-shrink-0 bg-black/60 rounded-full overflow-hidden p-1 border ${isWinner ? "border-[#c5a880]/60" : "border-white/10"} flex items-center justify-center`}>
+                      <TeamShield shieldUrl={item.shieldUrl} fallbackText={item.name} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-extrabold text-white uppercase truncate tracking-wide">{item.name}</p>
+                      <p className="text-[10px] text-slate-400 font-mono truncate">Téc: {item.owner}</p>
+                    </div>
                   </div>
 
-                  <div className="min-w-0 flex-1">
-                    <h5 className="uppercase font-display tracking-tight text-white font-bold leading-tight text-xs sm:text-sm">
-                      AGUARDANDO ROD. DO ESPERNEIO
-                    </h5>
-                    <p className="text-[10px] text-[#c5a880] font-mono font-bold mt-0.5 flex items-center gap-1.5">
-                      <span>Pontuação R20: {team.points.toFixed(2)} pts</span>
-                    </p>
+                  <div className="mt-3.5 pt-2.5 border-t border-white/10 flex items-center justify-between">
+                    <div>
+                      <p className="text-[8px] text-slate-400 font-mono uppercase tracking-wider">Pontos R21 (Esperneio)</p>
+                      <p className={`text-sm font-black font-mono ${isWinner ? "text-[#c5a880]" : "text-slate-400"}`}>
+                        {item.score.toFixed(2)} pts
+                      </p>
+                    </div>
+
+                    <span className={`px-2.5 py-1 rounded-lg text-[9px] font-mono font-black uppercase tracking-wider ${
+                      isWinner
+                        ? "bg-[#c5a880]/20 text-[#c5a880] border border-[#c5a880]/40 shadow-sm"
+                        : "bg-red-500/10 text-red-400 border border-red-500/20"
+                    }`}>
+                      {isWinner ? `AVANÇOU (VAGA ${item.rankAfter})` : "ELIMINADO"}
+                    </span>
                   </div>
                 </div>
               );

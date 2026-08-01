@@ -252,7 +252,38 @@ function generateScoresForTeamEx(slug: string, teamIndex: number): Record<number
   
   scores[17] = r17;
   
-  for (let r = 18; r <= 38; r++) {
+  for (let r = 18; r <= 19; r++) {
+    const seed = teamIndex;
+    scores[r] = Number((55 + Math.sin(r + seed) * 15).toFixed(2));
+  }
+
+  // R20: Cut Round & R21: Esperneio Round
+  if (slug === "teampimenta") {
+    scores[20] = 34.20;
+    scores[21] = 70.65; // Vaga 47 winner
+  } else if (slug === "gui-fifla") {
+    scores[20] = 33.10;
+    scores[21] = 64.93; // Vaga 48 winner
+  } else if (slug === "onodi-floripa") {
+    scores[20] = 32.80;
+    scores[21] = 50.86; // 49º position eliminated
+  } else if (slug === "brazzers-mkl-fc") {
+    scores[20] = 29.73;
+    scores[21] = 41.85; // 50º position eliminated
+  } else {
+    const rank = getTeamRank(slug);
+    const baseR20 = 75 - (rank / 50) * 35;
+    const noise = Math.sin(teamIndex * 2.3) * 3;
+    scores[20] = Number(Math.max(36.00, baseR20 + noise).toFixed(2));
+    scores[21] = Number((52 + Math.cos(teamIndex) * 12).toFixed(2));
+  }
+
+  for (let r = 22; r <= 24; r++) {
+    const seed = teamIndex;
+    scores[r] = Number((55 + Math.sin(r * 1.7 + seed) * 18).toFixed(2));
+  }
+
+  for (let r = 25; r <= 38; r++) {
     scores[r] = 0;
   }
   

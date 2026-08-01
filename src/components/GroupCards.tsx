@@ -93,8 +93,9 @@ export default function GroupCards({ groups, isAwaitingRound20 = false }: GroupC
 
                       const isVaga47 = t.qualifyingPosition === 47;
                       const isVaga48 = t.qualifyingPosition === 48;
-                      const isPendingEsperneioSlot = isVaga47 || isVaga48;
-                      const displayName = isVaga47 ? "Vaga 47" : isVaga48 ? "Vaga 48" : t.name;
+                      const isRealTeam = Boolean(t.name && !t.name.startsWith("Aguardando") && t.name !== "Vaga 47" && t.name !== "Vaga 48");
+                      const isPendingEsperneioSlot = (isVaga47 || isVaga48) && !isRealTeam;
+                      const displayName = isPendingEsperneioSlot ? (isVaga47 ? "Vaga 47" : "Vaga 48") : t.name;
 
                       // Style rows based on classification status
                       const rowClass = isAwaitingRound20
@@ -204,7 +205,9 @@ export default function GroupCards({ groups, isAwaitingRound20 = false }: GroupC
                               <span className="text-[8px] text-slate-400 font-mono lower-case font-light truncate">
                                 {isPendingEsperneioSlot 
                                   ? "Aguardando Rod. do Esperneio" 
-                                  : (t.qualifyingPosition && !isAwaitingRound20 ? `Corte #${t.qualifyingPosition}` : "")}
+                                  : (t.qualifyingPosition && !isAwaitingRound20 
+                                      ? ((isVaga47 || isVaga48) ? `Corte #${t.qualifyingPosition} (Esperneio)` : `Corte #${t.qualifyingPosition}`) 
+                                      : "")}
                               </span>
                             </div>
                           </td>
