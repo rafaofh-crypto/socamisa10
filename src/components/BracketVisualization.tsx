@@ -45,13 +45,11 @@ export default function BracketVisualization({
     
     // Class names according to premium requirements
     let textClass = "font-semibold text-slate-355";
-    let scoreTextClass = "text-gold";
     let textStyle: React.CSSProperties = {};
     let scoreStyle: React.CSSProperties = {};
     
     if (isWinner) {
       textClass = "font-black text-white flex items-center gap-1 text-[12px] uppercase tracking-wide drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]";
-      scoreTextClass = "text-[#ff6b35]"; // pontuação em laranja vibrante
     } else if (isLoser) {
       textClass = "text-slate-300 font-normal select-none";
       textStyle = {
@@ -59,7 +57,6 @@ export default function BracketVisualization({
         textDecoration: "line-through",
         textDecorationColor: "rgba(255, 255, 255, 0.4)"
       };
-      scoreTextClass = "text-slate-400 font-normal";
       scoreStyle = {
         opacity: 0.65,
         textDecoration: "line-through",
@@ -67,7 +64,13 @@ export default function BracketVisualization({
       };
     }
 
-    const inputScoreValue = manualScores[matchCode]?.[teamKey] ?? "";
+    const scoreVal = teamKey === "home" ? match.homeScore : match.awayScore;
+    const manualVal = manualScores[matchCode]?.[teamKey];
+    const inputScoreValue = manualVal !== undefined 
+      ? manualVal 
+      : (scoreVal !== undefined && scoreVal !== null && (scoreVal > 0 || match.winner !== null) 
+          ? (typeof scoreVal === 'number' ? scoreVal.toFixed(2) : scoreVal) 
+          : "");
 
     return (
       <div className="flex justify-between items-center py-1.5 transition-all text-xs">
@@ -94,8 +97,17 @@ export default function BracketVisualization({
           value={inputScoreValue}
           disabled={!isSimulatorsEnabled}
           onChange={(e) => onMatchScoreChange(matchCode, teamKey === "home", e.target.value)}
-          className={`w-14 text-center py-1 rounded bg-[#0a0a0a]/90 border border-slate-800 font-mono text-[11px] font-bold ${scoreTextClass} focus:outline-none focus:border-gold/50 disabled:opacity-50 disabled:cursor-not-allowed`}
-          style={scoreStyle}
+          className={`w-14 text-center py-1 rounded font-mono text-[11px] font-bold transition-all focus:outline-none focus:border-emerald-400 disabled:cursor-not-allowed ${
+            isWinner
+              ? "bg-emerald-950/60 border border-emerald-500/50 text-emerald-300 font-black shadow-[0_0_10px_rgba(52,211,153,0.2)] disabled:opacity-100"
+              : isLoser
+                ? "bg-[#0a0a0a]/90 border border-slate-800 text-slate-400 font-normal disabled:opacity-50"
+                : "bg-[#0a0a0a]/90 border border-slate-800 text-slate-200 font-bold disabled:opacity-60"
+          }`}
+          style={{
+            ...(isWinner ? { WebkitTextFillColor: '#6ee7b7', color: '#6ee7b7' } : {}),
+            ...scoreStyle
+          }}
         />
       </div>
     );
@@ -214,7 +226,7 @@ export default function BracketVisualization({
           {/* COLUNA 1: ROUND OF 32 (8 confrontos) */}
           <div className="flex flex-col justify-around h-[1050px] w-64 space-y-1">
             <div className="text-center pb-2 border-b border-white/5">
-              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-[#D4AF37]">1/16 de Final (R24) - Lado A</span>
+              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-[#D4AF37]">1/16 de Final (R25) - Lado A</span>
             </div>
             {renderSymmetricMatchCard("round_of_32", "M49", "left")}
             {renderSymmetricMatchCard("round_of_32", "M50", "left")}
@@ -229,7 +241,7 @@ export default function BracketVisualization({
           {/* COLUNA 2: ROUND OF 16 / OITAVAS (4 confrontos) */}
           <div className="flex flex-col justify-around h-[1050px] w-64">
             <div className="text-center pb-2 border-b border-white/5">
-              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-slate-400">Oitavas de Final (R25) - Lado A</span>
+              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-slate-400">Oitavas de Final (R26) - Lado A</span>
             </div>
             {renderSymmetricMatchCard("round_of_16", "M81", "left")}
             {renderSymmetricMatchCard("round_of_16", "M83", "left")}
@@ -240,7 +252,7 @@ export default function BracketVisualization({
           {/* COLUNA 3: QUARTAS (2 confrontos) */}
           <div className="flex flex-col justify-around h-[1050px] w-64">
             <div className="text-center pb-2 border-b border-white/5">
-              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-slate-400">Quartas de Final (R26) - Lado A</span>
+              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-slate-400">Quartas de Final (R27) - Lado A</span>
             </div>
             {renderSymmetricMatchCard("quarterfinals", "M90", "left")}
             {renderSymmetricMatchCard("quarterfinals", "M92", "left")}
@@ -249,7 +261,7 @@ export default function BracketVisualization({
           {/* COLUNA 4: SEMIFINAL (1 confronto) */}
           <div className="flex flex-col justify-around h-[1050px] w-64">
             <div className="text-center pb-2 border-b border-white/5">
-              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-slate-400">Semifinal (R27) - Lado A</span>
+              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-slate-400">Semifinal (R28) - Lado A</span>
             </div>
             {renderSymmetricMatchCard("semifinals", "M98", "left")}
           </div>
@@ -264,7 +276,7 @@ export default function BracketVisualization({
             {/* GRAND FINALS CARD */}
             <div className="space-y-4 w-full">
               <div className="text-center flex flex-col items-center">
-                <span className="text-[11px] font-black text-gold uppercase tracking-widest bg-gold/10 px-3 py-1 rounded-full border border-gold/25">🏆 A GRANDE FINAL (R28)</span>
+                <span className="text-[11px] font-black text-gold uppercase tracking-widest bg-gold/10 px-3 py-1 rounded-full border border-gold/25">🏆 A GRANDE FINAL (R29)</span>
               </div>
               {renderSymmetricMatchCard("final", "M101", "left")}
             </div>
@@ -272,7 +284,7 @@ export default function BracketVisualization({
             {/* DISPUTA 3º LUGAR */}
             <div className="space-y-4 w-full border-t border-gold/10 pt-6">
               <div className="text-center">
-                <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">🥉 DISPUTA DE 3º LUGAR (R28)</span>
+                <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">🥉 DISPUTA DE 3º LUGAR (R29)</span>
               </div>
               {renderSymmetricMatchCard("third_place", "M102", "left")}
             </div>
@@ -298,7 +310,7 @@ export default function BracketVisualization({
           {/* COLUNA 5: SEMIFINAL (1 confronto) */}
           <div className="flex flex-col justify-around h-[1050px] w-64">
             <div className="text-center pb-2 border-b border-white/5">
-              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-slate-400">Semifinal (R27) - Lado B</span>
+              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-slate-400">Semifinal (R28) - Lado B</span>
             </div>
             {renderSymmetricMatchCard("semifinals", "M100", "right")}
           </div>
@@ -306,7 +318,7 @@ export default function BracketVisualization({
           {/* COLUNA 6: QUARTAS (2 confrontos) */}
           <div className="flex flex-col justify-around h-[1050px] w-64">
             <div className="text-center pb-2 border-b border-white/5">
-              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-slate-400">Quartas de Final (R26) - Lado B</span>
+              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-slate-400">Quartas de Final (R27) - Lado B</span>
             </div>
             {renderSymmetricMatchCard("quarterfinals", "M94", "right")}
             {renderSymmetricMatchCard("quarterfinals", "M96", "right")}
@@ -315,7 +327,7 @@ export default function BracketVisualization({
           {/* COLUNA 7: ROUND OF 16 / OITAVAS (4 confrontos) */}
           <div className="flex flex-col justify-around h-[1050px] w-64">
             <div className="text-center pb-2 border-b border-white/5">
-              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-slate-400">Oitavas de Final (R25) - Lado B</span>
+              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-slate-400">Oitavas de Final (R26) - Lado B</span>
             </div>
             {renderSymmetricMatchCard("round_of_16", "M89", "right")}
             {renderSymmetricMatchCard("round_of_16", "M91", "right")}
@@ -326,7 +338,7 @@ export default function BracketVisualization({
           {/* COLUNA 8: ROUND OF 32 (8 confrontos) */}
           <div className="flex flex-col justify-around h-[1050px] w-64 space-y-1">
             <div className="text-center pb-2 border-b border-white/5">
-              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-[#D4AF37]">1/16 de Final (R24) - Lado B</span>
+              <span className="text-[10px] tracking-wider uppercase font-mono font-extrabold text-[#D4AF37]">1/16 de Final (R25) - Lado B</span>
             </div>
             {renderSymmetricMatchCard("round_of_32", "M57", "right")}
             {renderSymmetricMatchCard("round_of_32", "M58", "right")}

@@ -213,13 +213,65 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
       };
     }
 
-    // Process matches per phase
-    processMatchResults(clonedBracket, 'round_of_32', manualScores, tiebreakers);
-    processMatchResults(clonedBracket, 'round_of_16', manualScores, tiebreakers);
-    processMatchResults(clonedBracket, 'quarterfinals', manualScores, tiebreakers);
-    processMatchResults(clonedBracket, 'semifinals', manualScores, tiebreakers);
-    processMatchResults(clonedBracket, 'final', manualScores, tiebreakers);
-    processMatchResults(clonedBracket, 'third_place', manualScores, tiebreakers);
+    const normalize = (str: string) => 
+      (str || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+
+    const getTeamScoreForRound = (team: Team | null | undefined, roundNum: number): number | null => {
+      if (!team || !team.name) return null;
+      const teamKey = normalize(team.name);
+      const found = teams.find(ct => {
+        const ctKey = normalize(ct.name);
+        return ctKey === teamKey || (team.owner && normalize(ct.owner) === normalize(team.owner));
+      });
+      if (found && found.scores && typeof found.scores[roundNum] === 'number') {
+        return found.scores[roundNum];
+      }
+      return null;
+    };
+
+    // Official round mapping for knockout phases
+    const PHASE_ROUNDS: Record<string, number> = {
+      round_of_32: cutRound + 5, // R25
+      round_of_16: cutRound + 6, // R26
+      quarterfinals: cutRound + 7, // R27
+      semifinals: cutRound + 8, // R28
+      final: cutRound + 9, // R29
+      third_place: cutRound + 9 // R29
+    };
+
+    const phases = ['round_of_32', 'round_of_16', 'quarterfinals', 'semifinals', 'final', 'third_place'] as const;
+
+    // Process matches per phase sequentially so winners propagate to next phases
+    for (const phase of phases) {
+      const phaseRound = PHASE_ROUNDS[phase];
+      const effectiveScores: Record<string, { home: number; away: number }> = {};
+
+      if (clonedBracket[phase]) {
+        for (const [matchCode, match] of Object.entries(clonedBracket[phase] as Record<string, any>)) {
+          // Check if manual score was explicitly input for this match
+          if (manualScores[matchCode] && (manualScores[matchCode].home !== 0 || manualScores[matchCode].away !== 0)) {
+            effectiveScores[matchCode] = manualScores[matchCode];
+          } else if (match.home && match.away) {
+            const homeScore = getTeamScoreForRound(match.home, phaseRound);
+            const awayScore = getTeamScoreForRound(match.away, phaseRound);
+            // If scores exist and round has either arrived or has non-zero points
+            if (
+              homeScore !== null && awayScore !== null &&
+              (currentRound >= phaseRound || homeScore > 0 || awayScore > 0 || (isSimulatorsEnabled && Object.keys(manualScores).length > 0))
+            ) {
+              effectiveScores[matchCode] = {
+                home: homeScore,
+                away: awayScore
+              };
+            } else if (manualScores[matchCode]) {
+              effectiveScores[matchCode] = manualScores[matchCode];
+            }
+          }
+        }
+      }
+
+      processMatchResults(clonedBracket, phase, effectiveScores, tiebreakers);
+    }
 
     let rankings = null;
     try {
@@ -232,7 +284,7 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
       computedBracket: clonedBracket,
       finalRankings: rankings
     };
-  }, [initialBracket, manualScores, allGroupTeams]);
+  }, [initialBracket, manualScores, allGroupTeams, teams, currentRound, cutRound, isSimulatorsEnabled]);
 
   // Handle score edits
   const handleMatchScoreChange = (matchCode: string, isHome: boolean, val: string) => {
@@ -318,7 +370,7 @@ export default function MataMata({ teams, currentRound, cutRound, isSimulatorsEn
           <Trophy className="w-5 h-5 text-gold" />
           <div>
             <h2 className="text-sm font-semibold uppercase tracking-wider text-white">COPA M10 BRASIL 2026</h2>
-            <p className="text-[10px] text-slate-400 font-mono">Fases: Corte (R{cutRound}) &gt; Grupos (R{cutRound+1}-R{cutRound+3}) &gt; Chaveamento Finais</p>
+            <p className="text-[10px] text-slate-400 font-mono">Fases: Corte (R{cutRound}) &gt; Esperneio (R{cutRound+1}) &gt; Grupos (R{cutRound+2}-R{cutRound+4}) &gt; 1/16 (R{cutRound+5}) &gt; Finais</p>
           </div>
         </div>
         <div className="flex gap-2 select-none">

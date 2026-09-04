@@ -283,12 +283,68 @@ function generateScoresForTeamEx(slug: string, teamIndex: number): Record<number
     scores[r] = Number((55 + Math.sin(r * 1.7 + seed) * 18).toFixed(2));
   }
 
-  for (let r = 25; r <= 38; r++) {
+  // R25: 1/16 de Final (Round of 32) da Copa M10
+  scores[25] = ROUND_25_OFFICIAL_SCORES[slug] ?? Number((60 + Math.sin(teamIndex * 1.9) * 20).toFixed(2));
+
+  for (let r = 26; r <= 38; r++) {
     scores[r] = 0;
   }
   
   return scores;
 }
+
+export const ROUND_25_OFFICIAL_SCORES: Record<string, number> = {
+  "abedao": 69.29,
+  "abedaozinho": 70.78,
+  "avahy-costa-da-lagoa": 80.6,
+  "avaih-f-c": 105.93,
+  "barbeariadc": 79.38,
+  "brazzers-mkl-fc": 41.9,
+  "c-r-pirika": 110.35,
+  "camisa-pesada-sa": 120.03,
+  "campecheiro-futz": 51.07,
+  "capita-buske": 77.49,
+  "carlao07": 102.83,
+  "casquinha-ec": 93.69,
+  "chinchila-cabecuda": 105.23,
+  "crf-galo": 98.5,
+  "dedeyy-fc": 112.03,
+  "delirio-futebol-e-festa": 60.61,
+  "dida82-fc": 118.63,
+  "diferencial-f-c": 118.8,
+  "dique-sc": 84.51,
+  "dois-vizinhos-sa": 120.24,
+  "dudumathias-fc": 103.68,
+  "e-c-cascalho": 57.89,
+  "everton-ultramaratonista-f-c": 106.15,
+  "fernandoguinho": 96.95,
+  "figueirense-fc-o-maior": 82.9,
+  "floripamengao": 84.8,
+  "fortaleza-da-ilha": 81.7,
+  "furacao-k7-fc": 101.73,
+  "futcafa": 81.71,
+  "gd-lomeusc": 87.68,
+  "gui-fifla": 83.23,
+  "jammes-rodriguez": 98.25,
+  "jberetta": 110.58,
+  "kaka-f-c": 99.35,
+  "lendinhaxx-fc": 64.99,
+  "lenoch-n-roll": 103.55,
+  "marixco-fc": 114.45,
+  "mazanza-futebol-clube": 76.3,
+  "monges-tibetanos-fc": 104.53,
+  "montinho-artilheiro-fc": 112.05,
+  "ninja-do-ocidente": 84.98,
+  "onodi-floripa": 82.11,
+  "pretinho99-f-c": 117.53,
+  "real-barreiros-fc": 102.09,
+  "ribeiro-copeiro-84-f-c": 100.2,
+  "rivers-of-babylon": 96.88,
+  "rolo-compressor-4lib": 119.93,
+  "sovaco-da-pantera": 84.84,
+  "tainha-ovada-fc": 117.73,
+  "teampimenta": 62.21
+};
 
 export const SHIELD_MAP: Record<string, string> = {
   "sovaco da pantera": "Sovaco da Pantera.avif",

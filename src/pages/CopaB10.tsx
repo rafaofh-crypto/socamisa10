@@ -157,37 +157,7 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
     });
   }, [sortedB10Standings]);
 
-  // 4. Derive Top 3 Elite Teams for the selected round
-  const top3Elite = useMemo(() => {
-    if (isAwaitingRound25) {
-      return [
-        {
-          id: 'mock-elite-1',
-          name: 'Aguardando 1º Lugar',
-          owner: 'A definir',
-          shieldUrl: '',
-          b10RoundScore: 0,
-        },
-        {
-          id: 'mock-elite-2',
-          name: 'Aguardando 2º Lugar',
-          owner: 'A definir',
-          shieldUrl: '',
-          b10RoundScore: 0,
-        },
-        {
-          id: 'mock-elite-3',
-          name: 'Aguardando 3º Lugar',
-          owner: 'A definir',
-          shieldUrl: '',
-          b10RoundScore: 0,
-        },
-      ];
-    }
-    return mappedB10Teams.slice(0, 3);
-  }, [mappedB10Teams, isAwaitingRound25]);
-
-  // 5. Phase 2 (Esperneio / Repescagem) scoring and qualification logic - JOGO ÚNICO na Rodada 26
+  // 4. Phase 2 (Esperneio / Repescagem) scoring and qualification logic - JOGO ÚNICO na Rodada 26
   const repescagemData = useMemo(() => {
     const f2Round = b10Round + 1; // Rodada 26 do Cartola (Rodada Única do Esperneio)
 
@@ -304,13 +274,16 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
         },
         team2: {
           id: `mock-playoff-2-${idx}`,
-          name: idx === 0 ? "Aguardando 2º Repescagem" : idx === 1 ? "Aguardando 1º Repescagem" : `Aguardando #${50 - idx + 1}`,
-          owner: "Pendente",
+          name: idx === 0 ? "2º Repescagem" : idx === 1 ? "1º Repescagem" : `Aguardando #${50 - idx + 1}`,
+          owner: idx <= 1 ? "Aguardando R26" : "Pendente",
           shieldUrl: "",
           b10RoundScore: 0,
           totalLeaguePoints: 0,
           leagueRank: 50 - idx + 1,
           isVirtual: true,
+          isRepPending: idx <= 1,
+          category: idx <= 1 ? 'REPESCAGEM' : 'ACESSO',
+          f2Rank: idx === 0 ? 2 : idx === 1 ? 1 : undefined,
           scores: {}
         },
         title: `Confronto ${idx + 1}`,
@@ -328,27 +301,69 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
       }));
     }
 
+    const f2Round = b10Round + 1; // Rodada 26 (Esperneio / Repescagem)
+    // A Rodada 26 define quais dos 4 concorrentes ocupam as duas vagas restantes.
+    // Como a rodada 26 ainda não foi jogada, só consideramos definida se a rodada atual for maior que a R26,
+    // ou se houver pontuações reais registradas na R26.
+    const isRound26Finished = (currentRound > f2Round) || (currentRound >= f2Round && repescagemData.some(t => typeof t.scoreR26 === 'number' && t.scoreR26 > 0));
+
     // Filter classified teams from Repescagem (Phase 2)
     const repClassified = repescagemData.filter(t => t.isTop2);
 
     const matchesList = [];
 
     // Match 1: 17º Colocado vs 2º da Repescagem
-    if (acessoGroup[0] && repClassified[1]) {
+    if (acessoGroup[0]) {
+      const repTeam2 = isRound26Finished && repClassified[1]
+        ? repClassified[1]
+        : {
+            id: 'pending-rep-2',
+            name: '2º Repescagem',
+            owner: 'Aguardando R26',
+            shieldUrl: '',
+            b10RoundScore: 0,
+            totalLeaguePoints: 0,
+            leagueRank: 99,
+            isVirtual: true,
+            isRepPending: true,
+            category: 'REPESCAGEM',
+            f2Rank: 2,
+            rank: 48,
+            scores: {}
+          };
+
       matchesList.push({
         id: 1,
         team1: acessoGroup[0],
-        team2: repClassified[1],
+        team2: repTeam2,
         title: "Confronto 1"
       });
     }
 
     // Match 2: 18º Colocado vs 1º da Repescagem
-    if (acessoGroup[1] && repClassified[0]) {
+    if (acessoGroup[1]) {
+      const repTeam1 = isRound26Finished && repClassified[0]
+        ? repClassified[0]
+        : {
+            id: 'pending-rep-1',
+            name: '1º Repescagem',
+            owner: 'Aguardando R26',
+            shieldUrl: '',
+            b10RoundScore: 0,
+            totalLeaguePoints: 0,
+            leagueRank: 99,
+            isVirtual: true,
+            isRepPending: true,
+            category: 'REPESCAGEM',
+            f2Rank: 1,
+            rank: 47,
+            scores: {}
+          };
+
       matchesList.push({
         id: 2,
         team1: acessoGroup[1],
-        team2: repClassified[0],
+        team2: repTeam1,
         title: "Confronto 2"
       });
     }
@@ -383,7 +398,9 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
       let winner: 'team1' | 'team2' | null = null;
       let tiebreakerApplied = false;
 
-      if (isPlayoffCompleted) {
+      const canComplete = isPlayoffCompleted && !m.team1.isVirtual && !m.team2.isVirtual && !m.team2.isRepPending;
+
+      if (canComplete) {
         if (score1 > score2) {
           winner = 'team1';
         } else if (score2 > score1) {
@@ -405,7 +422,7 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
         score2,
         winner,
         tiebreakerApplied,
-        isPlayed: isPlayoffCompleted,
+        isPlayed: canComplete,
         f3Leg1Round,
         f3Leg2Round
       };
@@ -473,7 +490,7 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
         <div className="absolute top-0 right-1/4 w-72 h-72 bg-[#D4AF37]/5 rounded-full filter blur-[100px] pointer-events-none" />
         <div className="absolute bottom-0 left-10 w-60 h-60 bg-[#D4AF37]/3 rounded-full filter blur-[80px] pointer-events-none" />
 
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-[#D4AF37]/10 rounded-xl border border-[#D4AF37]/20">
               <Crown className="w-6 h-6 text-[#D4AF37] animate-pulse" />
@@ -483,137 +500,45 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
                 Vitrine Premiada de Elite
               </h2>
               <p className="text-[10px] text-slate-400 font-mono tracking-widest uppercase">
-                Top 3 Colocados da Rodada {b10Round} da Copa B10
+                Consagração Oficial &bull; Copa B10
               </p>
             </div>
           </div>
-          <p className="hidden sm:block text-[10px] font-mono bg-white/5 px-3 py-1 rounded-full text-slate-400 border border-white/5">
-            Mapeamento: 1º ao 16º Avançam Direto
-          </p>
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] font-mono font-black text-amber-400 bg-amber-500/10 px-4 py-2 rounded-lg border border-amber-500/20 tracking-widest uppercase shadow-md flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+              COMPETIÇÃO EM ANDAMENTO
+            </span>
+            <p className="hidden sm:block text-[10px] font-mono bg-white/5 px-3 py-1 rounded-full text-slate-400 border border-white/5">
+              Mapeamento: 1º ao 16º Avançam Direto
+            </p>
+          </div>
         </div>
 
         {/* The Premium podium layout divided with Termômetro */}
-        {top3Elite.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 pt-2">
-            
-            {/* Column for podium - takes 8 cols on desktop */}
-            <div className="lg:col-span-8 flex flex-col justify-between">
-              <div className="mb-3">
-                <span className="text-[10px] uppercase font-mono font-black text-slate-400 tracking-wider bg-white/5 p-1.5 rounded-lg border border-white/5">
-                  Podium de Elite da Rodada
-                </span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 pt-2">
+          
+          {/* Column for Notice - takes 8 cols on desktop */}
+          <div className="lg:col-span-8 flex flex-col justify-between">
+            <div className="relative z-10 py-10 px-6 text-center bg-black/40 border border-white/5 rounded-2xl flex flex-col items-center justify-center space-y-3 h-full min-h-[300px]">
+              <div className="w-14 h-14 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37] mb-1 shadow-[0_0_20px_rgba(212,175,55,0.15)]">
+                <Trophy className="w-7 h-7 text-[#D4AF37]" />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                
-                {/* 2nd Place (Silver theme) - position left on large screens */}
-                {top3Elite[1] && (
-                  <div className="order-2 md:order-1 flex flex-col justify-between p-4 rounded-2xl border border-white/5 bg-black/30 hover:bg-black/40 hover:border-slate-400/30 transition duration-300 group">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-lg bg-slate-400/10 border border-slate-400/20 text-slate-300 flex items-center justify-center font-mono font-black text-[10px]">
-                          2º
-                        </span>
-                        <span className="text-[8px] font-mono font-bold bg-slate-400/15 text-slate-300 px-1.5 py-0.5 rounded uppercase">
-                          Prata
-                        </span>
-                      </div>
-                      <Award className="w-4 h-4 text-slate-400" />
-                    </div>
-
-                    <div className="my-5 text-center">
-                      <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center bg-zinc-950/50 rounded-full border border-slate-400/25 p-1.5 shadow-inner group-hover:scale-105 transition duration-300">
-                        <TeamShield shieldUrl={top3Elite[1].shieldUrl} fallbackText={top3Elite[1].name} className="w-full h-full object-contain" />
-                      </div>
-                      <h3 className="font-display font-black text-xs uppercase text-slate-200 tracking-wide line-clamp-1 group-hover:text-white transition">
-                        {top3Elite[1].name}
-                      </h3>
-                      <p className="text-[9px] text-slate-400 font-mono">
-                        Téc: {top3Elite[1].owner}
-                      </p>
-                    </div>
-
-                    <div className="mt-1 pt-2 border-t border-white/5 flex items-center justify-between text-[10px] font-mono">
-                      <span className="text-slate-550">R{b10Round} Score</span>
-                      <span className="font-bold text-slate-300">{top3Elite[1].b10RoundScore.toFixed(2)} pts</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* 1st Place (Gold theme with crown) - centered and elevated */}
-                {top3Elite[0] && (
-                  <div className="order-1 md:order-2 flex flex-col justify-between p-5 rounded-2xl border-2 border-[#D4AF37]/50 bg-gradient-to-b from-[#D4AF37]/10 to-black/40 hover:from-[#D4AF37]/15 hover:to-black/50 transition duration-300 group relative shadow-[0_15px_35px_rgba(212,175,55,0.12)]">
-                    {/* Crown placement badge */}
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#D4AF37] to-[#F1C40F] text-black px-3 py-0.5 rounded-full font-mono font-black text-[8px] uppercase tracking-widest flex items-center gap-1 shadow-lg">
-                      <Crown className="w-2.5 h-2.5 fill-black" strokeWidth={2.5} /> Campeão
-                    </div>
-
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="w-7 h-7 rounded-lg bg-[#D4AF37]/20 border border-[#D4AF37]/50 text-[#D4AF37] flex items-center justify-center font-mono font-black text-xs">
-                          1º
-                        </span>
-                        <span className="text-[8px] font-mono font-black bg-[#D4AF37]/20 text-[#D4AF37] px-1.5 py-0.5 rounded uppercase">
-                          Elite
-                        </span>
-                      </div>
-                      <Trophy className="w-4 h-4 text-[#D4AF37]" strokeWidth={2.5} />
-                    </div>
-
-                    <div className="my-4 text-center">
-                      <div className="w-14 h-14 mx-auto mb-2 flex items-center justify-center bg-[#D4AF37]/5 rounded-full border-2 border-[#D4AF37] p-2 shadow-[0_0_15px_rgba(212,175,55,0.2)] group-hover:scale-110 transition duration-300">
-                        <TeamShield shieldUrl={top3Elite[0].shieldUrl} fallbackText={top3Elite[0].name} className="w-full h-full object-contain" />
-                      </div>
-                      <h3 className="font-display font-black text-sm uppercase text-white tracking-wider line-clamp-1">
-                        {top3Elite[0].name}
-                      </h3>
-                      <p className="text-[9px] text-[#D4AF37] font-mono font-semibold uppercase">
-                        Téc: {top3Elite[0].owner}
-                      </p>
-                    </div>
-
-                    <div className="mt-1 pt-2 border-t border-[#D4AF37]/25 flex items-center justify-between text-[10px] font-mono">
-                      <span className="text-slate-400">R{b10Round} Score</span>
-                      <span className="font-black text-[#D4AF37]">{top3Elite[0].b10RoundScore.toFixed(2)} pts</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* 3rd Place (Bronze theme) - position right */}
-                {top3Elite[2] && (
-                  <div className="order-3 md:order-3 flex flex-col justify-between p-4 rounded-2xl border border-white/5 bg-black/30 hover:bg-black/40 hover:border-[#CD7F32]/30 transition duration-300 group">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-lg bg-[#CD7F32]/10 border border-[#CD7F32]/20 text-[#CD7F32] flex items-center justify-center font-mono font-black text-[10px]">
-                          3º
-                        </span>
-                        <span className="text-[8px] font-mono font-bold bg-[#CD7F32]/15 text-[#CD7F32] px-1.5 py-0.5 rounded uppercase">
-                          Bronze
-                        </span>
-                      </div>
-                      <Star className="w-4 h-4 text-[#CD7F32]" />
-                    </div>
-
-                    <div className="my-5 text-center">
-                      <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center bg-zinc-950/50 rounded-full border border-[#CD7F32]/25 p-1.5 shadow-inner group-hover:scale-105 transition duration-300">
-                        <TeamShield shieldUrl={top3Elite[2].shieldUrl} fallbackText={top3Elite[2].name} className="w-full h-full object-contain" />
-                      </div>
-                      <h3 className="font-display font-black text-xs uppercase text-slate-200 tracking-wide line-clamp-1 group-hover:text-white transition">
-                        {top3Elite[2].name}
-                      </h3>
-                      <p className="text-[9px] text-slate-400 font-mono">
-                        Téc: {top3Elite[2].owner}
-                      </p>
-                    </div>
-
-                    <div className="mt-1 pt-2 border-t border-white/5 flex items-center justify-between text-[10px] font-mono">
-                      <span className="text-slate-550">R{b10Round} Score</span>
-                      <span className="font-bold text-[#CD7F32]">{top3Elite[2].b10RoundScore.toFixed(2)} pts</span>
-                    </div>
-                  </div>
-                )}
-
+              <h4 className="font-display font-black text-base sm:text-lg text-white uppercase tracking-tight">
+                Aguardando Definição dos Campeões
+              </h4>
+              <p className="text-xs text-slate-400 max-w-lg leading-relaxed">
+                A Copa B10 está em andamento. A Vitrine Premiada de Elite será preenchida oficialmente com o Campeão, Vice e Pódio conforme os confrontos e fases finais forem concluídos na Rodada 38.
+              </p>
+              <div className="pt-2 text-[10px] font-mono text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/20 px-3.5 py-1.5 rounded-full uppercase font-bold">
+                💡 Fase 1 (Corte na R25): 1º ao 16º avançam direto à Fase 4 &bull; 47º ao 50º disputam o Esperneio
+              </div>
+              <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-2 text-slate-500 font-mono text-[9px] relative z-10">
+                <Award className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <span>PAINEL DOS CAMPEÕES COPA B10 &bull; AGUARDANDO RESULTADOS FINAIS DO MATA-MATA</span>
               </div>
             </div>
+          </div>
 
             {/* Column for Termômetro da Repescagem - takes 4 cols on desktop */}
             <div className="lg:col-span-4 flex flex-col justify-between p-4 rounded-3xl border border-white/10 bg-black/50 backdrop-blur-md relative overflow-hidden group">
@@ -704,11 +629,6 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
             </div>
 
           </div>
-        ) : (
-          <div className="p-8 text-center border-2 border-dashed border-white/10 rounded-2xl">
-            <p className="text-sm font-mono text-slate-400">Carregando dados da rodada para consolidar os premiados...</p>
-          </div>
-        )}
       </section>
 
       {/* Sub Navigation Tabs */}
@@ -1091,24 +1011,32 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
                       isPlayed && winner === 'team2' ? 'grayscale opacity-40' : ''
                     }`}>
                       <div className={`w-11 h-11 bg-zinc-950 rounded-full border p-1.5 flex items-center justify-center mb-1.5 shadow-inner transition-transform group-hover:scale-105 duration-300 ${
-                        winner === 'team1' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20 bg-gradient-to-b from-[#D4AF37]/10 to-transparent' : 'border-white/5'
+                        winner === 'team1' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20 bg-gradient-to-b from-[#D4AF37]/10 to-transparent' : team1.isRepPending ? 'border-amber-500/40 border-dashed bg-amber-500/5' : 'border-white/5'
                       }`}>
-                        <TeamShield shieldUrl={team1.shieldUrl} fallbackText={team1.name} className="w-full h-full object-contain" />
+                        {team1.isRepPending || !team1.shieldUrl ? (
+                          <div className="w-full h-full rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400">
+                            <Flame className="w-4 h-4 text-amber-400 animate-pulse" />
+                          </div>
+                        ) : (
+                          <TeamShield shieldUrl={team1.shieldUrl} fallbackText={team1.name} className="w-full h-full object-contain" />
+                        )}
                       </div>
                       
                       <div className="h-8 flex flex-col justify-center min-w-0 w-full mb-1">
                         <span className={`uppercase truncate font-display tracking-wide ${nameSize1} ${
-                          winner === 'team1' ? 'text-white font-black' : winner === 'team2' ? 'text-slate-500' : 'text-slate-200'
+                          winner === 'team1' ? 'text-white font-black' : winner === 'team2' ? 'text-slate-500' : team1.isRepPending ? 'text-amber-400 font-bold' : 'text-slate-200'
                         }`}>
                           {team1.name}
                         </span>
                         <span className="text-[8px] text-slate-550 font-mono truncate">
-                          Téc: {team1.owner}
+                          {team1.isRepPending ? 'Aguardando R26' : `Téc: ${team1.owner}`}
                         </span>
                       </div>
 
                       {/* Rank badge */}
-                      <span className="text-[8px] font-mono px-1 rounded bg-white/5 text-slate-400">
+                      <span className={`text-[8px] font-mono px-1 rounded ${
+                        team1.isRepPending ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold' : 'bg-white/5 text-slate-400'
+                      }`}>
                         {team1.category === 'REPESCAGEM' ? `${team1.f2Rank}º Rep.` : `#${team1.rank}º`}
                       </span>
                     </div>
@@ -1145,24 +1073,32 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
                       isPlayed && winner === 'team1' ? 'grayscale opacity-40' : ''
                     }`}>
                       <div className={`w-11 h-11 bg-zinc-950 rounded-full border p-1.5 flex items-center justify-center mb-1.5 shadow-inner transition-transform group-hover:scale-105 duration-300 ${
-                        winner === 'team2' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20 bg-gradient-to-b from-[#D4AF37]/10 to-transparent' : 'border-white/5'
+                        winner === 'team2' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20 bg-gradient-to-b from-[#D4AF37]/10 to-transparent' : team2.isRepPending ? 'border-amber-500/40 border-dashed bg-amber-500/5' : 'border-white/5'
                       }`}>
-                        <TeamShield shieldUrl={team2.shieldUrl} fallbackText={team2.name} className="w-full h-full object-contain" />
+                        {team2.isRepPending || !team2.shieldUrl ? (
+                          <div className="w-full h-full rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400">
+                            <Flame className="w-4 h-4 text-amber-400 animate-pulse" />
+                          </div>
+                        ) : (
+                          <TeamShield shieldUrl={team2.shieldUrl} fallbackText={team2.name} className="w-full h-full object-contain" />
+                        )}
                       </div>
                       
                       <div className="h-8 flex flex-col justify-center min-w-0 w-full mb-1">
                         <span className={`uppercase truncate font-display tracking-wide ${nameSize2} ${
-                          winner === 'team2' ? 'text-white font-black' : winner === 'team1' ? 'text-slate-500' : 'text-slate-200'
+                          winner === 'team2' ? 'text-white font-black' : winner === 'team1' ? 'text-slate-500' : team2.isRepPending ? 'text-amber-400 font-bold' : 'text-slate-200'
                         }`}>
                           {team2.name}
                         </span>
                         <span className="text-[8px] text-slate-550 font-mono truncate">
-                          Téc: {team2.owner}
+                          {team2.isRepPending ? 'Aguardando R26' : `Téc: ${team2.owner}`}
                         </span>
                       </div>
 
                       {/* Rank badge */}
-                      <span className="text-[8px] font-mono px-1 rounded bg-white/5 text-slate-400">
+                      <span className={`text-[8px] font-mono px-1 rounded ${
+                        team2.isRepPending ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold' : 'bg-white/5 text-slate-400'
+                      }`}>
                         {team2.category === 'REPESCAGEM' ? `${team2.f2Rank}º Rep.` : `#${team2.rank}º`}
                       </span>
                     </div>
