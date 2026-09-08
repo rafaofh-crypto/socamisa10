@@ -30,25 +30,15 @@ interface CopaB10Props {
 const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }: CopaB10Props) => {
   const isAwaitingRound25 = !isSimulatorsEnabled && currentRound < 25;
 
-  // Local state for Copa B10 selection of evaluation round (Fase 1: Corte)
-  // Default to round 25 (or currentRound if smaller, or up to 38)
-  const [b10Round, setB10Round] = useState<number>(25);
+  // A Rodada de Corte oficial da Copa B10 (Fase 1) é estritamente a Rodada 25.
+  // Ela determina em definitivo os 16 times de Elite, os 30 de Play-offs e os 4 da Repescagem.
+  const b10Round = 25;
 
   const [activeSubTab, setActiveSubTab] = useState<'funil' | 'playoffs' | 'fase4' | 'fasefinal' | 'tabela' | 'cronograma' | 'regulamento'>('tabela');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Sync or lock b10Round when awaiting or currentRound changes
-  useEffect(() => {
-    if (isAwaitingRound25) {
-      setB10Round(25);
-    } else {
-      const defaultRound = isSimulatorsEnabled ? 25 : currentRound;
-      setB10Round(Math.min(defaultRound, currentRound > 0 ? currentRound : 25));
-    }
-  }, [isAwaitingRound25, currentRound, isSimulatorsEnabled]);
-
-  // 1. Calculate the General Cartola League Ranking for all teams (to serve as Tiebreaker #2)
-  // Summing all round scores up to currentRound
+  // 1. Calculate the General Cartola League Ranking for all teams at the time of the Round 25 cut
+  // Summing all round scores up to round 25 to preserve the exact official tiebreaker rank of Phase 1
   const teamsWithLeagueRank = useMemo(() => {
     if (!teams || teams.length === 0) return [];
 
@@ -56,7 +46,7 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
       .map(t => {
         const totalPoints = Object.keys(t.scores)
           .map(Number)
-          .filter(r => r <= currentRound)
+          .filter(r => r <= 25)
           .reduce((sum, r) => sum + (t.scores[r] || 0), 0);
         return {
           team: t,
@@ -67,9 +57,9 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
       .map((item, idx) => ({
         ...item.team,
         totalLeaguePoints: item.totalPoints,
-        leagueRank: idx + 1 // Official general league rank starting at 1
+        leagueRank: idx + 1 // Official general league rank at R25 cutoff
       }));
-  }, [teams, currentRound]);
+  }, [teams]);
 
   // 2. Perform the sorting for Copa B10 - Round of Cut (b10Round)
   // Apply tiebreakers:
@@ -429,19 +419,6 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
     });
   }, [acessoGroup, repescagemData, b10Round, currentRound, isSimulatorsEnabled, isAwaitingRound25]);
 
-  // Available rounds for selector
-  const availableRounds = useMemo(() => {
-    if (isAwaitingRound25) {
-      return [25];
-    }
-    const rounds = [];
-    const limit = isSimulatorsEnabled ? Math.max(currentRound, 18) : currentRound;
-    for (let r = 1; r <= Math.min(limit, 38); r++) {
-      rounds.push(r);
-    }
-    return rounds;
-  }, [currentRound, isSimulatorsEnabled, isAwaitingRound25]);
-
   return (
     <div className="space-y-8 animate-fadeIn text-slate-200">
       
@@ -459,27 +436,23 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
           </p>
         </div>
 
-        {/* Dynamic Cartola FC Evaluation Round selector */}
-        <div className="flex items-center gap-3 bg-black/40 border border-white/10 p-3 rounded-2xl md:w-80">
-          <div className="p-2 bg-[#D4AF37]/10 rounded-xl">
+        {/* Indicador Oficial da Rodada de Corte (Fase 1) */}
+        <div className="flex items-center gap-3 bg-black/40 border border-[#D4AF37]/30 p-3.5 rounded-2xl md:w-80 shadow-[0_0_15px_rgba(212,175,55,0.05)]">
+          <div className="p-2.5 bg-[#D4AF37]/10 rounded-xl border border-[#D4AF37]/20">
             <Activity className="w-5 h-5 text-[#D4AF37]" />
           </div>
           <div className="flex-grow">
             <label className="block text-[9px] font-mono uppercase text-slate-400 tracking-wider">
-              Rodada de Avaliação (Fase 1)
+              Fase 1: Rodada de Corte Oficial
             </label>
-            <select
-              value={b10Round}
-              onChange={(e) => setB10Round(Number(e.target.value))}
-              className="bg-transparent text-xs font-mono font-bold text-white pr-8 focus:ring-0 focus:outline-none cursor-pointer w-full disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isAwaitingRound25}
-            >
-              {availableRounds.map((r) => (
-                <option key={r} value={r} className="bg-[#121212] text-white font-mono text-xs">
-                  Rodada {r} {r === currentRound ? " (Atual)" : ""}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-sm font-mono font-black text-white">
+                Rodada 25
+              </span>
+              <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold uppercase tracking-wider">
+                Definida
+              </span>
+            </div>
           </div>
         </div>
       </div>

@@ -120,27 +120,50 @@ export default function Destaques({ teams, currentRound }: DestaquesProps) {
     };
   }, [teams, selectedRound]);
 
-  // 2.6 Calculate Dynamically "Líder do Mês (Maio)"
-  const monthlyLeaderMaio = useMemo(() => {
-    if (teams.length === 0) return { team: null, value: 0 };
-    let bestTeam: CartolaTeam | null = null;
-    let maxMaio = -Infinity;
+  // 2.6 Calculate Dynamically "Líder do Mês" based on selectedRound's month
+  const monthlyLeader = useMemo(() => {
+    if (teams.length === 0) return { team: null, value: 0, monthName: "Mês Atual", isCompleted: false, roundsCount: 0, totalRounds: 0 };
     
-    const maioRounds = MONTH_TO_ROUNDS["Maio"] || [14, 15, 16, 17, 18];
+    const ALL_MONTHS = [
+      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
+      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ];
+
+    let foundMonth = "Setembro";
+    for (const m of ALL_MONTHS) {
+      const rounds = MONTH_TO_ROUNDS[m] || [];
+      if (rounds.includes(selectedRound)) {
+        foundMonth = m;
+        break;
+      }
+    }
+
+    const monthRounds = MONTH_TO_ROUNDS[foundMonth] || [selectedRound];
+    // Rounds in this month played up to selectedRound
+    const playedRoundsInMonth = monthRounds.filter((r) => r <= selectedRound);
+    const roundsToEvaluate = playedRoundsInMonth.length > 0 ? playedRoundsInMonth : [selectedRound];
+    const isCompletedMonth = monthRounds.every((r) => r <= selectedRound);
+
+    let bestTeam: CartolaTeam | null = null;
+    let maxScore = -Infinity;
 
     teams.forEach((t) => {
-      const maioScore = maioRounds.reduce((sum, r) => sum + (t.scores[r] || 0), 0);
-      if (maioScore > maxMaio) {
-        maxMaio = maioScore;
+      const monthScore = roundsToEvaluate.reduce((sum, r) => sum + (t.scores[r] || 0), 0);
+      if (monthScore > maxScore) {
+        maxScore = monthScore;
         bestTeam = t;
       }
     });
 
     return {
       team: bestTeam,
-      value: Number(maxMaio.toFixed(2))
+      value: maxScore > -Infinity ? Number(maxScore.toFixed(2)) : 0,
+      monthName: foundMonth,
+      isCompleted: isCompletedMonth,
+      roundsCount: roundsToEvaluate.length,
+      totalRounds: monthRounds.length
     };
-  }, [teams]);
+  }, [teams, selectedRound]);
 
   // 2.7 Calculate Dynamically "Recorde Histórico" (Highest single-round score up to selectedRound)
   const recordeHistorico = useMemo(() => {
@@ -397,33 +420,33 @@ export default function Destaques({ teams, currentRound }: DestaquesProps) {
               )}
             </div>
 
-            {/* Card 4: Líder do Mês (Maio) - Recopa Mensal */}
+            {/* Card 4: Líder do Mês - Recopa Mensal */}
             <div className="glass-effect rounded-2xl p-6 flex flex-col justify-between border border-gold/20 shadow-lg h-full min-h-[220px] relative overflow-hidden transition-all duration-300 hover:scale-[1.02]">
               <div className="absolute top-0 right-0 p-6 opacity-10 bg-[#D4AF37] blur-2xl w-24 h-24 rounded-full pointer-events-none" />
               <div className="flex justify-between items-start gap-2 relative z-10 w-full mb-3">
                 <span className="text-slate-200 text-xs font-display font-black tracking-wide uppercase flex items-center gap-1.5">
                   <Flame className="w-4 h-4 text-orange-400" />
-                  Líder do Mês (Maio)
+                  Líder do Mês ({monthlyLeader.monthName})
                 </span>
-                <span className="text-[8px] bg-orange-400/10 text-orange-400 border border-orange-450/25 px-2 py-0.5 rounded font-black font-mono uppercase tracking-wider">
-                  📅 Recopa
+                <span className="text-[8px] bg-orange-400/10 text-orange-400 border border-orange-400/25 px-2 py-0.5 rounded font-black font-mono uppercase tracking-wider">
+                  {monthlyLeader.isCompleted ? "🏆 Campeão do Mês" : `📅 ${monthlyLeader.roundsCount}/${monthlyLeader.totalRounds} Rodadas`}
                 </span>
               </div>
 
-              {monthlyLeaderMaio.team ? (
+              {monthlyLeader.team ? (
                 <>
                   <div className="my-4 flex items-center gap-4 relative z-10">
                     <div className="w-14 h-14 bg-[#121212]/80 p-1 rounded-full border border-gold/10 flex items-center justify-center overflow-hidden shrink-0">
-                      <TeamShield shieldUrl={monthlyLeaderMaio.team.shieldUrl} fallbackText={monthlyLeaderMaio.team.name} />
+                      <TeamShield shieldUrl={monthlyLeader.team.shieldUrl} fallbackText={monthlyLeader.team.name} />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="font-display font-bold text-base text-slate-100 uppercase tracking-tight leading-tight truncate">{monthlyLeaderMaio.team.name}</h4>
-                      <p className="text-[11px] text-slate-400 truncate mt-0.5">Dono: {monthlyLeaderMaio.team.owner}</p>
+                      <h4 className="font-display font-bold text-base text-slate-100 uppercase tracking-tight leading-tight truncate">{monthlyLeader.team.name}</h4>
+                      <p className="text-[11px] text-slate-400 truncate mt-0.5">Dono: {monthlyLeader.team.owner}</p>
                     </div>
                   </div>
 
                   <div className="mt-2 flex items-baseline gap-1 relative z-10">
-                    <span className="font-mono text-3xl font-black text-orange-400 tracking-tight">{monthlyLeaderMaio.value.toFixed(2)}</span>
+                    <span className="font-mono text-3xl font-black text-orange-400 tracking-tight">{monthlyLeader.value.toFixed(2)}</span>
                     <span className="text-[10px] uppercase text-slate-400 font-mono font-bold ml-1">pts</span>
                   </div>
                 </>
