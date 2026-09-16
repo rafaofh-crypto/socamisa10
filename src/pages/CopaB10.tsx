@@ -18,7 +18,9 @@ import {
   Activity, 
   ShieldAlert, 
   Star,
-  Calendar
+  Calendar,
+  CheckCircle2,
+  Clock
 } from 'lucide-react';
 
 interface CopaB10Props {
@@ -377,18 +379,24 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
 
     // Map matches with dynamic Cartola scores for Ida (R27) e Volta (R28) - Agregado de 180 min
     return matchesList.map((m) => {
-      const score1Leg1 = (isSimulatorsEnabled || f3Leg1Round <= currentRound) && typeof m.team1.scores[f3Leg1Round] === 'number' ? m.team1.scores[f3Leg1Round] : 0;
-      const score1Leg2 = (isSimulatorsEnabled || f3Leg2Round <= currentRound) && typeof m.team1.scores[f3Leg2Round] === 'number' ? m.team1.scores[f3Leg2Round] : 0;
+      const hasScore1Leg1 = (isSimulatorsEnabled || f3Leg1Round <= currentRound) && typeof m.team1.scores[f3Leg1Round] === 'number' && m.team1.scores[f3Leg1Round] > 0;
+      const hasScore1Leg2 = (isSimulatorsEnabled || f3Leg2Round <= currentRound) && typeof m.team1.scores[f3Leg2Round] === 'number' && m.team1.scores[f3Leg2Round] > 0;
+      const score1Leg1 = hasScore1Leg1 ? m.team1.scores[f3Leg1Round] : 0;
+      const score1Leg2 = hasScore1Leg2 ? m.team1.scores[f3Leg2Round] : 0;
       const score1 = Number((score1Leg1 + score1Leg2).toFixed(2));
 
-      const score2Leg1 = (isSimulatorsEnabled || f3Leg1Round <= currentRound) && typeof m.team2.scores[f3Leg1Round] === 'number' ? m.team2.scores[f3Leg1Round] : 0;
-      const score2Leg2 = (isSimulatorsEnabled || f3Leg2Round <= currentRound) && typeof m.team2.scores[f3Leg2Round] === 'number' ? m.team2.scores[f3Leg2Round] : 0;
+      const hasScore2Leg1 = (isSimulatorsEnabled || f3Leg1Round <= currentRound) && typeof m.team2.scores[f3Leg1Round] === 'number' && m.team2.scores[f3Leg1Round] > 0;
+      const hasScore2Leg2 = (isSimulatorsEnabled || f3Leg2Round <= currentRound) && typeof m.team2.scores[f3Leg2Round] === 'number' && m.team2.scores[f3Leg2Round] > 0;
+      const score2Leg1 = hasScore2Leg1 ? m.team2.scores[f3Leg1Round] : 0;
+      const score2Leg2 = hasScore2Leg2 ? m.team2.scores[f3Leg2Round] : 0;
       const score2 = Number((score2Leg1 + score2Leg2).toFixed(2));
+
+      const isLeg1Played = hasScore1Leg1 || hasScore2Leg1 || currentRound >= f3Leg1Round;
+      const isLeg2Played = hasScore1Leg2 || hasScore2Leg2 || currentRound >= f3Leg2Round;
+      const canComplete = isPlayoffCompleted && !m.team1.isVirtual && !m.team2.isVirtual && !m.team2.isRepPending;
 
       let winner: 'team1' | 'team2' | null = null;
       let tiebreakerApplied = false;
-
-      const canComplete = isPlayoffCompleted && !m.team1.isVirtual && !m.team2.isVirtual && !m.team2.isRepPending;
 
       if (canComplete) {
         if (score1 > score2) {
@@ -402,14 +410,29 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
         }
       }
 
+      // Parcial leader after Leg 1 (when Leg 2 not yet finished)
+      let partialLeader: 'team1' | 'team2' | 'tied' | null = null;
+      if (isLeg1Played && !canComplete) {
+        if (score1Leg1 > score2Leg1) partialLeader = 'team1';
+        else if (score2Leg1 > score1Leg1) partialLeader = 'team2';
+        else if (hasScore1Leg1 && hasScore2Leg1) partialLeader = 'tied';
+      }
+
       return {
         ...m,
         score1Leg1,
         score1Leg2,
         score1,
+        hasScore1Leg1,
+        hasScore1Leg2,
         score2Leg1,
         score2Leg2,
         score2,
+        hasScore2Leg1,
+        hasScore2Leg2,
+        isLeg1Played,
+        isLeg2Played,
+        partialLeader,
         winner,
         tiebreakerApplied,
         isPlayed: canComplete,
@@ -947,149 +970,169 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
           </div>
 
           {/* Grid of 16 Matchups */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
             {playoffMatches.map((match) => {
               const { team1, team2, score1, score2, winner, isPlayed, tiebreakerApplied } = match;
-
-              // Size configuration for long names (>16 characters)
-              const nameSize1 = team1.name.length > 16 ? 'text-[9px] sm:text-[10px] leading-tight' : 'text-xs font-extrabold';
-              const nameSize2 = team2.name.length > 16 ? 'text-[9px] sm:text-[10px] leading-tight' : 'text-xs font-extrabold';
 
               return (
                 <div 
                   key={match.id}
-                  className="relative overflow-hidden rounded-2xl border border-[#D4AF37]/25 hover:border-[#D4AF37]/60 bg-black/50 backdrop-blur-md p-4 transition-all duration-350 shadow-lg group hover:shadow-[0_8px_20px_rgba(212,175,55,0.08)] flex flex-col justify-between min-h-[160px]"
+                  className="relative overflow-hidden rounded-3xl border border-[#D4AF37]/30 hover:border-[#D4AF37]/60 bg-[#090909]/95 backdrop-blur-md p-5 transition-all duration-350 shadow-2xl flex flex-col justify-between group"
                 >
-                  {/* Card top banner */}
-                  <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-3 text-[9px] font-mono">
-                    <span className="text-slate-400 uppercase tracking-widest font-black">
-                      Confronto #{match.id}
+                  {/* Top Header */}
+                  <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4 text-[10px] font-mono">
+                    <span className="text-[#D4AF37] uppercase tracking-widest font-bold flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37] inline-block shadow-[0_0_8px_rgba(212,175,55,0.6)]" />
+                      CONFRONTO #{match.id}
                     </span>
-                    {isPlayed ? (
-                      <span className="text-[8px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-black tracking-widest uppercase px-2 py-0.5 rounded-full">
-                        Finalizado (R{match.f3Leg1Round} e R{match.f3Leg2Round})
-                      </span>
-                    ) : (
-                      <span className="text-[8px] bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/20 font-black tracking-widest uppercase px-2 py-0.5 rounded-full animate-pulse">
-                        A realizar (R{match.f3Leg1Round} e R{match.f3Leg2Round})
-                      </span>
-                    )}
+                    <span className="bg-[#141414] border border-white/10 px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider text-slate-300 uppercase">
+                      IDA: R{match.f3Leg1Round} • VOLTA: R{match.f3Leg2Round}
+                    </span>
                   </div>
 
-                  {/* Layout com escudos de times lado a lado e o "VS" estilizado */}
-                  <div className="grid grid-cols-11 items-center gap-1 py-1">
+                  {/* Teams Side-by-Side with Center VS */}
+                  <div className="relative grid grid-cols-2 gap-3 items-start my-2">
                     
-                    {/* Team 1 Side (Left) */}
-                    <div className={`col-span-4 flex flex-col items-center text-center transition-all duration-300 ${
-                      isPlayed && winner === 'team2' ? 'grayscale opacity-40' : ''
-                    }`}>
-                      <div className={`w-11 h-11 bg-zinc-950 rounded-full border p-1.5 flex items-center justify-center mb-1.5 shadow-inner transition-transform group-hover:scale-105 duration-300 ${
-                        winner === 'team1' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20 bg-gradient-to-b from-[#D4AF37]/10 to-transparent' : team1.isRepPending ? 'border-amber-500/40 border-dashed bg-amber-500/5' : 'border-white/5'
-                      }`}>
+                    {/* VS Circle Badge Centered */}
+                    <div className="absolute left-1/2 top-11 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-[#181408] border border-[#D4AF37]/50 flex items-center justify-center text-[#D4AF37] text-[10px] font-mono font-black shadow-lg">
+                      VS
+                    </div>
+
+                    {/* Team 1 (Left) */}
+                    <div className="flex flex-col items-center text-center min-w-0">
+                      {/* Shield */}
+                      <div className="w-16 h-16 bg-[#121212] rounded-full border border-white/10 p-2 flex items-center justify-center mb-2 shadow-inner">
                         {team1.isRepPending || !team1.shieldUrl ? (
                           <div className="w-full h-full rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400">
-                            <Flame className="w-4 h-4 text-amber-400 animate-pulse" />
+                            <Flame className="w-5 h-5 text-amber-400 animate-pulse" />
                           </div>
                         ) : (
                           <TeamShield shieldUrl={team1.shieldUrl} fallbackText={team1.name} className="w-full h-full object-contain" />
                         )}
                       </div>
-                      
-                      <div className="h-8 flex flex-col justify-center min-w-0 w-full mb-1">
-                        <span className={`uppercase truncate font-display tracking-wide ${nameSize1} ${
-                          winner === 'team1' ? 'text-white font-black' : winner === 'team2' ? 'text-slate-500' : team1.isRepPending ? 'text-amber-400 font-bold' : 'text-slate-200'
-                        }`}>
-                          {team1.name}
-                        </span>
-                        <span className="text-[8px] text-slate-550 font-mono truncate">
-                          {team1.isRepPending ? 'Aguardando R26' : `Téc: ${team1.owner}`}
+
+                      {/* Name */}
+                      <h4 className="font-display font-black text-sm uppercase tracking-wide text-white truncate max-w-full px-1 text-center leading-tight">
+                        {team1.name}
+                      </h4>
+
+                      {/* Owner */}
+                      <p className="text-[11px] text-slate-400 font-mono truncate max-w-full text-center mt-0.5">
+                        {team1.isRepPending ? 'Aguardando R26' : `Téc: ${team1.owner}`}
+                      </p>
+
+                      {/* Position Tag */}
+                      <div className="flex justify-center mt-1.5 mb-3">
+                        <span className="bg-[#141414] border border-white/10 text-slate-400 text-[10px] font-mono px-2 py-0.5 rounded-md font-bold">
+                          {team1.category === 'REPESCAGEM' ? `${team1.f2Rank}º Rep.` : `#${team1.rank}º`}
                         </span>
                       </div>
 
-                      {/* Rank badge */}
-                      <span className={`text-[8px] font-mono px-1 rounded ${
-                        team1.isRepPending ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold' : 'bg-white/5 text-slate-400'
-                      }`}>
-                        {team1.category === 'REPESCAGEM' ? `${team1.f2Rank}º Rep.` : `#${team1.rank}º`}
-                      </span>
-                    </div>
-
-                    {/* VS & Scores Center Panel */}
-                    <div className="col-span-3 flex flex-col items-center justify-center">
-                      {isPlayed ? (
-                        <div className="flex flex-col items-center gap-1 w-full">
-                          {/* Rich comparison display */}
-                          <div className="flex items-center justify-center gap-1 text-[11px] font-mono font-black w-full bg-black/50 border border-white/5 py-1 px-1 rounded-lg">
-                            <span className={winner === 'team1' ? 'text-[#D4AF37] font-black' : 'text-slate-400'}>
-                              {score1.toFixed(0)}
-                            </span>
-                            <span className="text-[8px] text-slate-600 font-normal">:</span>
-                            <span className={winner === 'team2' ? 'text-[#D4AF37] font-black' : 'text-slate-400'}>
-                              {score2.toFixed(0)}
-                            </span>
-                          </div>
-                          
-                          {/* VS / Tiebreaker indicators */}
-                          <span className="text-[7px] font-mono uppercase bg-white/5 border border-white/5 text-slate-500 px-1 py-0.2 rounded mt-1">
-                            {tiebreakerApplied ? 'C.D.' : 'VS'}
+                      {/* Legs Box: IDA (R27) | VOLTA (R28) */}
+                      <div className="w-full bg-[#121212] border border-white/10 rounded-xl p-2.5 shadow-sm">
+                        <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 font-bold px-1 mb-1">
+                          <span>IDA (R{match.f3Leg1Round})</span>
+                          <span className="text-slate-600 font-normal">|</span>
+                          <span>VOLTA (R{match.f3Leg2Round})</span>
+                        </div>
+                        <div className="flex items-center justify-around font-mono text-xs font-bold text-white">
+                          <span className={match.hasScore1Leg1 ? 'text-white' : 'text-slate-500 tracking-widest'}>
+                            {match.hasScore1Leg1 ? match.score1Leg1.toFixed(2) : '———'}
+                          </span>
+                          <span className="text-slate-600 font-normal">:</span>
+                          <span className={match.hasScore1Leg2 ? 'text-white' : 'text-slate-500 tracking-widest'}>
+                            {match.hasScore1Leg2 ? match.score1Leg2.toFixed(2) : '———'}
                           </span>
                         </div>
-                      ) : (
-                        <div className="w-7 h-7 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/5 flex items-center justify-center text-[9px] font-mono font-black text-[#D4AF37] tracking-wider">
-                          VS
-                        </div>
-                      )}
+                      </div>
                     </div>
 
-                    {/* Team 2 Side (Right) */}
-                    <div className={`col-span-4 flex flex-col items-center text-center transition-all duration-300 ${
-                      isPlayed && winner === 'team1' ? 'grayscale opacity-40' : ''
-                    }`}>
-                      <div className={`w-11 h-11 bg-zinc-950 rounded-full border p-1.5 flex items-center justify-center mb-1.5 shadow-inner transition-transform group-hover:scale-105 duration-300 ${
-                        winner === 'team2' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20 bg-gradient-to-b from-[#D4AF37]/10 to-transparent' : team2.isRepPending ? 'border-amber-500/40 border-dashed bg-amber-500/5' : 'border-white/5'
-                      }`}>
+                    {/* Team 2 (Right) */}
+                    <div className="flex flex-col items-center text-center min-w-0">
+                      {/* Shield */}
+                      <div className="w-16 h-16 bg-[#121212] rounded-full border border-white/10 p-2 flex items-center justify-center mb-2 shadow-inner">
                         {team2.isRepPending || !team2.shieldUrl ? (
                           <div className="w-full h-full rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400">
-                            <Flame className="w-4 h-4 text-amber-400 animate-pulse" />
+                            <Flame className="w-5 h-5 text-amber-400 animate-pulse" />
                           </div>
                         ) : (
                           <TeamShield shieldUrl={team2.shieldUrl} fallbackText={team2.name} className="w-full h-full object-contain" />
                         )}
                       </div>
-                      
-                      <div className="h-8 flex flex-col justify-center min-w-0 w-full mb-1">
-                        <span className={`uppercase truncate font-display tracking-wide ${nameSize2} ${
-                          winner === 'team2' ? 'text-white font-black' : winner === 'team1' ? 'text-slate-500' : team2.isRepPending ? 'text-amber-400 font-bold' : 'text-slate-200'
-                        }`}>
-                          {team2.name}
-                        </span>
-                        <span className="text-[8px] text-slate-550 font-mono truncate">
-                          {team2.isRepPending ? 'Aguardando R26' : `Téc: ${team2.owner}`}
+
+                      {/* Name */}
+                      <h4 className="font-display font-black text-sm uppercase tracking-wide text-white truncate max-w-full px-1 text-center leading-tight">
+                        {team2.name}
+                      </h4>
+
+                      {/* Owner */}
+                      <p className="text-[11px] text-slate-400 font-mono truncate max-w-full text-center mt-0.5">
+                        {team2.isRepPending ? 'Aguardando R26' : `Téc: ${team2.owner}`}
+                      </p>
+
+                      {/* Position Tag */}
+                      <div className="flex justify-center mt-1.5 mb-3">
+                        <span className="bg-[#141414] border border-white/10 text-slate-400 text-[10px] font-mono px-2 py-0.5 rounded-md font-bold">
+                          {team2.category === 'REPESCAGEM' ? `${team2.f2Rank}º Rep.` : `#${team2.rank}º`}
                         </span>
                       </div>
 
-                      {/* Rank badge */}
-                      <span className={`text-[8px] font-mono px-1 rounded ${
-                        team2.isRepPending ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold' : 'bg-white/5 text-slate-400'
-                      }`}>
-                        {team2.category === 'REPESCAGEM' ? `${team2.f2Rank}º Rep.` : `#${team2.rank}º`}
-                      </span>
+                      {/* Legs Box: IDA (R27) | VOLTA (R28) */}
+                      <div className="w-full bg-[#121212] border border-white/10 rounded-xl p-2.5 shadow-sm">
+                        <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 font-bold px-1 mb-1">
+                          <span>IDA (R{match.f3Leg1Round})</span>
+                          <span className="text-slate-600 font-normal">|</span>
+                          <span>VOLTA (R{match.f3Leg2Round})</span>
+                        </div>
+                        <div className="flex items-center justify-around font-mono text-xs font-bold text-white">
+                          <span className={match.hasScore2Leg1 ? 'text-white' : 'text-slate-500 tracking-widest'}>
+                            {match.hasScore2Leg1 ? match.score2Leg1.toFixed(2) : '———'}
+                          </span>
+                          <span className="text-slate-600 font-normal">:</span>
+                          <span className={match.hasScore2Leg2 ? 'text-white' : 'text-slate-500 tracking-widest'}>
+                            {match.hasScore2Leg2 ? match.score2Leg2.toFixed(2) : '———'}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
                   </div>
 
-                  {/* Winner indicator or matchup help */}
-                  {isPlayed && (
-                    <div className="mt-3.5 pt-2 border-t border-white/5 flex items-center justify-between text-[8px] font-mono">
-                      <span className="text-slate-500">Garante Vaga:</span>
-                      <div className="flex items-center gap-1 font-bold text-emerald-400 uppercase">
-                        <Trophy className="w-2.5 h-2.5 text-[#D4AF37]" />
-                        <span className="truncate max-w-[90px]">
-                          {winner === 'team1' ? team1.name : team2.name}
+                  {/* Agregado Bottom Green Capsule */}
+                  <div className="mt-4 w-full bg-[#052319] border border-emerald-500/40 rounded-2xl py-3 px-4 flex flex-col items-center justify-center shadow-inner transition-all">
+                    <span className="text-emerald-400 text-[10px] font-mono font-black tracking-widest uppercase mb-1">
+                      AGREGADO
+                    </span>
+                    <div className="flex items-center justify-center gap-3 font-mono font-black text-xl sm:text-2xl tracking-wider text-white">
+                      <span>
+                        {(match.hasScore1Leg1 || match.hasScore1Leg2) ? score1.toFixed(2) : '0.00'}
+                      </span>
+                      <span className="text-emerald-500 font-bold">:</span>
+                      <span>
+                        {(match.hasScore2Leg1 || match.hasScore2Leg2) ? score2.toFixed(2) : '0.00'}
+                      </span>
+                    </div>
+
+                    {/* Vencedor definitivo ou status da disputa */}
+                    {isPlayed ? (
+                      <div className="mt-2 pt-2 border-t border-emerald-500/20 w-full flex items-center justify-center gap-1.5 text-[10px] font-mono font-bold text-emerald-300 uppercase">
+                        <Trophy className="w-3 h-3 text-[#D4AF37]" />
+                        <span>Classificado: {winner === 'team1' ? team1.name : team2.name}</span>
+                        {tiebreakerApplied && (
+                          <span className="text-[8px] bg-emerald-500/20 text-emerald-300 px-1 py-0.5 rounded ml-1">
+                            (Desempate Geral)
+                          </span>
+                        )}
+                      </div>
+                    ) : match.partialLeader && match.partialLeader !== 'tied' ? (
+                      <div className="mt-1.5 text-[9px] font-mono text-emerald-300/80 flex items-center justify-center gap-1">
+                        <span>Vantagem na Ida:</span>
+                        <span className="text-[#D4AF37] font-bold">
+                          {match.partialLeader === 'team1' ? team1.name : team2.name}
                         </span>
                       </div>
-                    </div>
-                  )}
+                    ) : null}
+                  </div>
                 </div>
               );
             })}
