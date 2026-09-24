@@ -12,6 +12,7 @@ import MataMata from "./pages/MataMata";
 import CopaB10 from "./pages/CopaB10";
 import Admin from "./pages/Admin";
 import RulesBook from "./pages/RulesBook";
+import GazetaC10 from "./pages/GazetaC10";
 import CompetitionSelector from "./components/CompetitionSelector";
 import TournamentCalendarView from "./components/TournamentCalendarView";
 
@@ -19,7 +20,7 @@ export default function App() {
   const { data, loading, error, sync, lastSync, progressLog, source } = useCartolaData();
 
   // Application active tab navigation state
-  const [activeTab, setActiveTab ] = useState<"dashboard" | "rodada" | "mensal" | "copa" | "copa_b10" | "calendario" | "regras" | "admin" >("dashboard");
+  const [activeTab, setActiveTab ] = useState<"dashboard" | "gazeta" | "rodada" | "mensal" | "copa" | "copa_b10" | "calendario" | "regras" | "admin" >("dashboard");
 
   // Visible components states managed by Admin
   const [isM10Enabled, setIsM10Enabled] = useState<boolean>(() => {
@@ -149,6 +150,13 @@ export default function App() {
                 teams={teams} 
                 currentRound={currentRound} 
                 syncTimestamp={syncTimestamp} 
+              />
+            )}
+
+            {activeTab === "gazeta" && (
+              <GazetaC10 
+                teams={teams} 
+                currentRound={currentRound} 
               />
             )}
 

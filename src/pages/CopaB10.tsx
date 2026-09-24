@@ -1029,7 +1029,11 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
                       </div>
 
                       {/* Legs Box: IDA (R27) | VOLTA (R28) */}
-                      <div className="w-full bg-[#121212] border border-white/10 rounded-xl p-2.5 shadow-sm">
+                      <div className={`w-full bg-[#121212] rounded-xl p-2.5 shadow-sm transition-all duration-300 ${
+                        isPlayed && winner === 'team1'
+                          ? 'border-2 border-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.35)]'
+                          : 'border border-white/10'
+                      }`}>
                         <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 font-bold px-1 mb-1">
                           <span>IDA (R{match.f3Leg1Round})</span>
                           <span className="text-slate-600 font-normal">|</span>
@@ -1078,7 +1082,11 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
                       </div>
 
                       {/* Legs Box: IDA (R27) | VOLTA (R28) */}
-                      <div className="w-full bg-[#121212] border border-white/10 rounded-xl p-2.5 shadow-sm">
+                      <div className={`w-full bg-[#121212] rounded-xl p-2.5 shadow-sm transition-all duration-300 ${
+                        isPlayed && winner === 'team2'
+                          ? 'border-2 border-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.35)]'
+                          : 'border border-white/10'
+                      }`}>
                         <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 font-bold px-1 mb-1">
                           <span>IDA (R{match.f3Leg1Round})</span>
                           <span className="text-slate-600 font-normal">|</span>
@@ -1115,9 +1123,9 @@ const CopaB10 = ({ teams = [], currentRound = 17, isSimulatorsEnabled = false }:
 
                     {/* Vencedor definitivo ou status da disputa */}
                     {isPlayed ? (
-                      <div className="mt-2 pt-2 border-t border-emerald-500/20 w-full flex items-center justify-center gap-1.5 text-[10px] font-mono font-bold text-emerald-300 uppercase">
-                        <Trophy className="w-3 h-3 text-[#D4AF37]" />
-                        <span>Classificado: {winner === 'team1' ? team1.name : team2.name}</span>
+                      <div className="mt-2.5 pt-2 border-t border-emerald-500/25 w-full flex items-center justify-center gap-1.5 text-[11px] font-mono font-bold text-emerald-400 uppercase tracking-wide">
+                        <Trophy className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                        <span>CLASSIFICADO: {winner === 'team1' ? team1.name : team2.name}</span>
                         {tiebreakerApplied && (
                           <span className="text-[8px] bg-emerald-500/20 text-emerald-300 px-1 py-0.5 rounded ml-1">
                             (Desempate Geral)

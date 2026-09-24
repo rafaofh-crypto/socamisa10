@@ -51,8 +51,9 @@ npm run lint
 ## 📋 Funcionalidades
 
 - **Dashboard:** Visão geral da rodada atual, classificação e histórico.
+- **Gazeta C10:** O diário oficial da liga com manchetes automatizadas, destaques de cada rodada, jogo do infarto, zebras e botão de cópia pronta para WhatsApp.
 - **Copa M10:** Fase de grupos, repescagem e chaveamento eliminatório (1/16 até a Final).
-- **Copa B10:** Sistema multicamadas (Termômetro da Repescagem, Play-offs, Elite 32 e Chaveamento Final).
+- **Copa B10:** Sistema multicamadas (Termômetro da Repescagem, Play-offs de 180 minutos, Elite 32 e Chaveamento Final).
 - **Mata-Mata:** Árvore de confrontos interativa com contraste aprimorado e indicação de classificados.
 - **Recopa Mensal:** Acompanhamento dos melhores desempenhos e patrimônio mês a mês.
 - **Painel Admin:** Controle de rodadas ativas, simulações manuais e sincronização com Google Sheets.

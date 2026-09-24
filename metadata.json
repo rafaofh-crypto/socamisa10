@@ -1,6 +1,6 @@
 {
   "name": "Só Camisa 10",
-  "description": "Gerador de chaves de mata-mata e simulador de torneio com 48 times e fase de grupos.",
+  "description": "SaaS de Gestão e Ligas Fantasy com Copa M10, Copa B10, Play-offs, Gazeta C10 e Painel de Sincronização.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

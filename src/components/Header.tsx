@@ -1,9 +1,9 @@
 import React from "react";
-import { Trophy, Star, Calendar, Sparkles, Settings, Award, Crown, BookOpen } from "lucide-react";
+import { Trophy, Star, Calendar, Sparkles, Settings, Award, Crown, BookOpen, Newspaper } from "lucide-react";
 
 interface HeaderProps {
-  activeTab: "dashboard" | "rodada" | "mensal" | "copa" | "copa_b10" | "calendario" | "regras" | "admin";
-  setActiveTab: (tab: "dashboard" | "rodada" | "mensal" | "copa" | "copa_b10" | "calendario" | "regras" | "admin") => void;
+  activeTab: "dashboard" | "gazeta" | "rodada" | "mensal" | "copa" | "copa_b10" | "calendario" | "regras" | "admin";
+  setActiveTab: (tab: "dashboard" | "gazeta" | "rodada" | "mensal" | "copa" | "copa_b10" | "calendario" | "regras" | "admin") => void;
   currentRound: number;
   isM10Enabled?: boolean;
   isB10Enabled?: boolean;
@@ -18,6 +18,7 @@ export default function Header({
 }: HeaderProps) {
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: Trophy },
+    { id: "gazeta", label: "Gazeta C10", icon: Newspaper },
     { id: "rodada", label: "Destaques", icon: Star },
     { id: "mensal", label: "Mensal", icon: Calendar },
     ...(isM10Enabled ? [{ id: "copa" as const, label: "Copa M10", icon: Award }] : []),
