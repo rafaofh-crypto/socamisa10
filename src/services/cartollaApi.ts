@@ -19,8 +19,8 @@ export const MONTH_TO_ROUNDS: Record<string, number[]> = {
   "Junho": [19],
   "Julho": [20, 21],
   "Agosto": [22, 23, 24, 25],
-  "Setembro": [26, 27, 28, 29],
-  "Outubro": [30, 31, 32, 33],
+  "Setembro": [26, 27, 28],
+  "Outubro": [29, 30, 31, 32, 33],
   "Novembro": [34, 35, 36, 37],
   "Dezembro": [38]
 };

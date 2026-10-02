@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { CartolaTeam } from "../services/cartolaService";
+import { MONTH_TO_ROUNDS } from "../services/cartollaApi";
 import TeamShield from "../components/TeamShield";
 import { 
   Newspaper, 
@@ -38,10 +39,10 @@ interface RoundEditorialInfo {
 
 const ROUND_EDITORIAL_ARCHIVE: Record<number, RoundEditorialInfo> = {
   28: {
-    tag: "COPA B10 • DECISÃO DOS 180 MINUTOS",
-    headline: "Mata-Mata de Infarto: Classificação por 0,05 Ponto e Zebras Chocam a Copa B10!",
-    subheadline: "A Rodada 28 encerra os Play-offs em clima de drama absoluto e define os 16 classificados para a Elite 32.",
-    leadParagraph: "A Rodada 28 consagrou momentos inesquecíveis para a história da liga. O Sovaco da Pantera buscou uma virada inacreditável contra o Gui FiFla e carimbou a vaga pela menor margem já registrada: 0,05 ponto! Ao mesmo tempo, equipes como Delirio Futebol e Festa e lendinhaxx fc consolidaram suas classificações sobre os favoritos, provando que no mata-mata o peso da camisa se decide nos detalhes.",
+    tag: "COPA B10 & FECHAMENTO DE SETEMBRO",
+    headline: "Mata-Mata de Infarto na Copa B10 e C.R.Pirika Consagrado Campeão de Setembro!",
+    subheadline: "A Rodada 28 define os 16 classificados da B10 por 0,05 ponto e fecha a premiação do mês antes da pausa eleitoral.",
+    leadParagraph: "A Rodada 28 consagrou momentos inesquecíveis para a história da liga. Além das reviravoltas na Copa B10 — com o Sovaco da Pantera garantindo classificação milagrosa por 0,05 ponto sobre o Gui FiFla —, a rodada selou em definitivo o Mês de Setembro (R26 a R28) devido ao adiamento da R29 para outubro em virtude do primeiro turno das eleições. Com regularidade cirúrgica, o C.R.Pirika (Diego a Jorge) totalizou 281,21 pontos e faturou a cobiçada coroa mensal da Só Camisa 10!",
     specialCardBadge: "O Jogo do Infarto",
     specialCardTitle: "Sovaco da Pantera 149.46 x 149.41 Gui FiFla",
     specialCardText: "O Gui FiFla venceu a Ida por quase 25 pontos de frente. Na Volta, o Sovaco mitou com 95.47 contra 70.57 e garantiu a classificação por meio décimo de ponto no agregado!",
@@ -211,16 +212,19 @@ export default function GazetaC10({ teams = [], currentRound }: GazetaC10Props) 
 
   // 3. Monthly Standings corresponding to effectiveRound
   const monthlyData = useMemo(() => {
+    const ALL_MONTHS = [
+      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
+      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ];
     let monthName = "Setembro";
-    let monthRounds = [26, 27, 28];
-    if (effectiveRound <= 25) {
-      monthName = "Agosto";
-      monthRounds = [22, 23, 24, 25];
+    for (const m of ALL_MONTHS) {
+      const list = MONTH_TO_ROUNDS[m] || [];
+      if (list.includes(effectiveRound)) {
+        monthName = m;
+        break;
+      }
     }
-    if (effectiveRound <= 21) {
-      monthName = "Julho";
-      monthRounds = [20, 21];
-    }
+    const monthRounds = MONTH_TO_ROUNDS[monthName] || [26, 27, 28];
 
     const relevantRounds = monthRounds.filter(r => r <= effectiveRound);
     if (relevantRounds.length === 0) return null;
@@ -235,11 +239,14 @@ export default function GazetaC10({ teams = [], currentRound }: GazetaC10Props) 
       };
     }).sort((a, b) => b.points - a.points);
 
+    const isCompleted = monthRounds.every(r => r <= effectiveRound);
+
     return {
       name: monthName,
-      roundsLabel: `R${relevantRounds[0]} a R${relevantRounds[relevantRounds.length - 1]}`,
+      roundsLabel: `R${monthRounds[0]} a R${monthRounds[monthRounds.length - 1]}`,
       top3: rankings.slice(0, 3),
-      gapFirstToSecond: rankings[1] ? Number((rankings[0].points - rankings[1].points).toFixed(2)) : 0
+      gapFirstToSecond: rankings[1] ? Number((rankings[0].points - rankings[1].points).toFixed(2)) : 0,
+      isCompleted
     };
   }, [teams, effectiveRound]);
 
@@ -280,10 +287,21 @@ export default function GazetaC10({ teams = [], currentRound }: GazetaC10Props) 
     text += `\n`;
 
     if (monthlyData) {
-      text += `📅 *LÍDER DO MÊS (${monthlyData.name} até R${effectiveRound}):*\n`;
-      text += `• 1º ${monthlyData.top3[0]?.name} (${monthlyData.top3[0]?.points} pts)\n`;
-      if (monthlyData.top3[1]) {
-        text += `• 2º ${monthlyData.top3[1]?.name} (${monthlyData.top3[1]?.points} pts - dif: ${monthlyData.gapFirstToSecond} pts)\n`;
+      if (monthlyData.isCompleted) {
+        text += `👑 *CAMPEÃO OFICIAL DO MÊS (${monthlyData.name} — ${monthlyData.roundsLabel}):*\n`;
+        text += `• 🥇 1º ${monthlyData.top3[0]?.name} (${monthlyData.top3[0]?.points} pts) — Título Consagrado!\n`;
+        if (monthlyData.top3[1]) {
+          text += `• 🥈 2º ${monthlyData.top3[1]?.name} (${monthlyData.top3[1]?.points} pts - dif: ${monthlyData.gapFirstToSecond} pts)\n`;
+        }
+        if (monthlyData.top3[2]) {
+          text += `• 🥉 3º ${monthlyData.top3[2]?.name} (${monthlyData.top3[2]?.points} pts)\n`;
+        }
+      } else {
+        text += `📅 *LÍDER DO MÊS (${monthlyData.name} até R${effectiveRound}):*\n`;
+        text += `• 1º ${monthlyData.top3[0]?.name} (${monthlyData.top3[0]?.points} pts)\n`;
+        if (monthlyData.top3[1]) {
+          text += `• 2º ${monthlyData.top3[1]?.name} (${monthlyData.top3[1]?.points} pts - dif: ${monthlyData.gapFirstToSecond} pts)\n`;
+        }
       }
       text += `\n`;
     }
@@ -577,29 +595,50 @@ export default function GazetaC10({ teams = [], currentRound }: GazetaC10Props) 
 
         {/* 5. GIRO DO MÊS CORRESPONDENTE À RODADA */}
         {monthlyData && (
-          <div className="bg-[#121215] border border-purple-500/20 rounded-3xl p-5 relative overflow-hidden shadow-lg flex flex-col justify-between">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full filter blur-2xl pointer-events-none" />
+          <div className={`bg-[#121215] border rounded-3xl p-5 relative overflow-hidden shadow-lg flex flex-col justify-between ${
+            monthlyData.isCompleted ? "border-amber-500/30" : "border-purple-500/20"
+          }`}>
+            <div className={`absolute top-0 right-0 w-32 h-32 rounded-full filter blur-2xl pointer-events-none ${
+              monthlyData.isCompleted ? "bg-amber-500/10" : "bg-purple-500/5"
+            }`} />
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[9px] font-mono uppercase font-black bg-purple-500/15 text-purple-400 border border-purple-500/25">
-                  <Calendar className="w-3 h-3" /> Mês de {monthlyData.name}
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[9px] font-mono uppercase font-black ${
+                  monthlyData.isCompleted
+                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                    : "bg-purple-500/15 text-purple-400 border border-purple-500/25"
+                }`}>
+                  {monthlyData.isCompleted ? <Trophy className="w-3 h-3 text-amber-400" /> : <Calendar className="w-3 h-3" />}
+                  {monthlyData.isCompleted ? `Campeão de ${monthlyData.name} (Consolidado)` : `Mês de ${monthlyData.name}`}
                 </span>
                 <span className="text-[9px] font-mono text-slate-500">{monthlyData.roundsLabel}</span>
               </div>
 
               <h3 className="text-base font-display font-black text-white uppercase mb-2">
-                Disputa da Premiação Mensal até a R{effectiveRound}
+                {monthlyData.isCompleted 
+                  ? `${monthlyData.top3[0]?.name} é o Campeão de ${monthlyData.name}!` 
+                  : `Disputa da Premiação Mensal até a R${effectiveRound}`}
               </h3>
               <p className="text-xs text-slate-300 font-sans leading-relaxed mb-4">
-                No recorte do mês de <strong>{monthlyData.name}</strong>, a briga pela premiação mensal tem <strong>{monthlyData.top3[0]?.name}</strong> na frente, com {monthlyData.gapFirstToSecond} pontos sobre o vice.
+                {monthlyData.isCompleted ? (
+                  <>
+                    Com o encerramento da Rodada {effectiveRound} e a paralisação do Brasileirão antes do 1º turno das eleições (com a R29 remarcada para outubro), o mês de <strong>{monthlyData.name}</strong> está oficialmente concluído! O título e a premiação vão para <strong>{monthlyData.top3[0]?.name}</strong> com {monthlyData.top3[0]?.points} pontos, superando o vice por {monthlyData.gapFirstToSecond} pontos!
+                  </>
+                ) : (
+                  <>
+                    No recorte do mês de <strong>{monthlyData.name}</strong>, a briga pela premiação mensal tem <strong>{monthlyData.top3[0]?.name}</strong> na frente, com {monthlyData.gapFirstToSecond} pontos sobre o vice.
+                  </>
+                )}
               </p>
             </div>
 
             <div className="space-y-1.5 bg-black/40 border border-white/5 rounded-xl p-3 text-[11px] font-mono">
               {monthlyData.top3.map((t, idx) => (
                 <div key={idx} className="flex justify-between items-center">
-                  <span className="text-slate-300 truncate max-w-[170px]">{idx + 1}º {t.name}</span>
-                  <span className="font-bold text-purple-300">{t.points} pts</span>
+                  <span className="text-slate-300 truncate max-w-[170px]">
+                    {idx === 0 ? "🥇" : idx === 1 ? "🥈" : "🥉"} {idx + 1}º {t.name}
+                  </span>
+                  <span className={`font-bold ${idx === 0 ? "text-amber-400" : "text-purple-300"}`}>{t.points} pts</span>
                 </div>
               ))}
             </div>
