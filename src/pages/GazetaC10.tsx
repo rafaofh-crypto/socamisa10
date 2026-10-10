@@ -38,6 +38,17 @@ interface RoundEditorialInfo {
 }
 
 const ROUND_EDITORIAL_ARCHIVE: Record<number, RoundEditorialInfo> = {
+  29: {
+    tag: "COPA M10 • FINAL HISTÓRICA & COPA B10 • ELITE 32",
+    headline: "Tainha Ovada FC Conquista a Copa M10 por Apenas 2,18 Pontos em Final Épica!",
+    subheadline: "Alexandre De Sousa ergue a taça mundial sobre o Dois Vizinhos SA; Camisa Pesada leva o 3º lugar e Copa B10 inicia a Elite 32.",
+    leadParagraph: "A Rodada 29 entrou para os anais da Liga Só Camisa 10 com a consagração do Campeão Mundial da Copa M10! Em uma decisão eletrizante de jogo único decidida no detalhe dos décimos, o Tainha Ovada FC somou 119,86 pontos contra 117,68 do Dois Vizinhos SA, garantindo a taça e a Glória Eterna por meros 2,18 pontos de diferença. Na disputa pelo 3º lugar, o Camisa Pesada SA bateu o Monges Tibetanos FC por 132,96 a 113,86 e completou o pódio de gala. Paralelamente, os 16 confrontos de ida da Fase 4 da Copa B10 (Elite 32) agitaram os primeiros 90 minutos da disputa de 180!",
+    specialCardBadge: "A Grande Final Mundial",
+    specialCardTitle: "Tainha Ovada 119.86 x 117.68 Dois Vizinhos",
+    specialCardText: "Uma decisão milimétrica decidida na marca da cal dos 2,18 pontos. O Tainha Ovada FC entra para a eternidade como o grande campeão da Copa M10!",
+    specialCardFooterLabel: "Final da Copa M10",
+    specialCardFooterValue: "TAINHA OVADA CAMPEÃO (+2.18 PTS)"
+  },
   28: {
     tag: "COPA B10 & FECHAMENTO DE SETEMBRO",
     headline: "Mata-Mata de Infarto na Copa B10 e C.R.Pirika Consagrado Campeão de Setembro!",

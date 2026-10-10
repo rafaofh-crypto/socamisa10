@@ -96,27 +96,77 @@ export const B10RoundOf32 = ({
       const away = sortedWinnersDesc[i];
 
       if (home && away) {
-        const scoreHomeLeg1 = (isSimulatorsEnabled || f4Leg1Round <= currentRound) && typeof home.scores[f4Leg1Round] === 'number' ? home.scores[f4Leg1Round] : 0;
-        const scoreHomeLeg2 = (isSimulatorsEnabled || f4Leg2Round <= currentRound) && typeof home.scores[f4Leg2Round] === 'number' ? home.scores[f4Leg2Round] : 0;
-        const scoreHome = Number((scoreHomeLeg1 + scoreHomeLeg2).toFixed(2));
+        // Safe check for official scores in R29 (Ida) and R30 (Volta)
+        const homeScoreLeg1 = (home.scores && typeof home.scores[f4Leg1Round] === 'number') ? home.scores[f4Leg1Round] : null;
+        const awayScoreLeg1 = (away.scores && typeof away.scores[f4Leg1Round] === 'number') ? away.scores[f4Leg1Round] : null;
+        
+        const homeScoreLeg2 = (home.scores && typeof home.scores[f4Leg2Round] === 'number') ? home.scores[f4Leg2Round] : null;
+        const awayScoreLeg2 = (away.scores && typeof away.scores[f4Leg2Round] === 'number') ? away.scores[f4Leg2Round] : null;
 
-        const scoreAwayLeg1 = (isSimulatorsEnabled || f4Leg1Round <= currentRound) && typeof away.scores[f4Leg1Round] === 'number' ? away.scores[f4Leg1Round] : 0;
-        const scoreAwayLeg2 = (isSimulatorsEnabled || f4Leg2Round <= currentRound) && typeof away.scores[f4Leg2Round] === 'number' ? away.scores[f4Leg2Round] : 0;
-        const scoreAway = Number((scoreAwayLeg1 + scoreAwayLeg2).toFixed(2));
+        const hasLeg1Data = (homeScoreLeg1 !== null && awayScoreLeg1 !== null) || isSimulatorsEnabled;
+        const hasLeg2Data = (homeScoreLeg2 !== null && awayScoreLeg2 !== null) || (isSimulatorsEnabled && homeScoreLeg2 !== null);
+
+        const isFullyPlayed = hasLeg1Data && hasLeg2Data && !away.isVirtual;
+        const isLeg1Played = hasLeg1Data && !away.isVirtual;
+
+        // Cumulative aggregate is only computed when both legs have official scores
+        const aggregateHome = isFullyPlayed 
+          ? Number(((homeScoreLeg1 ?? 0) + (homeScoreLeg2 ?? 0)).toFixed(2))
+          : null;
+        const aggregateAway = isFullyPlayed 
+          ? Number(((awayScoreLeg1 ?? 0) + (awayScoreLeg2 ?? 0)).toFixed(2))
+          : null;
 
         let winner: 'home' | 'away' | null = null;
         let tiebreakerApplied = false;
 
-        // Determine winner if round is played and away team is not a placeholder
-        if (isRound6Completed && !away.isVirtual) {
-          if (scoreHome > scoreAway) {
+        // ONLY determine winner when the phase is concluded with both legs played
+        if (isFullyPlayed && aggregateHome !== null && aggregateAway !== null) {
+          if (aggregateHome > aggregateAway) {
             winner = 'home';
-          } else if (scoreAway > scoreHome) {
+          } else if (aggregateAway > aggregateHome) {
             winner = 'away';
           } else {
-            // Tiebreaker: General Cartola FC ranking (lower leagueRank is better)
-            winner = (home.leagueRank || 99) < (away.leagueRank || 99) ? 'home' : 'away';
+            // Regulamento Oficial Copa B10 - Hierarquia de Desempates:
+            // 1. Melhor Semente de Categoria (Elite #1-16 vs Playoff) -> Home é Elite
+            // 2. Melhor pontuação na Rodada de Corte (R25)
+            // 3. Melhor posição no Ranking Geral Acumulado
+            winner = (home.rank < (away.seedRank || away.rank || 99)) ? 'home' : (
+              (home.scores?.[b10Round] || 0) > (away.scores?.[b10Round] || 0) ? 'home' : (
+                (home.leagueRank || 99) <= (away.leagueRank || 99) ? 'home' : 'away'
+              )
+            );
             tiebreakerApplied = true;
+          }
+        }
+
+        // Parcial after Leg 1 (when Leg 2 is still pending)
+        let provisionalAdvantage: {
+          leader: 'home' | 'away' | 'tied';
+          diff: number;
+          text: string;
+        } | null = null;
+
+        if (isLeg1Played && !isFullyPlayed && homeScoreLeg1 !== null && awayScoreLeg1 !== null) {
+          const diff = Number((homeScoreLeg1 - awayScoreLeg1).toFixed(2));
+          if (diff > 0) {
+            provisionalAdvantage = {
+              leader: 'home',
+              diff,
+              text: `+${diff.toFixed(2)} pts para ${home.name}`
+            };
+          } else if (diff < 0) {
+            provisionalAdvantage = {
+              leader: 'away',
+              diff: Math.abs(diff),
+              text: `+${Math.abs(diff).toFixed(2)} pts para ${away.name}`
+            };
+          } else {
+            provisionalAdvantage = {
+              leader: 'tied',
+              diff: 0,
+              text: 'Empate provisório'
+            };
           }
         }
 
@@ -124,15 +174,17 @@ export const B10RoundOf32 = ({
           id: i + 1,
           home,
           away,
-          scoreHomeLeg1,
-          scoreHomeLeg2,
-          scoreHome,
-          scoreAwayLeg1,
-          scoreAwayLeg2,
-          scoreAway,
+          homeScoreLeg1,
+          homeScoreLeg2,
+          awayScoreLeg1,
+          awayScoreLeg2,
+          aggregateHome,
+          aggregateAway,
           winner,
           tiebreakerApplied,
-          isPlayed: isRound6Completed && !away.isVirtual,
+          isFullyPlayed,
+          isLeg1Played,
+          provisionalAdvantage,
           f4Leg1Round,
           f4Leg2Round
         });
@@ -140,7 +192,7 @@ export const B10RoundOf32 = ({
     }
 
     return matchesList;
-  }, [eliteTeams, sortedWinnersDesc, f4Leg1Round, f4Leg2Round, isRound6Completed]);
+  }, [eliteTeams, sortedWinnersDesc, f4Leg1Round, f4Leg2Round, isSimulatorsEnabled, b10Round]);
 
   // Helper for dynamic font scaling on long names
   const formatNameClass = (name: string) => {
@@ -195,24 +247,49 @@ export const B10RoundOf32 = ({
       {/* Grid of Round of 32 Matches */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {roundOf32Matches.map((match) => {
-          const { home, away, scoreHome, scoreAway, winner, isPlayed, tiebreakerApplied } = match;
+          const { 
+            home, 
+            away, 
+            homeScoreLeg1, 
+            homeScoreLeg2, 
+            awayScoreLeg1, 
+            awayScoreLeg2, 
+            aggregateHome, 
+            aggregateAway, 
+            winner, 
+            tiebreakerApplied, 
+            isFullyPlayed, 
+            isLeg1Played, 
+            provisionalAdvantage 
+          } = match;
 
           return (
             <div 
               key={match.id}
-              className="relative overflow-hidden rounded-2xl border border-[#D4AF37]/25 hover:border-[#D4AF37]/75 bg-black/55 backdrop-blur-[12px] p-4 transition-all duration-300 shadow-lg group hover:shadow-[0_8px_25px_rgba(212,175,55,0.06)] flex flex-col justify-between min-h-[165px]"
+              className={`relative overflow-hidden rounded-2xl border bg-black/60 backdrop-blur-[12px] p-4 transition-all duration-300 shadow-lg flex flex-col justify-between min-h-[195px] group ${
+                isFullyPlayed 
+                  ? 'border-emerald-500/30 hover:border-emerald-500/60 shadow-[0_8px_25px_rgba(16,185,129,0.08)]' 
+                  : isLeg1Played 
+                    ? 'border-[#D4AF37]/35 hover:border-[#D4AF37]/75 shadow-[0_8px_25px_rgba(212,175,55,0.08)]' 
+                    : 'border-white/10 hover:border-white/20'
+              }`}
             >
               {/* Header Matchup Tag */}
-              <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-3 text-[9px] font-mono">
-                <span className="text-slate-400 uppercase tracking-wider font-extrabold">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-2 text-[9px] font-mono">
+                <span className="text-[#D4AF37] uppercase tracking-wider font-extrabold flex items-center gap-1.5">
+                  <span className={`w-1.5 h-1.5 rounded-full ${isFullyPlayed ? 'bg-emerald-400' : isLeg1Played ? 'bg-[#D4AF37] animate-pulse' : 'bg-slate-500'}`} />
                   Duelo #{match.id}
                 </span>
-                {isPlayed ? (
-                  <span className="text-[8px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-black tracking-widest uppercase px-2 py-0.5 rounded-full">
-                    Finalizado (R{match.f4Leg1Round} e R{match.f4Leg2Round})
+                {isFullyPlayed ? (
+                  <span className="text-[8px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-black tracking-widest uppercase px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <ShieldCheck className="w-2.5 h-2.5 text-emerald-400" /> Finalizado (R{match.f4Leg1Round} e R{match.f4Leg2Round})
+                  </span>
+                ) : isLeg1Played ? (
+                  <span className="text-[8px] bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 font-black tracking-widest uppercase px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Sparkles className="w-2.5 h-2.5 text-[#D4AF37]" /> Parcial da Ida (R{match.f4Leg1Round}) • Volta Pendente (R{match.f4Leg2Round})
                   </span>
                 ) : (
-                  <span className="text-[8px] bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/25 font-black tracking-widest uppercase px-1.5 py-0.5 rounded">
+                  <span className="text-[8px] bg-slate-500/10 text-slate-400 border border-slate-500/20 font-black tracking-widest uppercase px-1.5 py-0.5 rounded">
                     A confirmar (R{match.f4Leg1Round} e R{match.f4Leg2Round})
                   </span>
                 )}
@@ -224,7 +301,7 @@ export const B10RoundOf32 = ({
                 {/* Home/Elite Team (Left) */}
                 <div className="col-span-4 flex flex-col items-center text-center">
                   <div className={`w-11 h-11 bg-zinc-950 rounded-full border p-1.5 flex items-center justify-center mb-1.5 shadow-inner transition-transform group-hover:scale-105 duration-300 ${
-                    winner === 'home' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20 bg-gradient-to-b from-[#D4AF37]/15 to-transparent' : 'border-white/5'
+                    winner === 'home' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20 bg-gradient-to-b from-[#D4AF37]/15 to-transparent' : 'border-white/10'
                   }`}>
                     <TeamShield shieldUrl={home.shieldUrl} fallbackText={home.name} className="w-full h-full object-contain" />
                   </div>
@@ -244,24 +321,57 @@ export const B10RoundOf32 = ({
                   <span className="text-[7.5px] font-mono px-1 py-0.5 rounded bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/15 uppercase font-black tracking-wide">
                     {home.category === 'ELITE' ? `#${home.rank}º Elite` : `#${home.rank}º`}
                   </span>
+
+                  {/* Leg Breakdown Box */}
+                  <div className="w-full mt-2 bg-black/50 border border-white/5 rounded-lg p-1 text-[8px] font-mono">
+                    <div className="flex items-center justify-between text-slate-500 text-[7px] mb-0.5">
+                      <span>IDA (R{match.f4Leg1Round})</span>
+                      <span>VOLTA (R{match.f4Leg2Round})</span>
+                    </div>
+                    <div className="flex items-center justify-between font-bold">
+                      <span className={homeScoreLeg1 !== null ? 'text-white' : 'text-slate-500'}>
+                        {homeScoreLeg1 !== null ? homeScoreLeg1.toFixed(2) : '—'}
+                      </span>
+                      <span className="text-slate-700">:</span>
+                      <span className={homeScoreLeg2 !== null ? 'text-white' : 'text-amber-400/70 italic text-[7px]'}>
+                        {homeScoreLeg2 !== null ? homeScoreLeg2.toFixed(2) : 'Pendente'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* VS Panel (Center) */}
+                {/* VS / Score Panel (Center) */}
                 <div className="col-span-3 flex flex-col items-center justify-center">
-                  {isPlayed ? (
+                  {isFullyPlayed && aggregateHome !== null && aggregateAway !== null ? (
                     <div className="flex flex-col items-center gap-1 w-full">
-                      <div className="flex items-center justify-center gap-1 text-[11px] font-mono font-black w-full bg-black/60 border border-white/5 py-1 px-1.5 rounded-lg">
-                        <span className={winner === 'home' ? 'text-[#D4AF37] font-black' : 'text-slate-400'}>
-                          {scoreHome.toFixed(2)}
+                      <div className="flex items-center justify-center gap-1 text-[11px] font-mono font-black w-full bg-black/80 border border-emerald-500/30 py-1.5 px-1 rounded-lg shadow-[0_0_12px_rgba(16,185,129,0.15)]">
+                        <span className={winner === 'home' ? 'text-emerald-400 font-black' : 'text-slate-400'}>
+                          {aggregateHome.toFixed(2)}
                         </span>
                         <span className="text-[8px] text-slate-600">:</span>
-                        <span className={winner === 'away' ? 'text-[#D4AF37] font-black' : 'text-slate-400'}>
-                          {scoreAway.toFixed(2)}
+                        <span className={winner === 'away' ? 'text-emerald-400 font-black' : 'text-slate-400'}>
+                          {aggregateAway.toFixed(2)}
                         </span>
                       </div>
                       
-                      <span className="text-[7px] font-mono uppercase bg-white/5 border border-white/5 text-slate-500 px-1 py-0.2 rounded mt-1">
-                        {tiebreakerApplied ? 'C.D.' : 'VS'}
+                      <span className="text-[6.5px] font-mono uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1 py-0.5 rounded font-black tracking-wider text-center">
+                        {tiebreakerApplied ? 'C.D. Regulamento' : 'Agregado Final'}
+                      </span>
+                    </div>
+                  ) : isLeg1Played && homeScoreLeg1 !== null && awayScoreLeg1 !== null ? (
+                    <div className="flex flex-col items-center gap-1 w-full">
+                      <div className="flex items-center justify-center gap-1 text-[11px] font-mono font-black w-full bg-black/80 border border-[#D4AF37]/40 py-1.5 px-1 rounded-lg shadow-[0_0_12px_rgba(212,175,55,0.12)]">
+                        <span className={homeScoreLeg1 > awayScoreLeg1 ? 'text-[#D4AF37] font-black' : homeScoreLeg1 < awayScoreLeg1 ? 'text-slate-400' : 'text-white'}>
+                          {homeScoreLeg1.toFixed(2)}
+                        </span>
+                        <span className="text-[8px] text-slate-600">:</span>
+                        <span className={awayScoreLeg1 > homeScoreLeg1 ? 'text-[#D4AF37] font-black' : awayScoreLeg1 < homeScoreLeg1 ? 'text-slate-400' : 'text-white'}>
+                          {awayScoreLeg1.toFixed(2)}
+                        </span>
+                      </div>
+                      
+                      <span className="text-[6.5px] font-mono uppercase bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 px-1 py-0.5 rounded font-black tracking-wider text-center">
+                        Ida (90 Min)
                       </span>
                     </div>
                   ) : (
@@ -276,7 +386,7 @@ export const B10RoundOf32 = ({
                 {/* Away/Playoff Winner Team (Right) */}
                 <div className="col-span-4 flex flex-col items-center text-center">
                   <div className={`w-11 h-11 bg-zinc-950 rounded-full border p-1.5 flex items-center justify-center mb-1.5 shadow-inner transition-transform group-hover:scale-105 duration-300 ${
-                    winner === 'away' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20 bg-gradient-to-b from-[#D4AF37]/15 to-transparent' : 'border-white/5'
+                    winner === 'away' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20 bg-gradient-to-b from-[#D4AF37]/15 to-transparent' : 'border-white/10'
                   }`}>
                     {away.shieldUrl ? (
                       <TeamShield shieldUrl={away.shieldUrl} fallbackText={away.name} className="w-full h-full object-contain" />
@@ -305,20 +415,59 @@ export const B10RoundOf32 = ({
                   <span className="text-[7.5px] font-mono px-1 py-0.5 rounded bg-blue-500/10 text-blue-300 border border-blue-500/15 uppercase font-medium">
                     {away.isVirtual ? 'Play-off' : `#${away.seedRank}º Playoff`}
                   </span>
+
+                  {/* Leg Breakdown Box */}
+                  <div className="w-full mt-2 bg-black/50 border border-white/5 rounded-lg p-1 text-[8px] font-mono">
+                    <div className="flex items-center justify-between text-slate-500 text-[7px] mb-0.5">
+                      <span>IDA (R{match.f4Leg1Round})</span>
+                      <span>VOLTA (R{match.f4Leg2Round})</span>
+                    </div>
+                    <div className="flex items-center justify-between font-bold">
+                      <span className={awayScoreLeg1 !== null ? 'text-white' : 'text-slate-500'}>
+                        {awayScoreLeg1 !== null ? awayScoreLeg1.toFixed(2) : '—'}
+                      </span>
+                      <span className="text-slate-700">:</span>
+                      <span className={awayScoreLeg2 !== null ? 'text-white' : 'text-amber-400/70 italic text-[7px]'}>
+                        {awayScoreLeg2 !== null ? awayScoreLeg2.toFixed(2) : 'Pendente'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
               </div>
 
-              {/* Bottom Winner Bar */}
-              {isPlayed && (
-                <div className="mt-3.5 pt-2 border-t border-white/5 flex items-center justify-between text-[8px] font-mono">
-                  <span className="text-slate-500">Classificado:</span>
+              {/* Bottom Winner Bar / Provisional Advantage Bar */}
+              {isFullyPlayed && winner ? (
+                <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between text-[8px] font-mono">
+                  <span className="text-slate-500 uppercase tracking-wider font-bold">Classificado:</span>
                   <div className="flex items-center gap-1 font-bold text-emerald-400 uppercase">
-                    <ShieldCheck className="w-3 h-3 text-[#D4AF37]" />
-                    <span className="truncate max-w-[95px]" title={winner === 'home' ? home.name : away.name}>
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <span className="truncate max-w-[125px]" title={winner === 'home' ? home.name : away.name}>
                       {winner === 'home' ? home.name : away.name}
                     </span>
                   </div>
+                </div>
+              ) : isLeg1Played && provisionalAdvantage ? (
+                <div className="mt-3 pt-2 border-t border-white/5 flex flex-col gap-1 text-[8px] font-mono">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400 uppercase font-bold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" /> Vantagem Provisória:
+                    </span>
+                    <span className={`font-black uppercase truncate max-w-[130px] ${
+                      provisionalAdvantage.leader === 'home' ? 'text-[#D4AF37]' : provisionalAdvantage.leader === 'away' ? 'text-blue-300' : 'text-slate-300'
+                    }`} title={provisionalAdvantage.text}>
+                      {provisionalAdvantage.text}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[7.5px] text-slate-500 pt-0.5">
+                    <span>Decisão da vaga:</span>
+                    <span className="text-amber-400/80 font-bold uppercase">Volta na R30 (Jogo Aberto)</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between text-[8px] font-mono text-slate-500">
+                  <span>Duelo de 180 Minutos</span>
+                  <span>Aguardando R29 e R30</span>
                 </div>
               )}
             </div>

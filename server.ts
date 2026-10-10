@@ -712,6 +712,17 @@ async function startServer() {
     return cachedLocalShieldsMap;
   }
 
+  // Endpoint interno para download do dossiê confidencial
+  app.get("/api/download-dossie", (req, res) => {
+    const filePath = path.join(process.cwd(), "DOSSIE_SISTEMA_SO_CAMISA_10.docx");
+    if (fs.existsSync(filePath)) {
+      res.setHeader("Content-Disposition", 'attachment; filename="DOSSIE_SISTEMA_SO_CAMISA_10.docx"');
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+      return res.sendFile(filePath);
+    }
+    return res.status(404).send("Dossiê não encontrado");
+  });
+
   // Endpoints para salvar e recuperar preferências do Google Sheets
   app.get("/api/sheets/config", (req, res) => {
     const configPath = path.join(process.cwd(), "sheets_config.json");

@@ -147,18 +147,21 @@ export const B10FinalBracket = ({
       const h = eliteTeams[i];
       const a = sortedPlayoffWinnersDesc[i];
       if (h && a) {
-        const scoreHLeg1 = (isSimulatorsEnabled || rR32Leg1 <= currentRound) && typeof h.scores[rR32Leg1] === 'number' ? h.scores[rR32Leg1] : 0;
-        const scoreHLeg2 = (isSimulatorsEnabled || rR32Leg2 <= currentRound) && typeof h.scores[rR32Leg2] === 'number' ? h.scores[rR32Leg2] : 0;
+        const hasLeg1Data = typeof h.scores?.[rR32Leg1] === 'number' && typeof a.scores?.[rR32Leg1] === 'number';
+        const hasLeg2Data = typeof h.scores?.[rR32Leg2] === 'number' && typeof a.scores?.[rR32Leg2] === 'number';
+        
+        const scoreHLeg1 = hasLeg1Data && typeof h.scores[rR32Leg1] === 'number' ? h.scores[rR32Leg1] : 0;
+        const scoreHLeg2 = hasLeg2Data && typeof h.scores[rR32Leg2] === 'number' ? h.scores[rR32Leg2] : 0;
         const scoreH = Number((scoreHLeg1 + scoreHLeg2).toFixed(2));
 
-        const scoreALeg1 = (isSimulatorsEnabled || rR32Leg1 <= currentRound) && typeof a.scores[rR32Leg1] === 'number' ? a.scores[rR32Leg1] : 0;
-        const scoreALeg2 = (isSimulatorsEnabled || rR32Leg2 <= currentRound) && typeof a.scores[rR32Leg2] === 'number' ? a.scores[rR32Leg2] : 0;
+        const scoreALeg1 = hasLeg1Data && typeof a.scores[rR32Leg1] === 'number' ? a.scores[rR32Leg1] : 0;
+        const scoreALeg2 = hasLeg2Data && typeof a.scores[rR32Leg2] === 'number' ? a.scores[rR32Leg2] : 0;
         const scoreA = Number((scoreALeg1 + scoreALeg2).toFixed(2));
 
         let winner: 'home' | 'away' | null = null;
         let tiebreakerApplied = false;
 
-        const isPlayed = (isSimulatorsEnabled || currentRound >= rR32Leg2) && !a.isVirtual;
+        const isPlayed = (isSimulatorsEnabled || (hasLeg1Data && hasLeg2Data)) && !a.isVirtual;
         if (isPlayed) {
           if (scoreH > scoreA) {
             winner = 'home';

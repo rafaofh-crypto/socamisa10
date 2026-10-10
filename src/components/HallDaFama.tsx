@@ -1,16 +1,15 @@
 import React, { useMemo } from "react";
-import { Trophy, Star, Shield, Award, Sparkles, AlertCircle, Heart } from "lucide-react";
+import { Trophy, Star, Shield, Award, Sparkles, AlertCircle, Heart, Crown } from "lucide-react";
 import TeamShield from "./TeamShield";
 import { CartolaTeam } from "../services/cartollaApi";
 import { calculateStandings, getActiveRounds } from "../services/rankings";
 import {
   processCuttingRound,
-  getBestThirdPlaced,
-  allocateThirdPlacedTeams,
   buildFullBracket,
   processMatchResults,
   determineFinalRankings
-} from "../tournamentData";
+} from "../services/knockout";
+import { getBestThirdPlaced, allocateThirdPlacedTeams } from "../tournamentData";
 
 interface HallDaFamaProps {
   teams: CartolaTeam[];
@@ -33,11 +32,10 @@ export default function HallDaFama({ teams, currentRound }: HallDaFamaProps) {
     };
   }, [generalStandings]);
 
-  // 2. Solve Copa M10 Podium Dynamically
+  // 2. Solve Copa M10 Podium Dynamically (reusing exact MataMata logic)
   const m10Podium = useMemo(() => {
-    if (teams.length === 0) return null;
+    if (!teams || teams.length === 0) return null;
     try {
-      // Copa M10 cut round is 20
       const cutRound = 20;
       const cuttingResult = processCuttingRound(cutRound, teams);
       if (!cuttingResult) return null;
@@ -48,9 +46,9 @@ export default function HallDaFama({ teams, currentRound }: HallDaFamaProps) {
       for (const [letter, teamList] of Object.entries(groupsToPopulate)) {
         populatedGroups[letter] = (teamList as any[]).map(t => {
           const match = teams.find(ct => ct.name === t.name);
-          const r1 = match ? (match.scores[cutRound + 1] || 0) : 0;
-          const r2 = match ? (match.scores[cutRound + 2] || 0) : 0;
-          const r3 = match ? (match.scores[cutRound + 3] || 0) : 0;
+          const r1 = match ? (match.scores?.[22] || 0) : 0;
+          const r2 = match ? (match.scores?.[23] || 0) : 0;
+          const r3 = match ? (match.scores?.[24] || 0) : 0;
           return {
             ...t,
             groupRound1: r1,
@@ -93,21 +91,62 @@ export default function HallDaFama({ teams, currentRound }: HallDaFamaProps) {
         };
       }
 
-      // Empty manualScores for programmatic computation
-      const manualScores = {};
-      processMatchResults(bracket, 'round_of_32', manualScores, tiebreakers);
-      processMatchResults(bracket, 'round_of_16', manualScores, tiebreakers);
-      processMatchResults(bracket, 'quarterfinals', manualScores, tiebreakers);
-      processMatchResults(bracket, 'semifinals', manualScores, tiebreakers);
-      processMatchResults(bracket, 'final', manualScores, tiebreakers);
-      processMatchResults(bracket, 'third_place', manualScores, tiebreakers);
+      const normalize = (str: string) => str ? str.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
+      const getTeamScoreForRound = (team: any, roundNum: number) => {
+        if (!team || !team.name) return null;
+        const teamKey = normalize(team.name);
+        const found = teams.find(ct => {
+          const ctKey = normalize(ct.name);
+          return ctKey === teamKey || (team.owner && normalize(ct.owner) === normalize(team.owner));
+        });
+        if (found && found.scores && typeof found.scores[roundNum] === "number") {
+          return found.scores[roundNum];
+        }
+        return null;
+      };
+
+      const PHASE_ROUNDS: Record<string, number> = {
+        round_of_32: 25,
+        round_of_16: 26,
+        quarterfinals: 27,
+        semifinals: 28,
+        final: 29,
+        third_place: 29
+      };
+
+      const phases = ["round_of_32", "round_of_16", "quarterfinals", "semifinals", "final", "third_place"] as const;
+
+      for (const phase of phases) {
+        const phaseRound = PHASE_ROUNDS[phase];
+        const effectiveScores: Record<string, { home: number; away: number }> = {};
+        if (bracket[phase]) {
+          for (const [matchCode, match] of Object.entries(bracket[phase] as Record<string, any>)) {
+            if (match.home && match.away) {
+              const homeScore = getTeamScoreForRound(match.home, phaseRound);
+              const awayScore = getTeamScoreForRound(match.away, phaseRound);
+              if (homeScore !== null && awayScore !== null) {
+                effectiveScores[matchCode] = { home: homeScore, away: awayScore };
+              }
+            }
+          }
+        }
+        processMatchResults(bracket, phase, effectiveScores, tiebreakers);
+      }
 
       const rk = determineFinalRankings(bracket);
       return {
         champion: rk.champion,
         runnerUp: rk.runner_up,
         third: rk.third_place,
-        fourth: rk.fourth_place
+        fourth: rk.fourth_place,
+        finalScore: bracket.final?.M101 ? {
+          home: bracket.final.M101.homeScore,
+          away: bracket.final.M101.awayScore
+        } : null,
+        thirdScore: bracket.third_place?.M102 ? {
+          home: bracket.third_place.M102.homeScore,
+          away: bracket.third_place.M102.awayScore
+        } : null
       };
     } catch (e) {
       console.error("M10 Hall of fame calculation error:", e);
@@ -115,213 +154,16 @@ export default function HallDaFama({ teams, currentRound }: HallDaFamaProps) {
     }
   }, [teams]);
 
-  // 3. Solve Copa B10 Podium Dynamically
-  const b10Podium = useMemo(() => {
-    if (teams.length === 0) return null;
-    try {
-      const b10Round = 25;
-      
-      // Calculate league rank first
-      const sortedByLeague = [...teams].map(t => {
-        const totalPoints = Object.values(t.scores).reduce((acc, curr) => acc + curr, 0);
-        return { team: t, totalPoints };
-      })
-      .sort((a, b) => b.totalPoints - a.totalPoints)
-      .map((item, idx) => ({
-        ...item.team,
-        totalLeaguePoints: item.totalPoints,
-        leagueRank: idx + 1
-      }));
-
-      // Map Copa B10 classification
-      const sortedB10Standings = sortedByLeague.map(t => {
-        const scoreInRound = typeof t.scores[b10Round] === 'number' ? t.scores[b10Round] : 0;
-        return { ...t, b10RoundScore: Number(scoreInRound.toFixed(2)), prevPhaseScore: 0 };
-      })
-      .sort((a, b) => {
-        if (Math.abs(b.b10RoundScore - a.b10RoundScore) > 0.001) return b.b10RoundScore - a.b10RoundScore;
-        return a.leagueRank - b.leagueRank;
-      });
-
-      const mappedB10Teams = sortedB10Standings.map((team, index) => {
-        const category = index < 16 ? 'ELITE' : index >= 46 ? 'REPESCAGEM' : 'ACESSO';
-        return { ...team, category, rank: index + 1 };
-      });
-
-      const repescagemGroup = mappedB10Teams.filter(t => t.category === 'REPESCAGEM');
-      const acessoGroup = mappedB10Teams.filter(t => t.category === 'ACESSO');
-      const eliteGroup = mappedB10Teams.filter(t => t.category === 'ELITE');
-
-      // Repescagem (Phase 2)
-      const f2Rounds = [b10Round + 1, b10Round + 2, b10Round + 3];
-      const repescagemData = repescagemGroup.map(t => {
-        const s2 = t.scores[f2Rounds[0]] || 0;
-        const s3 = t.scores[f2Rounds[1]] || 0;
-        const s4 = t.scores[f2Rounds[2]] || 0;
-        return { ...t, totalAccumulated: Number((s2 + s3 + s4).toFixed(2)), isTop2: false };
-      })
-      .sort((a, b) => {
-        if (Math.abs(b.totalAccumulated - a.totalAccumulated) > 0.001) return b.totalAccumulated - a.totalAccumulated;
-        return a.leagueRank - b.leagueRank;
-      });
-
-      repescagemData[0].isTop2 = true;
-      if (repescagemData[1]) repescagemData[1].isTop2 = true;
-
-      const repClassified = repescagemData.filter(t => t.isTop2);
-
-      // Play-offs (Phase 3) - in R29
-      const f3Round = b10Round + 4;
-      const pfMatches = [];
-      if (acessoGroup[0] && repClassified[1]) pfMatches.push({ t1: acessoGroup[0], t2: repClassified[1] });
-      if (acessoGroup[1] && repClassified[0]) pfMatches.push({ t1: acessoGroup[1], t2: repClassified[0] });
-
-      for (let i = 0; i < 14; i++) {
-        const t1 = acessoGroup[2 + i];
-        const t2 = acessoGroup[29 - i];
-        if (t1 && t2) pfMatches.push({ t1, t2 });
-      }
-
-      const playoffWinners = pfMatches.map(m => {
-        const sc1 = m.t1.scores[f3Round] || 0;
-        const sc2 = m.t2.scores[f3Round] || 0;
-        let winnerTeam = sc1 > sc2 ? m.t1 : m.t2;
-        if (Math.abs(sc1 - sc2) < 0.001) {
-          winnerTeam = m.t1.rank < m.t2.rank ? m.t1 : m.t2;
-        }
-        return { ...winnerTeam, seedRank: winnerTeam.rank };
-      });
-
-      const sortedPlayoffWinnersDesc = [...playoffWinners].sort((a, b) => b.seedRank - a.seedRank);
-
-      // Round of 32 (Phase 4) - in R30
-      const f4Round = b10Round + 5;
-      const r32Matches = [];
-      for (let i = 0; i < 16; i++) {
-        const home = eliteGroup[i];
-        const away = sortedPlayoffWinnersDesc[i];
-        if (home && away) r32Matches.push({ home, away });
-      }
-
-      const r32Winners = r32Matches.map(m => {
-        const sHome = m.home.scores[f4Round] || 0;
-        const sAway = m.away.scores[f4Round] || 0;
-        let win = sHome > sAway ? m.home : m.away;
-        if (Math.abs(sHome - sAway) < 0.001) {
-          win = m.home.rank < m.away.rank ? m.home : m.away;
-        }
-        return win;
-      });
-
-      // Simple resolver for Double Legged Stages (Soma simples de Ida e Volta)
-      const resolveTiebreaker = (t1: any, t2: any) => {
-        // Priority #1: Phase Rank
-        if (t1.rank !== t2.rank) {
-          return t1.rank < t2.rank ? "team1" : "team2";
-        }
-        // Priority #2: Group Stage Score (Rorte/Fase 1 is equivalent)
-        if (Math.abs(t1.b10RoundScore - t2.b10RoundScore) > 0.001) {
-          return t1.b10RoundScore > t2.b10RoundScore ? "team1" : "team2";
-        }
-        // Priority #3: League Rank on Cartola
-        return t1.leagueRank < t2.leagueRank ? "team1" : "team2";
-      };
-
-      const resolveDoubleLegMatch = (t1: any, t2: any, rIda: number, rVolta: number) => {
-        const s1_1 = t1.scores[rIda] || 0;
-        const s1_2 = t1.scores[rVolta] || 0;
-        const s2_1 = t2.scores[rIda] || 0;
-        const s2_2 = t2.scores[rVolta] || 0;
-
-        const agg1 = Number((s1_1 + s1_2).toFixed(2));
-        const agg2 = Number((s2_1 + s2_2).toFixed(2));
-
-        if (agg1 > agg2) return { winner: 'team1', team1: t1, team2: t2 };
-        if (agg2 > agg1) return { winner: 'team2', team1: t1, team2: t2 };
-
-        const tb = resolveTiebreaker(t1, t2);
-        return { winner: tb, team1: t1, team2: t2 };
-      };
-
-      // Oitavas (Phase 5) - R31 & R32
-      const rOitavasIda = b10Round + 6;
-      const rOitavasVolta = b10Round + 7;
-      const oitavasMatchesIdx = [
-        { t1Idx: 0, t2Idx: 14 },
-        { t1Idx: 2, t2Idx: 12 },
-        { t1Idx: 4, t2Idx: 10 },
-        { t1Idx: 6, t2Idx: 8 },
-        { t1Idx: 1, t2Idx: 15 },
-        { t1Idx: 3, t2Idx: 13 },
-        { t1Idx: 5, t2Idx: 11 },
-        { t1Idx: 7, t2Idx: 9 }
-      ];
-
-      const oitavasWinners = oitavasMatchesIdx.map(item => {
-        const t1 = r32Winners[item.t1Idx];
-        const t2 = r32Winners[item.t2Idx];
-        if (!t1 || !t2) return null;
-        const res = resolveDoubleLegMatch(t1, t2, rOitavasIda, rOitavasVolta);
-        return res.winner === 'team1' ? res.team1 : res.team2;
-      }).filter(Boolean);
-
-      // Quartas (Phase 6) - R33 & R34
-      const rQuartasIda = b10Round + 8;
-      const rQuartasVolta = b10Round + 9;
-      
-      const quartasWinners = [
-        resolveDoubleLegMatch(oitavasWinners[0], oitavasWinners[3], rQuartasIda, rQuartasVolta),
-        resolveDoubleLegMatch(oitavasWinners[1], oitavasWinners[2], rQuartasIda, rQuartasVolta),
-        resolveDoubleLegMatch(oitavasWinners[4], oitavasWinners[7], rQuartasIda, rQuartasVolta),
-        resolveDoubleLegMatch(oitavasWinners[5], oitavasWinners[6], rQuartasIda, rQuartasVolta)
-      ].map(res => {
-        return res.winner === 'team1' ? res.team1 : res.team2;
-      });
-
-      // Semis (Phase 7) - R35 & R36
-      const rSemiIda = b10Round + 10;
-      const rSemiVolta = b10Round + 11;
-
-      const semi1 = resolveDoubleLegMatch(quartasWinners[0], quartasWinners[1], rSemiIda, rSemiVolta);
-      const semi2 = resolveDoubleLegMatch(quartasWinners[2], quartasWinners[3], rSemiIda, rSemiVolta);
-
-      const f1 = semi1.winner === 'team1' ? semi1.team1 : semi1.team2;
-      const l1 = semi1.winner === 'team1' ? semi1.team2 : semi1.team1;
-      const f2 = semi2.winner === 'team1' ? semi2.team1 : semi2.team2;
-      const l2 = semi2.winner === 'team1' ? semi2.team2 : semi2.team1;
-
-      // Super Final (Phase 8) - R37 Single Match
-      const rFinalSingle = b10Round + 12; // R37
-      const scF1 = f1.scores[rFinalSingle] || 0;
-      const scF2 = f2.scores[rFinalSingle] || 0;
-
-      let b10Champion = scF1 > scF2 ? f1 : f2;
-      let b10RunnerUp = scF1 > scF2 ? f2 : f1;
-      if (Math.abs(scF1 - scF2) < 0.001) {
-        const tb = resolveTiebreaker(f1, f2);
-        b10Champion = tb === 'team1' ? f1 : f2;
-        b10RunnerUp = tb === 'team1' ? f2 : f1;
-      }
-
-      // 3rd place
-      const scL1 = l1.scores[rFinalSingle] || 0;
-      const scL2 = l2.scores[rFinalSingle] || 0;
-      let b10Third = scL1 > scL2 ? l1 : l2;
-      if (Math.abs(scL1 - scL2) < 0.001) {
-        const tb = resolveTiebreaker(l1, l2);
-        b10Third = tb === 'team1' ? l1 : l2;
-      }
-
-      return {
-        champion: b10Champion,
-        runnerUp: b10RunnerUp,
-        third: b10Third
-      };
-    } catch (e) {
-      console.error("B10 Hall of fame calculation error:", e);
-      return null;
-    }
-  }, [teams]);
+  // 3. Status da Copa B10: Torneio em andamento (Fase 4 • Elite 32 em R29 e R30)
+  // De acordo com o regulamento oficial, a Copa B10 só é finalizada na R37. Não antecipar títulos!
+  const b10Status = useMemo(() => {
+    return {
+      isCompleted: false,
+      phaseName: "Fase 4 • Elite 32 (16-avos de Final)",
+      roundsLabel: "Rodadas 29 e 30 (Duelos de 180 Min)",
+      description: "32 equipes disputam vagas nas Oitavas em confrontos de ida e volta. A consagração do Campeão da Copa B10 ocorrerá na Grande Final (Rodada 37)."
+    };
+  }, []);
 
   return (
     <div className="space-y-8 animate-fadeIn" id="hall-of-fame-section">
@@ -332,13 +174,13 @@ export default function HallDaFama({ teams, currentRound }: HallDaFamaProps) {
         
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#D4AF37]/15 border border-[#D4AF37]/30 rounded-full text-gold text-[10px] font-mono font-black uppercase tracking-wider animate-pulse mb-3">
           <Sparkles className="w-3.5 h-3.5" />
-          GALA DE ENCERRAMENTO • RODADA 38
+          GALERIA DA GLÓRIA ETERNA • TEMPORADA 2026
         </div>
-        <h2 className="font-display font-black text-2xl sm:text-3.5xl text-white uppercase tracking-tight">
+        <h2 className="font-display font-black text-2xl sm:text-3xl text-white uppercase tracking-tight">
           HALL DA FAMA SÓ CAMISA 10
         </h2>
         <p className="text-xs sm:text-sm text-slate-300 mt-2 max-w-2xl mx-auto">
-          Consagramos oficialmente os lendários treinadores e clubes campeões do ecossistema de ligas e copas de futebol virtual da temporada 2026. A glória é eterna e de direito aos vitoriosos!
+          Consagramos oficialmente os lendários treinadores e clubes campeões do ecossistema de ligas e copas da temporada 2026. A glória é eterna e de direito aos vitoriosos!
         </p>
       </div>
 
@@ -352,8 +194,8 @@ export default function HallDaFama({ teams, currentRound }: HallDaFamaProps) {
             
             <div className="space-y-4">
               <div className="flex justify-between items-center border-b border-white/5 pb-3">
-                <span className="text-[10px] font-mono font-black text-white bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded">
-                  👑 CAMPEONATO GERAL (38R)
+                <span className="text-[10px] font-mono font-black text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded flex items-center gap-1">
+                  👑 CAMPEONATO GERAL (38R) • LÍDER PROVISÓRIO (R{currentRound})
                 </span>
                 <Trophy className="w-5 h-5 text-amber-500" />
               </div>
@@ -369,7 +211,7 @@ export default function HallDaFama({ teams, currentRound }: HallDaFamaProps) {
                 </h4>
                 <p className="text-xs text-slate-400 font-medium">{generalPodium.champion.owner}</p>
                 <div className="mt-3 bg-amber-500/10 border border-amber-500/25 px-3 py-1 rounded-full">
-                  <span className="font-mono text-[11px] font-extrabold text-amber-400">{generalPodium.champion.calculatedPoints.toFixed(2)} pts</span>
+                  <span className="font-mono text-[11px] font-extrabold text-amber-400">1º GERAL • {generalPodium.champion.calculatedPoints.toFixed(2)} pts</span>
                 </div>
               </div>
 
@@ -406,7 +248,7 @@ export default function HallDaFama({ teams, currentRound }: HallDaFamaProps) {
             </div>
 
             <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-              <span>PRÊMIO: SOBERANO DAS 38R</span>
+              <span>PRÊMIO GERAL (38R)</span>
               <span className="text-amber-400 font-bold">R$ 500,00 + 🏆</span>
             </div>
           </div>
@@ -414,30 +256,35 @@ export default function HallDaFama({ teams, currentRound }: HallDaFamaProps) {
 
         {/* 2. COMPONENT: COPA M10 PODIUM */}
         {m10Podium && (
-          <div className="bg-[#121212]/90 border border-blue-500/15 rounded-2xl p-6 relative overflow-hidden shadow-xl flex flex-col justify-between min-h-[460px]">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-xl pointer-events-none" />
+          <div className="bg-[#121212]/90 border border-blue-500/25 rounded-2xl p-6 relative overflow-hidden shadow-xl flex flex-col justify-between min-h-[460px]">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-xl pointer-events-none" />
             
             <div className="space-y-4">
               <div className="flex justify-between items-center border-b border-white/5 pb-3">
-                <span className="text-[10px] font-mono font-black text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded">
-                  🏆 COPA M10 (WORLD CUP)
+                <span className="text-[10px] font-mono font-black text-blue-300 bg-blue-500/15 border border-blue-500/30 px-2.5 py-0.5 rounded flex items-center gap-1">
+                  🏆 COPA M10 (MUNDO) • ENCERRADA NA R29
                 </span>
                 <Star className="w-5 h-5 text-blue-400" />
               </div>
 
               {/* Blue Champion Spotlight */}
-              <div className="bg-gradient-to-b from-blue-600/10 to-transparent border border-blue-500/30 rounded-xl p-5 text-center flex flex-col items-center">
-                <Trophy className="w-10 h-10 text-blue-400 mb-2.5 animate-bounce" />
-                <div className="w-16 h-16 bg-blue-400/15 p-2 rounded-full border-2 border-blue-400 flex items-center justify-center">
-                  <TeamShield shieldUrl={m10Podium.champion.shieldUrl} fallbackText={m10Podium.champion.name} />
+              <div className="bg-gradient-to-b from-blue-600/15 to-transparent border border-blue-500/40 rounded-xl p-5 text-center flex flex-col items-center shadow-lg">
+                <Trophy className="w-10 h-10 text-yellow-400 mb-2.5 animate-bounce" />
+                <div className="w-16 h-16 bg-blue-400/20 p-2 rounded-full border-2 border-yellow-400 flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.25)]">
+                  <TeamShield shieldUrl={m10Podium.champion?.shieldUrl} fallbackText={m10Podium.champion?.name} />
                 </div>
                 <h4 className="font-display font-black text-base text-white uppercase leading-tight mt-3 tracking-wide">
-                  {m10Podium.champion.name}
+                  {m10Podium.champion?.name}
                 </h4>
-                <p className="text-xs text-slate-400 font-medium">{m10Podium.champion.owner}</p>
-                <div className="mt-3 bg-blue-500/10 border border-blue-500/25 px-3 py-1 rounded-full">
-                  <span className="font-mono text-[11px] font-extrabold text-blue-400">CAMPEÃO DA COPA</span>
+                <p className="text-xs text-slate-300 font-medium">Téc: {m10Podium.champion?.owner}</p>
+                <div className="mt-3 bg-yellow-400/10 border border-yellow-400/30 px-3 py-1 rounded-full">
+                  <span className="font-mono text-[11px] font-black text-yellow-400">CAMPEÃO DA COPA M10</span>
                 </div>
+                {m10Podium.finalScore && (
+                  <span className="text-[9px] font-mono text-emerald-400 mt-2">
+                    Final: {m10Podium.finalScore.away?.toFixed(2)} x {m10Podium.finalScore.home?.toFixed(2)} (+2.18 pts)
+                  </span>
+                )}
               </div>
 
               {/* Runners up list */}
@@ -446,29 +293,35 @@ export default function HallDaFama({ teams, currentRound }: HallDaFamaProps) {
                   <div className="flex items-center gap-3">
                     <span className="font-sans font-black text-xs text-slate-400">2º</span>
                     <div className="w-8 h-8 flex items-center justify-center">
-                      <TeamShield shieldUrl={m10Podium.runnerUp.shieldUrl} fallbackText={m10Podium.runnerUp.name} />
+                      <TeamShield shieldUrl={m10Podium.runnerUp?.shieldUrl} fallbackText={m10Podium.runnerUp?.name} />
                     </div>
                     <div>
-                      <p className="font-display font-extrabold text-xs text-white truncate max-w-[150px]">{m10Podium.runnerUp.name}</p>
-                      <p className="text-[10px] text-slate-400">{m10Podium.runnerUp.owner}</p>
+                      <p className="font-display font-extrabold text-xs text-white truncate max-w-[150px]">{m10Podium.runnerUp?.name}</p>
+                      <p className="text-[10px] text-slate-400">{m10Podium.runnerUp?.owner}</p>
                     </div>
                   </div>
-                  <span className="font-mono text-xs font-bold text-slate-350">VICE</span>
+                  <span className="font-mono text-xs font-bold text-slate-300">VICE-CAMPEÃO</span>
                 </div>
 
                 {m10Podium.third && (
                   <div className="flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/5">
                     <div className="flex items-center gap-3">
-                      <span className="font-sans font-black text-xs text-amber-700">3º</span>
+                      <span className="font-sans font-black text-xs text-amber-600">3º</span>
                       <div className="w-8 h-8 flex items-center justify-center">
-                        <TeamShield shieldUrl={m10Podium.third.shieldUrl} fallbackText={m10Podium.third.name} />
+                        <TeamShield shieldUrl={m10Podium.third?.shieldUrl} fallbackText={m10Podium.third?.name} />
                       </div>
                       <div>
-                        <p className="font-display font-extrabold text-xs text-white truncate max-w-[150px]">{m10Podium.third.name}</p>
-                        <p className="text-[10px] text-slate-400">{m10Podium.third.owner}</p>
+                        <p className="font-display font-extrabold text-xs text-white truncate max-w-[150px]">{m10Podium.third?.name}</p>
+                        <p className="text-[10px] text-slate-400">{m10Podium.third?.owner}</p>
                       </div>
                     </div>
-                    <span className="font-mono text-xs font-bold text-amber-600">3º LUGAR</span>
+                    <span className="font-mono text-xs font-bold text-amber-500">3º LUGAR</span>
+                  </div>
+                )}
+                {m10Podium.fourth && (
+                  <div className="flex items-center justify-between bg-white/5 p-2 rounded-lg border border-white/5 text-[10px] text-slate-400">
+                    <span>4º Lugar:</span>
+                    <span className="font-bold text-slate-300">{m10Podium.fourth?.name}</span>
                   </div>
                 )}
               </div>
@@ -481,74 +334,50 @@ export default function HallDaFama({ teams, currentRound }: HallDaFamaProps) {
           </div>
         )}
 
-        {/* 3. COMPONENT: COPA B10 PODIUM */}
-        {b10Podium && (
-          <div className="bg-[#121212]/90 border border-emerald-500/20 rounded-2xl p-6 relative overflow-hidden shadow-xl flex flex-col justify-between min-h-[460px]">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl pointer-events-none" />
-            
-            <div className="space-y-4">
-              <div className="flex justify-between items-center border-b border-white/5 pb-3">
-                <span className="text-[10px] font-mono font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded">
-                  🏆 COPA B10 (ELITE BRASIL)
-                </span>
-                <Award className="w-5 h-5 text-emerald-400" />
+        {/* 3. COMPONENT: COPA B10 STATUS (EM ANDAMENTO - FASE 4) */}
+        <div className="bg-[#121212]/90 border border-emerald-500/25 rounded-2xl p-6 relative overflow-hidden shadow-xl flex flex-col justify-between min-h-[460px]">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
+          
+          <div className="space-y-4">
+            <div className="flex justify-between items-center border-b border-white/5 pb-3">
+              <span className="text-[10px] font-mono font-black text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded flex items-center gap-1">
+                ⚔️ COPA B10 (ELITE BRASIL) • EM ANDAMENTO
+              </span>
+              <Award className="w-5 h-5 text-emerald-400" />
+            </div>
+
+            {/* In-progress banner */}
+            <div className="bg-gradient-to-b from-emerald-600/10 to-transparent border border-emerald-500/30 rounded-xl p-5 text-center flex flex-col items-center">
+              <div className="w-14 h-14 bg-emerald-500/15 p-2 rounded-full border border-emerald-500/30 flex items-center justify-center mb-2 shadow-inner">
+                <Crown className="w-7 h-7 text-emerald-400 animate-pulse" />
               </div>
-
-              {/* Emerald Champion Spotlight */}
-              <div className="bg-gradient-to-b from-emerald-600/10 to-transparent border border-emerald-500/30 rounded-xl p-5 text-center flex flex-col items-center">
-                <Trophy className="w-10 h-10 text-emerald-400 mb-2.5 animate-bounce" />
-                <div className="w-16 h-16 bg-emerald-400/15 p-2 rounded-full border-2 border-emerald-500 flex items-center justify-center">
-                  <TeamShield shieldUrl={b10Podium.champion.shieldUrl} fallbackText={b10Podium.champion.name} />
-                </div>
-                <h4 className="font-display font-black text-base text-white uppercase leading-tight mt-3 tracking-wide">
-                  {b10Podium.champion.name}
-                </h4>
-                <p className="text-xs text-slate-400 font-medium">{b10Podium.champion.owner}</p>
-                <div className="mt-3 bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 rounded-full">
-                  <span className="font-mono text-[11px] font-extrabold text-emerald-400">CAMPEÃO DA ELITE</span>
-                </div>
-              </div>
-
-              {/* Runners up list */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/5">
-                  <div className="flex items-center gap-3">
-                    <span className="font-sans font-black text-xs text-slate-400">2º</span>
-                    <div className="w-8 h-8 flex items-center justify-center">
-                      <TeamShield shieldUrl={b10Podium.runnerUp.shieldUrl} fallbackText={b10Podium.runnerUp.name} />
-                    </div>
-                    <div>
-                      <p className="font-display font-extrabold text-xs text-white truncate max-w-[150px]">{b10Podium.runnerUp.name}</p>
-                      <p className="text-[10px] text-slate-400">{b10Podium.runnerUp.owner}</p>
-                    </div>
-                  </div>
-                  <span className="font-mono text-xs font-bold text-slate-350">VICE</span>
-                </div>
-
-                {b10Podium.third && (
-                  <div className="flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/5">
-                    <div className="flex items-center gap-3">
-                      <span className="font-sans font-black text-xs text-amber-700">3º</span>
-                      <div className="w-8 h-8 flex items-center justify-center">
-                        <TeamShield shieldUrl={b10Podium.third.shieldUrl} fallbackText={b10Podium.third.name} />
-                      </div>
-                      <div>
-                        <p className="font-display font-extrabold text-xs text-white truncate max-w-[150px]">{b10Podium.third.name}</p>
-                        <p className="text-[10px] text-slate-400">{b10Podium.third.owner}</p>
-                      </div>
-                    </div>
-                    <span className="font-mono text-xs font-bold text-amber-600">3º LUGAR</span>
-                  </div>
-                )}
+              <h4 className="font-display font-black text-base text-white uppercase leading-tight mt-1 tracking-wide">
+                {b10Status.phaseName}
+              </h4>
+              <p className="text-xs text-[#D4AF37] font-mono font-bold mt-1">{b10Status.roundsLabel}</p>
+              
+              <div className="mt-3 bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 rounded-full">
+                <span className="font-mono text-[10px] font-bold text-emerald-300 uppercase">16 Vagas em Disputa</span>
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-              <span>PRÊMIO COPA ELITE</span>
-              <span className="text-emerald-400 font-bold">R$ 300,00 + 🏆</span>
+            {/* Explanation of ongoing stage */}
+            <div className="bg-white/5 p-3.5 rounded-xl border border-white/5 space-y-2 text-xs font-mono text-slate-300">
+              <p className="text-[11px] leading-relaxed text-slate-300">
+                {b10Status.description}
+              </p>
+              <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px]">
+                <span className="text-slate-400">Status Atual:</span>
+                <span className="text-[#D4AF37] font-bold">R29 (Ida) • R30 (Volta)</span>
+              </div>
             </div>
           </div>
-        )}
+
+          <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+            <span>PRÊMIO COPA ELITE</span>
+            <span className="text-emerald-400 font-bold">R$ 300,00 + 🏆</span>
+          </div>
+        </div>
 
       </div>
     </div>

@@ -285,7 +285,9 @@ export function getTournamentCalendar(currentRound: number): TournamentCalendarE
     } else if (item.round < currentRound) {
       statusM10 = "completed";
     } else if (item.round === currentRound) {
-      statusM10 = "active";
+      // Na R29, a Copa M10 teve sua Grande Final em Jogo Único efetivamente realizada e homologada.
+      // Portanto, para R29 já processada, seu status oficial é CONCLUÍDO (Campeão Consagrado).
+      statusM10 = (item.round === 29 && currentRound >= 29) ? "completed" : "active";
     } else {
       statusM10 = "upcoming";
     }
