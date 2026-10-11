@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { CartolaTeam } from '../services/cartolaService';
 import TeamShield from './TeamShield';
-import { Trophy, Crown, Sparkles, AlertCircle, ShieldCheck } from 'lucide-react';
+import { Trophy, Crown, Sparkles, Flame } from 'lucide-react';
 
 interface B10RoundOf32Props {
   teams: CartolaTeam[];
@@ -22,7 +22,6 @@ export const B10RoundOf32 = ({
 }: B10RoundOf32Props) => {
   const f4Leg1Round = b10Round + 4; // Rodada 29 (Ida da Fase 4)
   const f4Leg2Round = b10Round + 5; // Rodada 30 (Volta da Fase 4)
-  const isRound6Completed = isSimulatorsEnabled || currentRound >= f4Leg2Round;
   const isAwaitingRound25 = !isSimulatorsEnabled && currentRound < 25;
 
   // 1. Get the 16 Elite teams from Phase 1 (1º to 16º)
@@ -64,8 +63,6 @@ export const B10RoundOf32 = ({
         };
       } else {
         // Play-offs are not played yet (Virtual Mode)
-        // High rank number represents a lower quality seed.
-        // Seeding 17 to 32 is simulated gracefully.
         return {
           isVirtual: true,
           id: `v-winner-${match.id}`,
@@ -194,20 +191,10 @@ export const B10RoundOf32 = ({
     return matchesList;
   }, [eliteTeams, sortedWinnersDesc, f4Leg1Round, f4Leg2Round, isSimulatorsEnabled, b10Round]);
 
-  // Helper for dynamic font scaling on long names
-  const formatNameClass = (name: string) => {
-    if (name.length > 18) {
-      return 'text-[9px] sm:text-[10px] leading-[1.1] font-bold';
-    } else if (name.length > 14) {
-      return 'text-[10px] sm:text-xs leading-tight font-extrabold';
-    }
-    return 'text-xs sm:text-sm font-black';
-  };
-
   return (
     <div className="space-y-6 animate-fadeIn">
-      {/* Header Banner - Hall da Fama */}
-      <div className="relative overflow-hidden p-6 rounded-3xl border border-[#D4AF37]/35 bg-[#121212]/90 backdrop-blur-md">
+      {/* Header Banner */}
+      <div className="relative overflow-hidden p-6 rounded-3xl border border-[#D4AF37]/35 bg-[#121212]/90 backdrop-blur-md shadow-2xl">
         <div className="absolute top-0 right-0 w-80 h-full bg-gradient-to-l from-[#D4AF37]/5 to-transparent pointer-events-none" />
         
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
@@ -236,16 +223,16 @@ export const B10RoundOf32 = ({
         
         <div className="mt-4 pt-3 border-t border-white/5 flex flex-wrap gap-x-6 gap-y-2 text-[10px] font-mono text-slate-400">
           <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" /> Lógica de Cruzamento: 1º Geral vs Pior Classificado do Play-off, 2º vs 2º Pior...
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" /> Sementes Espelhadas: 1º Geral vs 16º Play-off, 2º vs 15º...
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> Desempate: Maior pontuação agregada da Liga Cartola original.
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> Desempate Regulamentar: Semente de Elite &gt; R25 &gt; Rank Geral da Liga
           </span>
         </div>
       </div>
 
-      {/* Grid of Round of 32 Matches */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {/* Grid of 16 Matchups - Exato padrão visual da Fase 3 (Play-offs) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
         {roundOf32Matches.map((match) => {
           const { 
             home, 
@@ -263,171 +250,141 @@ export const B10RoundOf32 = ({
             provisionalAdvantage 
           } = match;
 
+          // Destaque visual em verde:
+          // Se finalizado (R30 homologada): para o classificado definitivo (winner)
+          // Se em andamento (R29 homologada, R30 pendente): para quem possui a vantagem provisória
+          const isHomeHighlighted = isFullyPlayed 
+            ? winner === 'home' 
+            : (isLeg1Played && provisionalAdvantage?.leader === 'home');
+
+          const isAwayHighlighted = isFullyPlayed 
+            ? winner === 'away' 
+            : (isLeg1Played && provisionalAdvantage?.leader === 'away');
+
           return (
             <div 
               key={match.id}
-              className={`relative overflow-hidden rounded-2xl border bg-black/60 backdrop-blur-[12px] p-4 transition-all duration-300 shadow-lg flex flex-col justify-between min-h-[195px] group ${
-                isFullyPlayed 
-                  ? 'border-emerald-500/30 hover:border-emerald-500/60 shadow-[0_8px_25px_rgba(16,185,129,0.08)]' 
-                  : isLeg1Played 
-                    ? 'border-[#D4AF37]/35 hover:border-[#D4AF37]/75 shadow-[0_8px_25px_rgba(212,175,55,0.08)]' 
-                    : 'border-white/10 hover:border-white/20'
-              }`}
+              className="relative overflow-hidden rounded-3xl border border-[#D4AF37]/30 hover:border-[#D4AF37]/60 bg-[#090909]/95 backdrop-blur-md p-5 transition-all duration-350 shadow-2xl flex flex-col justify-between group"
             >
-              {/* Header Matchup Tag */}
-              <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-2 text-[9px] font-mono">
-                <span className="text-[#D4AF37] uppercase tracking-wider font-extrabold flex items-center gap-1.5">
-                  <span className={`w-1.5 h-1.5 rounded-full ${isFullyPlayed ? 'bg-emerald-400' : isLeg1Played ? 'bg-[#D4AF37] animate-pulse' : 'bg-slate-500'}`} />
-                  Duelo #{match.id}
+              {/* Top Header */}
+              <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4 text-[10px] font-mono">
+                <span className="text-[#D4AF37] uppercase tracking-widest font-bold flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37] inline-block shadow-[0_0_8px_rgba(212,175,55,0.6)]" />
+                  CONFRONTO #{match.id}
                 </span>
-                {isFullyPlayed ? (
-                  <span className="text-[8px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-black tracking-widest uppercase px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <ShieldCheck className="w-2.5 h-2.5 text-emerald-400" /> Finalizado (R{match.f4Leg1Round} e R{match.f4Leg2Round})
-                  </span>
-                ) : isLeg1Played ? (
-                  <span className="text-[8px] bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 font-black tracking-widest uppercase px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <Sparkles className="w-2.5 h-2.5 text-[#D4AF37]" /> Parcial da Ida (R{match.f4Leg1Round}) • Volta Pendente (R{match.f4Leg2Round})
-                  </span>
-                ) : (
-                  <span className="text-[8px] bg-slate-500/10 text-slate-400 border border-slate-500/20 font-black tracking-widest uppercase px-1.5 py-0.5 rounded">
-                    A confirmar (R{match.f4Leg1Round} e R{match.f4Leg2Round})
-                  </span>
-                )}
+                <span className="bg-[#141414] border border-white/10 px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider text-slate-300 uppercase">
+                  IDA: R{match.f4Leg1Round} • VOLTA: R{match.f4Leg2Round}
+                </span>
               </div>
 
-              {/* Side-by-side Matchup Flow */}
-              <div className="grid grid-cols-11 items-center gap-1 py-1">
+              {/* Teams Side-by-Side with Center VS */}
+              <div className="relative grid grid-cols-2 gap-3 items-start my-2">
                 
-                {/* Home/Elite Team (Left) */}
-                <div className="col-span-4 flex flex-col items-center text-center">
-                  <div className={`w-11 h-11 bg-zinc-950 rounded-full border p-1.5 flex items-center justify-center mb-1.5 shadow-inner transition-transform group-hover:scale-105 duration-300 ${
-                    winner === 'home' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20 bg-gradient-to-b from-[#D4AF37]/15 to-transparent' : 'border-white/10'
+                {/* VS Circle Badge Centered */}
+                <div className="absolute left-1/2 top-11 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-[#181408] border border-[#D4AF37]/50 flex items-center justify-center text-[#D4AF37] text-[10px] font-mono font-black shadow-lg">
+                  VS
+                </div>
+
+                {/* Team 1 (Left - Home / Elite) */}
+                <div className="flex flex-col items-center text-center min-w-0">
+                  {/* Shield */}
+                  <div className="w-16 h-16 bg-[#121212] rounded-full border border-white/10 p-2 flex items-center justify-center mb-2 shadow-inner">
+                    {!home.shieldUrl ? (
+                      <div className="w-full h-full rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400">
+                        <Flame className="w-5 h-5 text-amber-400 animate-pulse" />
+                      </div>
+                    ) : (
+                      <TeamShield shieldUrl={home.shieldUrl} fallbackText={home.name} className="w-full h-full object-contain" />
+                    )}
+                  </div>
+
+                  {/* Name */}
+                  <h4 className="font-display font-black text-sm uppercase tracking-wide text-white truncate max-w-full px-1 text-center leading-tight">
+                    {home.name}
+                  </h4>
+
+                  {/* Owner */}
+                  <p className="text-[11px] text-slate-400 font-mono truncate max-w-full text-center mt-0.5">
+                    Téc: {home.owner}
+                  </p>
+
+                  {/* Position Tag */}
+                  <div className="flex justify-center mt-1.5 mb-3">
+                    <span className="bg-[#141414] border border-white/10 text-slate-400 text-[10px] font-mono px-2 py-0.5 rounded-md font-bold">
+                      #{home.rank}º Elite
+                    </span>
+                  </div>
+
+                  {/* Legs Box: IDA (R29) | VOLTA (R30) */}
+                  <div className={`w-full bg-[#121212] rounded-xl p-2.5 shadow-sm transition-all duration-300 ${
+                    isHomeHighlighted
+                      ? 'border-2 border-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.35)]'
+                      : 'border border-white/10'
                   }`}>
-                    <TeamShield shieldUrl={home.shieldUrl} fallbackText={home.name} className="w-full h-full object-contain" />
-                  </div>
-                  
-                  <div className="h-8 flex flex-col justify-center min-w-0 w-full mb-1">
-                    <span className={`uppercase truncate font-display tracking-wide ${formatNameClass(home.name)} ${
-                      winner === 'home' ? 'text-white font-black' : winner === 'away' ? 'text-slate-500' : 'text-slate-200'
-                    }`}>
-                      {home.name}
-                    </span>
-                    <span className="text-[8px] text-slate-400 font-mono truncate">
-                      Téc: {home.owner}
-                    </span>
-                  </div>
-
-                  {/* Seed Badge */}
-                  <span className="text-[7.5px] font-mono px-1 py-0.5 rounded bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/15 uppercase font-black tracking-wide">
-                    {home.category === 'ELITE' ? `#${home.rank}º Elite` : `#${home.rank}º`}
-                  </span>
-
-                  {/* Leg Breakdown Box */}
-                  <div className="w-full mt-2 bg-black/50 border border-white/5 rounded-lg p-1 text-[8px] font-mono">
-                    <div className="flex items-center justify-between text-slate-500 text-[7px] mb-0.5">
+                    <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 font-bold px-1 mb-1">
                       <span>IDA (R{match.f4Leg1Round})</span>
+                      <span className="text-slate-600 font-normal">|</span>
                       <span>VOLTA (R{match.f4Leg2Round})</span>
                     </div>
-                    <div className="flex items-center justify-between font-bold">
-                      <span className={homeScoreLeg1 !== null ? 'text-white' : 'text-slate-500'}>
-                        {homeScoreLeg1 !== null ? homeScoreLeg1.toFixed(2) : '—'}
+                    <div className="flex items-center justify-around font-mono text-xs font-bold text-white">
+                      <span className={homeScoreLeg1 !== null ? 'text-white' : 'text-slate-500 tracking-widest'}>
+                        {homeScoreLeg1 !== null ? homeScoreLeg1.toFixed(2) : '———'}
                       </span>
-                      <span className="text-slate-700">:</span>
-                      <span className={homeScoreLeg2 !== null ? 'text-white' : 'text-amber-400/70 italic text-[7px]'}>
+                      <span className="text-slate-600 font-normal">:</span>
+                      <span className={homeScoreLeg2 !== null ? 'text-white' : 'text-slate-500 tracking-widest'}>
                         {homeScoreLeg2 !== null ? homeScoreLeg2.toFixed(2) : 'Pendente'}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* VS / Score Panel (Center) */}
-                <div className="col-span-3 flex flex-col items-center justify-center">
-                  {isFullyPlayed && aggregateHome !== null && aggregateAway !== null ? (
-                    <div className="flex flex-col items-center gap-1 w-full">
-                      <div className="flex items-center justify-center gap-1 text-[11px] font-mono font-black w-full bg-black/80 border border-emerald-500/30 py-1.5 px-1 rounded-lg shadow-[0_0_12px_rgba(16,185,129,0.15)]">
-                        <span className={winner === 'home' ? 'text-emerald-400 font-black' : 'text-slate-400'}>
-                          {aggregateHome.toFixed(2)}
-                        </span>
-                        <span className="text-[8px] text-slate-600">:</span>
-                        <span className={winner === 'away' ? 'text-emerald-400 font-black' : 'text-slate-400'}>
-                          {aggregateAway.toFixed(2)}
-                        </span>
+                {/* Team 2 (Right - Away / Play-off) */}
+                <div className="flex flex-col items-center text-center min-w-0">
+                  {/* Shield */}
+                  <div className="w-16 h-16 bg-[#121212] rounded-full border border-white/10 p-2 flex items-center justify-center mb-2 shadow-inner">
+                    {away.isVirtual || !away.shieldUrl ? (
+                      <div className="w-full h-full rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400">
+                        <Flame className="w-5 h-5 text-amber-400 animate-pulse" />
                       </div>
-                      
-                      <span className="text-[6.5px] font-mono uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1 py-0.5 rounded font-black tracking-wider text-center">
-                        {tiebreakerApplied ? 'C.D. Regulamento' : 'Agregado Final'}
-                      </span>
-                    </div>
-                  ) : isLeg1Played && homeScoreLeg1 !== null && awayScoreLeg1 !== null ? (
-                    <div className="flex flex-col items-center gap-1 w-full">
-                      <div className="flex items-center justify-center gap-1 text-[11px] font-mono font-black w-full bg-black/80 border border-[#D4AF37]/40 py-1.5 px-1 rounded-lg shadow-[0_0_12px_rgba(212,175,55,0.12)]">
-                        <span className={homeScoreLeg1 > awayScoreLeg1 ? 'text-[#D4AF37] font-black' : homeScoreLeg1 < awayScoreLeg1 ? 'text-slate-400' : 'text-white'}>
-                          {homeScoreLeg1.toFixed(2)}
-                        </span>
-                        <span className="text-[8px] text-slate-600">:</span>
-                        <span className={awayScoreLeg1 > homeScoreLeg1 ? 'text-[#D4AF37] font-black' : awayScoreLeg1 < homeScoreLeg1 ? 'text-slate-400' : 'text-white'}>
-                          {awayScoreLeg1.toFixed(2)}
-                        </span>
-                      </div>
-                      
-                      <span className="text-[6.5px] font-mono uppercase bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 px-1 py-0.5 rounded font-black tracking-wider text-center">
-                        Ida (90 Min)
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="relative flex flex-col items-center">
-                      <div className="w-7 h-7 rounded-full border border-[#D4AF37]/35 bg-[#D4AF37]/5 flex items-center justify-center text-[9px] font-mono font-black text-[#D4AF37] tracking-wider shadow">
-                        VS
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Away/Playoff Winner Team (Right) */}
-                <div className="col-span-4 flex flex-col items-center text-center">
-                  <div className={`w-11 h-11 bg-zinc-950 rounded-full border p-1.5 flex items-center justify-center mb-1.5 shadow-inner transition-transform group-hover:scale-105 duration-300 ${
-                    winner === 'away' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20 bg-gradient-to-b from-[#D4AF37]/15 to-transparent' : 'border-white/10'
-                  }`}>
-                    {away.shieldUrl ? (
-                      <TeamShield shieldUrl={away.shieldUrl} fallbackText={away.name} className="w-full h-full object-contain" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-zinc-900 rounded-full border border-white/10 text-[#D4AF37]">
-                        <Crown className="w-4 h-4 opacity-75" />
-                      </div>
+                      <TeamShield shieldUrl={away.shieldUrl} fallbackText={away.name} className="w-full h-full object-contain" />
                     )}
                   </div>
-                  
-                  <div className="h-8 flex flex-col justify-center min-w-0 w-full mb-1">
-                    <span 
-                      className={`uppercase truncate font-display tracking-wide ${formatNameClass(away.name)} ${
-                        winner === 'away' ? 'text-white font-black' : winner === 'home' ? 'text-slate-500' : 'text-slate-200'
-                      }`}
-                      title={away.name}
-                    >
-                      {away.name}
-                    </span>
-                    <span className="text-[8px] text-slate-400 font-mono truncate" title={away.owner}>
-                      Téc: {away.owner}
+
+                  {/* Name */}
+                  <h4 className="font-display font-black text-sm uppercase tracking-wide text-white truncate max-w-full px-1 text-center leading-tight">
+                    {away.name}
+                  </h4>
+
+                  {/* Owner */}
+                  <p className="text-[11px] text-slate-400 font-mono truncate max-w-full text-center mt-0.5">
+                    {away.isVirtual ? 'Definido pelo Play-off' : `Téc: ${away.owner}`}
+                  </p>
+
+                  {/* Position Tag */}
+                  <div className="flex justify-center mt-1.5 mb-3">
+                    <span className="bg-[#141414] border border-white/10 text-slate-400 text-[10px] font-mono px-2 py-0.5 rounded-md font-bold">
+                      {away.isVirtual ? 'Play-off' : `#${away.seedRank || away.rank}º Playoff`}
                     </span>
                   </div>
 
-                  {/* Seed / Playoff Badge */}
-                  <span className="text-[7.5px] font-mono px-1 py-0.5 rounded bg-blue-500/10 text-blue-300 border border-blue-500/15 uppercase font-medium">
-                    {away.isVirtual ? 'Play-off' : `#${away.seedRank}º Playoff`}
-                  </span>
-
-                  {/* Leg Breakdown Box */}
-                  <div className="w-full mt-2 bg-black/50 border border-white/5 rounded-lg p-1 text-[8px] font-mono">
-                    <div className="flex items-center justify-between text-slate-500 text-[7px] mb-0.5">
+                  {/* Legs Box: IDA (R29) | VOLTA (R30) */}
+                  <div className={`w-full bg-[#121212] rounded-xl p-2.5 shadow-sm transition-all duration-300 ${
+                    isAwayHighlighted
+                      ? 'border-2 border-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.35)]'
+                      : 'border border-white/10'
+                  }`}>
+                    <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 font-bold px-1 mb-1">
                       <span>IDA (R{match.f4Leg1Round})</span>
+                      <span className="text-slate-600 font-normal">|</span>
                       <span>VOLTA (R{match.f4Leg2Round})</span>
                     </div>
-                    <div className="flex items-center justify-between font-bold">
-                      <span className={awayScoreLeg1 !== null ? 'text-white' : 'text-slate-500'}>
-                        {awayScoreLeg1 !== null ? awayScoreLeg1.toFixed(2) : '—'}
+                    <div className="flex items-center justify-around font-mono text-xs font-bold text-white">
+                      <span className={awayScoreLeg1 !== null ? 'text-white' : 'text-slate-500 tracking-widest'}>
+                        {awayScoreLeg1 !== null ? awayScoreLeg1.toFixed(2) : '———'}
                       </span>
-                      <span className="text-slate-700">:</span>
-                      <span className={awayScoreLeg2 !== null ? 'text-white' : 'text-amber-400/70 italic text-[7px]'}>
+                      <span className="text-slate-600 font-normal">:</span>
+                      <span className={awayScoreLeg2 !== null ? 'text-white' : 'text-slate-500 tracking-widest'}>
                         {awayScoreLeg2 !== null ? awayScoreLeg2.toFixed(2) : 'Pendente'}
                       </span>
                     </div>
@@ -436,40 +393,63 @@ export const B10RoundOf32 = ({
 
               </div>
 
-              {/* Bottom Winner Bar / Provisional Advantage Bar */}
-              {isFullyPlayed && winner ? (
-                <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between text-[8px] font-mono">
-                  <span className="text-slate-500 uppercase tracking-wider font-bold">Classificado:</span>
-                  <div className="flex items-center gap-1 font-bold text-emerald-400 uppercase">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    <span className="truncate max-w-[125px]" title={winner === 'home' ? home.name : away.name}>
-                      {winner === 'home' ? home.name : away.name}
+              {/* Agregado Bottom Green Capsule */}
+              <div className="mt-4 w-full bg-[#052319] border border-emerald-500/40 rounded-2xl py-3 px-4 flex flex-col items-center justify-center shadow-inner transition-all">
+                <span className="text-emerald-400 text-[10px] font-mono font-black tracking-widest uppercase mb-1">
+                  {isFullyPlayed ? 'AGREGADO FINAL' : isLeg1Played ? 'AGREGADO PARCIAL' : 'AGREGADO'}
+                </span>
+                
+                <div className="flex items-center justify-center gap-3 font-mono font-black text-xl sm:text-2xl tracking-wider text-white">
+                  {isFullyPlayed && aggregateHome !== null && aggregateAway !== null ? (
+                    <>
+                      <span>{aggregateHome.toFixed(2)}</span>
+                      <span className="text-emerald-500 font-bold">:</span>
+                      <span>{aggregateAway.toFixed(2)}</span>
+                    </>
+                  ) : isLeg1Played && homeScoreLeg1 !== null && awayScoreLeg1 !== null ? (
+                    <>
+                      <span>{homeScoreLeg1.toFixed(2)}</span>
+                      <span className="text-emerald-500 font-bold">:</span>
+                      <span>{awayScoreLeg1.toFixed(2)}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-slate-400">—</span>
+                      <span className="text-emerald-500/60 font-bold">×</span>
+                      <span className="text-slate-400">—</span>
+                    </>
+                  )}
+                </div>
+
+                {/* Vencedor definitivo ou status da disputa */}
+                {isFullyPlayed && winner ? (
+                  <div className="mt-2.5 pt-2 border-t border-emerald-500/25 w-full flex items-center justify-center gap-1.5 text-[11px] font-mono font-bold text-emerald-400 uppercase tracking-wide">
+                    <Trophy className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                    <span>CLASSIFICADO: {winner === 'home' ? home.name : away.name}</span>
+                    {tiebreakerApplied && (
+                      <span className="text-[8px] bg-emerald-500/20 text-emerald-300 px-1 py-0.5 rounded ml-1">
+                        (Critério de Desempate)
+                      </span>
+                    )}
+                  </div>
+                ) : isLeg1Played && provisionalAdvantage ? (
+                  <div className="mt-2.5 pt-2 border-t border-emerald-500/25 w-full flex flex-col items-center justify-center gap-1 text-[11px] font-mono">
+                    <div className="flex items-center justify-center gap-1.5 text-emerald-300 font-bold uppercase tracking-wide">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                      <span>
+                        VANTAGEM PROVISÓRIA: {provisionalAdvantage.leader === 'home' ? home.name : provisionalAdvantage.leader === 'away' ? away.name : 'EMPATE'}
+                      </span>
+                    </div>
+                    <span className="text-[9px] text-emerald-400/80 font-mono">
+                      {provisionalAdvantage.text} • Decisão na Volta (R{match.f4Leg2Round})
                     </span>
                   </div>
-                </div>
-              ) : isLeg1Played && provisionalAdvantage ? (
-                <div className="mt-3 pt-2 border-t border-white/5 flex flex-col gap-1 text-[8px] font-mono">
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-400 uppercase font-bold flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" /> Vantagem Provisória:
-                    </span>
-                    <span className={`font-black uppercase truncate max-w-[130px] ${
-                      provisionalAdvantage.leader === 'home' ? 'text-[#D4AF37]' : provisionalAdvantage.leader === 'away' ? 'text-blue-300' : 'text-slate-300'
-                    }`} title={provisionalAdvantage.text}>
-                      {provisionalAdvantage.text}
-                    </span>
+                ) : (
+                  <div className="mt-2 text-[9px] font-mono text-emerald-400/60 uppercase tracking-wider">
+                    Aguardando início dos confrontos
                   </div>
-                  <div className="flex items-center justify-between text-[7.5px] text-slate-500 pt-0.5">
-                    <span>Decisão da vaga:</span>
-                    <span className="text-amber-400/80 font-bold uppercase">Volta na R30 (Jogo Aberto)</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between text-[8px] font-mono text-slate-500">
-                  <span>Duelo de 180 Minutos</span>
-                  <span>Aguardando R29 e R30</span>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           );
         })}
