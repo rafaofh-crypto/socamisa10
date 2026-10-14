@@ -13,6 +13,11 @@ interface State {
 }
 
 export class ErrorBoundary extends React.Component<Props, State> {
+  // These are provided by React at runtime. Explicit declarations also support
+  // the project's existing setup, which does not install @types/react.
+  declare readonly props: Readonly<Props>;
+  declare state: State;
+  declare setState: (state: Partial<State>) => void;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -25,7 +30,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return { hasError: true, error };
   }
 
-  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary capturou um erro não tratado:', error, errorInfo);
   }
 
@@ -36,7 +41,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
     }
   };
 
-  public override render() {
+  public render() {
     if (this.state.hasError) {
       return (
         <div className="rounded-3xl border border-red-500/30 bg-[#141012] p-8 text-center space-y-4 max-w-2xl mx-auto my-8 shadow-2xl">
@@ -47,13 +52,8 @@ export class ErrorBoundary extends React.Component<Props, State> {
             {this.props.fallbackTitle || 'Ocorreu uma instabilidade na exibição'}
           </h3>
           <p className="text-xs text-slate-400 font-mono leading-relaxed">
-            Detectamos um erro temporário no processamento dos dados. Nenhuma informação foi perdida.
+            Não foi possível exibir esta seção. Tente novamente.
           </p>
-          {this.state.error?.message && (
-            <div className="p-3 rounded-xl bg-black/60 border border-white/5 text-[11px] font-mono text-red-300/80 text-left overflow-x-auto">
-              <code>{this.state.error.message}</code>
-            </div>
-          )}
           <button
             onClick={this.handleReset}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#c49f27] text-black font-bold font-mono text-xs uppercase transition-all cursor-pointer shadow-lg shadow-[#D4AF37]/20"
@@ -70,3 +70,4 @@ export class ErrorBoundary extends React.Component<Props, State> {
 }
 
 export default ErrorBoundary;
+

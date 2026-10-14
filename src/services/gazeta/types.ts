@@ -138,12 +138,13 @@ export interface GazetaEdition {
   title: string;
   subtitle: string;
   dateStr: string;
+  verificationNotice?: string;
   stats: {
-    totalClubs: number;
-    averageRoundScore: number;
-    highestScore: { clubName: string; score: number };
-    lowestScore: { clubName: string; score: number };
-    totalMatchesB10Concluded: number;
+    totalClubs: number | null;
+    averageRoundScore: number | null;
+    highestScore: { clubName: string; score: number } | null;
+    lowestScore: { clubName: string; score: number } | null;
+    totalMatchesB10Concluded: number | null;
     m10Champion: string;
   };
   headlineStory: GazetaStory;
@@ -155,3 +156,4 @@ export interface GazetaEdition {
   radarClubs: RadarClubDigest[];
   whatsappText: string;
 }
+

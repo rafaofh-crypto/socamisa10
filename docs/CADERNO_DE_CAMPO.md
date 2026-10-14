@@ -1,5 +1,7 @@
 # Caderno de Campo — Só Camisa 10 (C10) ⚽📋
 
+> **Orientação mais recente: seção 13 — retificação da R30 autorizada pelo diretor em 14/10/2026.** As suspensões e pendências anteriores registram o estado à época e são superadas apenas no alcance dessa ordem.
+
 > **Status:** Documento Oficial de Referência e Coordenação da Equipe  
 > **Versão de Referência do Repositório (Auditoria):** Commit `f56474e7327aec2e50b01aee04e7a26c642cc5d1`  
 > **Última Atualização:** Outubro de 2026  
@@ -164,5 +166,99 @@ Base de análise auditada no repositório: **Commit `f56474e7327aec2e50b01aee04e
   - `compile_applet`: 100% aprovado (build succeeded).
   - `src/services/gazeta/test_gazeta_validation.ts`: Todas as 5 validações de integridade aprovadas com louvor.
 
+## 9. Continuidade autorizada pelo diretor — Gazeta única e histórico (14/10/2026)
+
+### Autorização e coordenação
+
+Após esgotamento dos créditos da IA amiga, o diretor pediu ao Codex avaliar o trabalho, verificar o pedido pendente e concluir a preparação da plataforma com uma única linha editorial (Gazeta) e histórico que preserve a R30 quando vier a R31. A intervenção está na branch `codex/gazeta-unica-historico-2026-10-14`, baseada na versão remota `62144816e0a9ceafb32063ef64b4ee105ca06cbd`. Nenhum merge/publicação é realizado por esta entrega; o diretor deve revisar a proposta antes da divulgação oficial.
+
+O conteúdo das seções anteriores permanece como registro histórico da IA amiga. Afirmações de aprovação de todas as verificações não substituem esta nova conferência: o checkout revisado apresentou erros de TypeScript no `ErrorBoundary`, corrigidos nesta branch.
+
+### Entrega e limitações
+
+- Boletim Clássico já removido pela IA amiga; mantida apenas a Gazeta.
+- Criados `publishedGazetaEditions.ts` e `publishedGazetaArchive.ts`: retratos completos R28/R29/R30, congelados e independentes dos dados vivos. R28/R29 são retratos editoriais preparados agora, não reprodução certificada de boletins publicados anteriormente.
+- Atualizado `GazetaEditionView.tsx`: arquivo por edição, seleção, aviso de próxima edição em preparação, filtros reiniciados ao trocar edição e fallback correto de cópia WhatsApp.
+- Atualizados `gazetaArchive.ts` e a preparação editorial em `gazetaEngine.ts`: correções factuais propostas e prevenção de resultados futuros em retratos anteriores; sem alterações em qualquer motor esportivo.
+- Ajustado `ErrorBoundary.tsx` para TypeScript e mensagem amigável. Não há garantia absoluta de ausência de falhas de produção.
+- Criado `test_gazeta_archive.ts` e documento `docs/gazeta/HISTORICO_DE_EDICOES.md`, que descreve origem, correções, verificações e procedimento de continuidade.
+
+### Revisão editorial explícita, sujeita à aprovação de publicação
+
+Carlao07 teve o maior agregado individual da Fase 4 (257,24), mas sua margem (83,22) foi a segunda maior; Tainha teve a maior (114,50). Carlao já liderava outubro após R29. FURACÃO marcou a sexta maior pontuação da R30 (116,43), não a terceira. A pontuação 148,81 de Carlao foi a maior da R29, não da temporada. Retiradas causas atribuídas a scouts/escalações sem dados, crítica/estado psicológico de participantes e probabilidade inventada de classificação. Metáforas e estrutura apreciadas pelo diretor preservadas.
+
+Essas correções alteram somente a proposta editorial desta branch; a versão anterior permanece no commit de referência. Não foram reabertos resultados, campeões ou classificados homologados. O registro editorial de copas da IA amiga foi mantido inalterado. Pontuações utilizadas são cópias consultadas da fonte, sem gravação na planilha. A correção R21 para 29,80 foi feita pelo diretor, não pelo Codex.
+
+### Verificações e passagem
+
+TypeScript, build, casos isolados e novo teste de histórico/renderização aprovados. As cinco baterias anteriores passaram com cópia isolada R1–R30; elas dependem de dados R29/R30 não versionados na base, portanto não são reproduzíveis sem fornecer esses arquivos. O teste de histórico não muda as entradas esportivas nem deriva notícia nova da R31 por calendário.
+
+Nova edição depende de preparo e revisão explícitos antes de entrar no catálogo. A chegada de uma rodada não implica homologação ou publicação. Interface sem modo clássico; nenhum scout/analogia foi integrado.
+
+Conferência no Chromium em desktop (1280×900) e mobile (390×844), com rede integralmente interceptada: navegação, histórico, filtros/busca, cópia WhatsApp com permissão negada e fallback, falha de cópia comunicada, ausência de textarea residual e ausência de overflow horizontal aprovados. Imagens locais inspecionadas. Ajustada apenas a quebra do título da Gazeta no celular, sem redesenho do aplicativo.
+
+Responsável atual desta frente: Codex. Disponibilidade sem bloqueio conhecido; cota restante não visível. IA amiga deve consultar esta seção e o documento de histórico antes de retomar. Pendências: revisão do diretor, aprovação das correções editoriais e autorização de merge/publicação. Nenhuma tarefa futura fica automaticamente autorizada.
 
 
+
+
+
+## 10. Retificação factual e proteção da Gazeta — ordem do diretor (14/10/2026)
+
+O diretor confirmou **Capitã Buske R30=80,58 pontos**, contestando a matéria com 117,13/segunda maior pontuação e determinando resolver a Gazeta sem mexer em posições ou campeonatos. A afirmação da seção 8 e a confiança na fonte da seção 9 ficam **expressamente contestadas**; permanecem apenas como registro das avaliações anteriores. Os resultados oficiais não foram reabertos.
+
+Codex reconhece que congelar a cópia disponível não comprovava sua validade. Não se homologa conteúdo por `verified:true`, finitude ou teste que usa a própria base contestada como referência.
+
+Entrega na branch `codex/gazeta-unica-historico-2026-10-14`: fatos editoriais com origem e validação exata; Buske 80,58 em texto/evidência/WhatsApp; retirada das alegações de posição/subida/críticas; remoção dos geradores de fatos substitutos; retratos anteriores mantidos para auditoria, fora do catálogo; aviso de conferência e ausência de estatísticas inventadas. Demais matérias, radar e tabelas editoriais aguardam fonte oficial conferida. **A Gazeta completa ainda não está pronta para divulgação.**
+
+Arquivos desta revisão: `editorialVerification.ts` (novo), `gazetaEngine.ts`, `gazetaArchive.ts`, `publishedGazetaArchive.ts`, `publishedGazetaEditions.ts`, `types.ts`, `test_gazeta_archive.ts`, `test_gazeta_validation.ts`, `GazetaEditionView.tsx`, `docs/gazeta/RIGOR_FACTUAL.md` (novo), `docs/gazeta/HISTORICO_DE_EDICOES.md` e este Caderno. A correção anterior do ErrorBoundary continua no conjunto da branch.
+
+Nenhuma pontuação esportiva, posição, campeonato, critério, confronto, vencedor ou resultado homologado foi alterado. Adaptadores de dados e sincronização examinados, não modificados; sem gravação na planilha. Somente a redação editorial recebe a confirmação do diretor.
+
+Passagem: Codex sem bloqueio conhecido, cota restante não visível. Consultado Caderno remoto da main `62144816e0a9ceafb32063ef64b4ee105ca06cbd`. IA amiga deve consultar o relatório `docs/gazeta/RIGOR_FACTUAL.md`, conferir a fonte efetivamente utilizada, preservar o bloqueio e não trabalhar simultaneamente nestes arquivos. Gepeto revisa a retificação e linguagem. Publicação/merge continuam dependendo de autorização expressa. A validação da cobertura completa é pendência, não sucesso declarado.
+
+Verificação concluída nesta revisão: TypeScript e build aprovados; suíte de rejeição factual e 14 casos isolados anteriores aprovados. Chromium local: seis cenários (1280×900 e 390×844; leitura divergente, confirmada e ausente), conferindo 80,58, quarentena, aviso de próxima edição, cópia com permissão negada e erro de cópia, ausência de tela branca e overflow. Rede integralmente interceptada, sem acesso a produção ou sincronização. Imagem mobile inspecionada. Build mantém avisos anteriores de tamanho de bundle/import misto; eles não foram tratados nesta frente.
+
+## 11. Fonte corrigida pelo diretor e nova conferência de leitura (14/10/2026)
+
+O diretor informou: "corrigi a tabela amigo, encontrei o que houve de errado", e reiterou o link da fonte oficial. Codex releu o arquivo; versão retornada `2026-10-14T18:59:08.861Z`. Confirmados Buske R30=80,58, 50 clubes únicos, 1.500 pontuações R1–R30 numéricas e finitas e Fernandoguinho R21=29,80. A divergência de leitura de Buske apontada na seção 10 está resolvida pela correção feita **pelo diretor**, não pelo Codex.
+
+Comparação por identificador: oito pontuações R30 diferentes da cópia anterior; R1–R29 iguais. Detalhes em `docs/gazeta/CONFERENCIA_PLANILHA_R30.md`. A ferramenta forneceu representação textual de Excel e não expôs aba/formatação nativa; não afirmar leitura direta de uma célula específica nem cache de produção atualizado.
+
+Persistem cinco pontuações de volta antigas no registro editorial das copas da Gazeta (confrontos 2, 12 e 15). Apenas comparadas pontuações, **sem recalcular agregados, classificados ou posições e sem alterar resultados homologados**. A atualização da planilha não corrige sozinha as matérias literais ou retratos anteriores. A Gazeta completa permanece pendente de reconciliação editorial com os registros homologados; não certificar nem publicar automaticamente.
+
+Esta continuidade atualizou somente este Caderno e o novo relatório da conferência, na branch de revisão. Nenhum código esportivo, planilha, cache, regra, dado ou produção foi alterado; sem sincronização. Disponibilidade sem bloqueio conhecido, cota restante não visível. IA amiga e Gepeto devem consultar esta seção e o relatório antes de continuar. Merge/publicação seguem sem autorização nesta etapa.
+
+## 12. Auditoria de impacto em confrontos solicitada pelo diretor (14/10/2026)
+
+Nova orientação expressa: "mas se esse vacilo alterou algum resultado de confronto eu preciso muito saber e ate mesmo corrigir". Codex investigou com dados reais anteriores/corrigidos e os componentes esportivos reais, sem modificar campeonatos.
+
+Achado comprovado no cálculo dos 16 confrontos da Fase 4: somente #12 troca vencedor. Antes: C.R.Pirika 223,29 x 225,27 CRF Galo. Fonte corrigida: **C.R.Pirika 229,49 x 200,39 CRF Galo**, vantagem 29,10, sem desempate. Ambos os componentes da B10 concordam. O cálculo das oitavas troca o adversário do Tainha de Galo para Pirika; outras sete duplas iguais. Confrontos #2 e #15 mudam apenas de placar. Playoffs da B10 e chaveamento/classificação final da M10 iguais.
+
+Relatório e proposta concreta em `docs/gazeta/IMPACTO_CONFRONTOS_R30.md`. Arquivos esportivos usados no teste conferidos contra main. Instrumentação somente em memória/área de trabalho. Sem dados inventados, gravação de pontuação, sincronização, alteração de regra, homologação ou publicação. Tentativas de ler produção pela ferramenta não foram acessíveis; o estado do cache/resultado efetivamente homologado continua pendente. Sem dados R31/R32 para apurar consequências posteriores.
+
+A decisão do diretor sobre eventual retificação por erro material deverá identificar o confronto, resultado e efeito no chaveamento, além de etapas posteriores já disputadas. Não executar propagação em cascata automática. Esta auditoria não formaliza mudança esportiva; prepara uma decisão informada diante da nova solicitação. Codex sem bloqueio conhecido, cota restante não visível. IA amiga deve consultar este relatório antes de retomar; manter separação entre registro jornalístico e resultado oficial.
+
+## 13. Ordem de execução imediata e retificação específica da R30 (14/10/2026)
+
+### Autorização expressa e exceção delimitada
+
+Após conhecer o impacto, o diretor determinou: "CODEX, nao posso esperar a ia amiga voltar a funcionar amigo. tenho que fazer essa alteracao agora. faz o que precisa fazer, deixa tudo publicado no diario como estamos fazendo mas nao posso divulgar coisa errada."
+
+Codex executa a retificação comprovada agora, com testes e registro, sem aguardar a IA amiga. Esta ordem supera a suspensão anterior **exclusivamente para o erro material da R30 e suas consequências demonstradas**, não autoriza reabrir outros resultados, mudar critérios ou fabricar etapas posteriores.
+
+### Correção concreta
+
+**C.R.Pirika 229,49 x 200,39 CRF Galo; Pirika classificado e adversário do Tainha nas oitavas.** Camisa Pesada x Lendinhaxx passa a 243,79 x 212,44; Chinchila x Carlao07 a 176,26 x 265,94, mantendo os vencedores desses dois duelos. Buske R30=80,58.
+
+Fonte corrigida pelo próprio diretor, relida e conferida: 50 clubes únicos, R1–R30 numéricas, versão `2026-10-14T18:59:08.861Z`. Incluídas cópias persistidas R29/R30 e patrimônios. Arquivos históricos existentes R1–R28 não editados. Sem gravação na planilha, alteração de fórmula, desempate, regulamento ou componentes de competição. Playoffs B10 e M10 preservados nos testes.
+
+Proteção no ponto de entrada do aplicativo reconhece a cópia antiga exata dos 50 scores R30 e retifica somente as oito entradas comprovadas. Não modifica novos dados desconhecidos nem outras rodadas. Todas as telas passam a receber os mesmos dados corrigidos, inclusive quando o navegador traz o cache antigo reconhecido.
+
+Gazeta restabelecida com fonte conferida, capa de retificação, matérias, histórias cruzadas, radar dos 50, tabelas e WhatsApp consistentes; histórico R28/R29/R30 preparado e congelado. Nada de scouts, causas inventadas, posições/números substitutos ou geração de edições futuras por calendário. Os rascunhos contestados seguem preservados fora da interface.
+
+### Testes e passagem
+
+Detalhes, lista de arquivos e limitações: `docs/gazeta/RETIFICACAO_AUTORIZADA_R30.md`. Testes de fonte, correção do cache antigo, preservação de entradas/rodadas desconhecidas, 16 confrontos nos dois componentes B10, M10 sem alteração e Chromium desktop/mobile com três situações de leitura e rede totalmente interceptada. TypeScript/build e cópia WhatsApp conferidos. Nenhum dado de R31/R32 fornecido: não apurar partidas posteriores por suposição.
+
+Codex sem bloqueio conhecido; cota restante não visível. IA amiga deve consultar esta seção, o relatório e main antes de retomar. A referência correta passa a ser a retificação autorizada, não as afirmações antigas de vitória de Galo na Fase 4. Publicação acompanhada pelo status da integração GitHub/Vercel; a inspeção direta do domínio está bloqueada pelo proxy do ambiente e não deve ser declarada como realizada.
