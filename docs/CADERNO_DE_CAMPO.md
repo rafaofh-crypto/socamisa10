@@ -298,3 +298,13 @@ TypeScript/build, testes factuais e de cache, teste editorial e comparação aut
 **IA amiga: preserve as reportagens completas e a personalidade recuperada. Não substitua novamente por resumos genéricos nem restaure dados contestados, mecanismos de preenchimento fictício ou vitória do Galo na Fase 4. Consulte o Caderno e o estado atual do código antes de trabalhar; não edite concorrentemente os mesmos arquivos. A proposta editorial depende da aprovação final do diretor para merge/publicação.**
 
 Codex sem bloqueio conhecido; cota restante não visível. Pendência: revisão do diretor/Gepeto dos textos completos e aprovação final. Sem autorização de publicação nesta missão.
+
+### 14.1. Aprovação final e integração da restauração editorial (14/10/2026)
+
+O diretor aprovou expressamente: **"blz codex. pode publicar irmao"**. Codex concluiu o PR #2 (https://github.com/rafaofh-crypto/socamisa10/pull/2), após conferir que a main e o head eram as versões revisadas e que a Vercel confirmou o deploy da revisão. Commit integrado na main: **`95a9b3eb81c3eb52191d569a40a0075c45a8bf42`**. A árvore integrada `625ca1cd8935f376656d6306106575604d565e87` coincide com a proposta testada e aprovada.
+
+As sete pautas e os textos completos estão integrados; Buske foi substituído pela virada Pretinho99 x Sovaco (16,60 de desvantagem na ida, vitória 19,01 na volta, vaga 2,41). Pirika 229,49 x 200,39 Galo, Pirika x Tainha, Buske 80,58, proteção de cache, R28/R29 e dados não editoriais R30 permanecem preservados. Nenhuma alteração adicional em regras, dados ou motores esportivos.
+
+Vercel confirmou **success / Deployment has completed** em **14/10/2026, 17:44:00 (America/Sao_Paulo)**: https://vercel.com/socamisa10/socamisa10/HL7VGjVzaigYgV6yRw4zmJ8F1tjM.
+
+A autorização de publicação supera a pendência de aprovação da seção 14 apenas para esta proposta. A confirmação vem do status oficial da Vercel no GitHub; a avaliação visual foi feita localmente e não se declara navegação em produção, pois o domínio está bloqueado pela rede deste ambiente. IA amiga deve partir da main publicada, preservar as reportagens completas e a curadoria aprovada e não reintroduzir textos genéricos, números contestados ou vitória de Galo na Fase 4. Codex sem bloqueio conhecido; cota restante não visível.
