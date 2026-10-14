@@ -200,3 +200,19 @@ Responsável atual desta frente: Codex. Disponibilidade sem bloqueio conhecido; 
 
 
 
+
+## 10. Retificação factual e proteção da Gazeta — ordem do diretor (14/10/2026)
+
+O diretor confirmou **Capitã Buske R30=80,58 pontos**, contestando a matéria com 117,13/segunda maior pontuação e determinando resolver a Gazeta sem mexer em posições ou campeonatos. A afirmação da seção 8 e a confiança na fonte da seção 9 ficam **expressamente contestadas**; permanecem apenas como registro das avaliações anteriores. Os resultados oficiais não foram reabertos.
+
+Codex reconhece que congelar a cópia disponível não comprovava sua validade. Não se homologa conteúdo por `verified:true`, finitude ou teste que usa a própria base contestada como referência.
+
+Entrega na branch `codex/gazeta-unica-historico-2026-10-14`: fatos editoriais com origem e validação exata; Buske 80,58 em texto/evidência/WhatsApp; retirada das alegações de posição/subida/críticas; remoção dos geradores de fatos substitutos; retratos anteriores mantidos para auditoria, fora do catálogo; aviso de conferência e ausência de estatísticas inventadas. Demais matérias, radar e tabelas editoriais aguardam fonte oficial conferida. **A Gazeta completa ainda não está pronta para divulgação.**
+
+Arquivos desta revisão: `editorialVerification.ts` (novo), `gazetaEngine.ts`, `gazetaArchive.ts`, `publishedGazetaArchive.ts`, `publishedGazetaEditions.ts`, `types.ts`, `test_gazeta_archive.ts`, `test_gazeta_validation.ts`, `GazetaEditionView.tsx`, `docs/gazeta/RIGOR_FACTUAL.md` (novo), `docs/gazeta/HISTORICO_DE_EDICOES.md` e este Caderno. A correção anterior do ErrorBoundary continua no conjunto da branch.
+
+Nenhuma pontuação esportiva, posição, campeonato, critério, confronto, vencedor ou resultado homologado foi alterado. Adaptadores de dados e sincronização examinados, não modificados; sem gravação na planilha. Somente a redação editorial recebe a confirmação do diretor.
+
+Passagem: Codex sem bloqueio conhecido, cota restante não visível. Consultado Caderno remoto da main `62144816e0a9ceafb32063ef64b4ee105ca06cbd`. IA amiga deve consultar o relatório `docs/gazeta/RIGOR_FACTUAL.md`, conferir a fonte efetivamente utilizada, preservar o bloqueio e não trabalhar simultaneamente nestes arquivos. Gepeto revisa a retificação e linguagem. Publicação/merge continuam dependendo de autorização expressa. A validação da cobertura completa é pendência, não sucesso declarado.
+
+Verificação concluída nesta revisão: TypeScript e build aprovados; suíte de rejeição factual e 14 casos isolados anteriores aprovados. Chromium local: seis cenários (1280×900 e 390×844; leitura divergente, confirmada e ausente), conferindo 80,58, quarentena, aviso de próxima edição, cópia com permissão negada e erro de cópia, ausência de tela branca e overflow. Rede integralmente interceptada, sem acesso a produção ou sincronização. Imagem mobile inspecionada. Build mantém avisos anteriores de tamanho de bundle/import misto; eles não foram tratados nesta frente.

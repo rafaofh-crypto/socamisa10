@@ -1,9 +1,11 @@
+// QUARENTENA EDITORIAL: fonte contestada pelo diretor (Buske R30=80,58).
+// Rascunhos anteriores preservados para auditoria. Não importar na interface.
 // Retratos editoriais preservados em 14/10/2026. Não são fonte de resultados esportivos.
 // Fonte: https://docs.google.com/spreadsheets/d/1wGw0eOvoqS-Iv_qSqzpRBSPA815SqHFiEu2TMk0O_Lk/edit; versão consultada: 2026-10-14T13:38:38.292Z.
 // Alterações editoriais estão descritas no Caderno e aguardam aprovação/publicação.
 import type { GazetaEdition } from './types';
 
-export const PUBLISHED_GAZETA_EDITIONS: Record<number, GazetaEdition> = {
+export const UNVERIFIED_GAZETA_DRAFTS: Record<number, GazetaEdition> = {
   "28": {
     "editionNumber": 28,
     "round": 28,

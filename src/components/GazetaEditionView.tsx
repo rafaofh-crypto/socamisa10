@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { CartolaTeam } from '../services/cartolaService';
 import { getPublishedGazetaEdition, getAvailableGazetaEditions, getLatestGazetaEditionRound } from '../services/gazeta/publishedGazetaArchive';
+import { getGazetaSourceWarning } from '../services/gazeta/editorialVerification';
 import { GazetaStory, CupMatchReport, RadarClubDigest } from '../services/gazeta/types';
 import TeamShield from './TeamShield';
 import { 
@@ -38,6 +39,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
   const effectiveRound = availableEditions.some(item => item.round === selectedRound)
     ? selectedRound : availableEditions[0]?.round ?? null;
   const edition = effectiveRound === null ? null : getPublishedGazetaEdition(effectiveRound);
+  const sourceWarning = effectiveRound === null ? null : getGazetaSourceWarning(teams, effectiveRound);
 
   useEffect(() => {
     setSearchTerm('');
@@ -145,11 +147,11 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
                   Arquivo de Edições da Gazeta
                 </span>
                 <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
-                  HISTÓRICO PRESERVADO
+                  INFORMAÇÕES CONFERIDAS
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 font-mono">
-                Navegue pelas edições anteriores e nunca perca as crônicas de cada rodada
+                Edições e matérias disponíveis após conferência editorial
               </p>
             </div>
           </div>
@@ -174,7 +176,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
                   <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${
                     isSelected ? 'bg-black/30 text-black' : 'bg-black/40 text-slate-400'
                   }`}>
-                    {ed.round === 30 ? 'Fase 4 B10' : ed.round === 29 ? 'Final M10' : ed.round === 28 ? 'Playoffs' : `R${ed.round}`}
+                    {ed.badge}
                   </span>
                 </button>
               );
@@ -196,9 +198,11 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
 
       {safeCurrentRound > (availableEditions[0]?.round ?? 0) && (
         <p role="status" className="text-sm text-slate-300 rounded-xl bg-white/5 border border-white/10 p-3">
-          A edição da R{safeCurrentRound} está em preparação. As edições anteriores continuam disponíveis no histórico.
+          A edição da R{safeCurrentRound} está em preparação. As matérias conferidas permanecem disponíveis.
         </p>
       )}
+      {edition.verificationNotice && <p role="status" className="text-sm text-amber-200 rounded-xl bg-amber-500/10 border border-amber-500/20 p-4">{edition.verificationNotice}</p>}
+      {sourceWarning && <p role="alert" className="text-sm text-amber-200">{sourceWarning}</p>}
       {copyError && <p role="alert" className="text-sm text-amber-300">{copyError}</p>}
 
       {/* 2. MASTHEAD DO JORNAL */}
@@ -218,7 +222,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
               <span className="min-w-0">Gazeta <span className="text-[#D4AF37]">Só Camisa 10</span></span>
             </h1>
             <p className="text-slate-400 text-xs sm:text-sm font-sans">
-              O Jornal Oficial da Temporada · Cobertura Factual dos 50 Clubes, Copas B10/M10 e Disputas Mensais
+              {edition.subtitle}
             </p>
           </div>
 
@@ -242,39 +246,23 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
           </div>
         </div>
 
-        {/* TERMÔMETRO RÁPIDO DA RODADA */}
+        {/* Unconfirmed statistics stay absent, never invented from a fallback. */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 relative z-10">
-          <div className="bg-black/40 border border-white/5 rounded-2xl p-3.5">
-            <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">Maior Mitada R{effectiveRound}</span>
-            <div className="text-sm sm:text-base font-black text-blue-400 truncate font-display">
-              {edition.stats?.highestScore?.clubName || 'Craque da Rodada'}
-            </div>
-            <span className="text-xs font-mono text-slate-300 font-bold">{edition.stats?.highestScore?.score || 0} pts</span>
-          </div>
-
-          <div className="bg-black/40 border border-white/5 rounded-2xl p-3.5">
-            <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">Líder do Geral</span>
-            <div className="text-sm sm:text-base font-black text-[#D4AF37] truncate font-display">
-              {edition.geralTop5?.[0]?.name || 'Tainha Ovada FC'}
-            </div>
-            <span className="text-xs font-mono text-slate-300 font-bold">{edition.geralTop5?.[0]?.points || 2656.29} pts</span>
-          </div>
-
-          <div className="bg-black/40 border border-white/5 rounded-2xl p-3.5">
-            <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">Líder do Mês</span>
-            <div className="text-sm sm:text-base font-black text-purple-400 truncate font-display">
-              {edition.monthlyTop5?.[0]?.name || 'Carlao07'}
-            </div>
-            <span className="text-xs font-mono text-slate-300 font-bold">{edition.monthlyTop5?.[0]?.points || 257.24} pts</span>
-          </div>
-
-          <div className="bg-black/40 border border-white/5 rounded-2xl p-3.5">
-            <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">Copa B10</span>
-            <div className="text-sm sm:text-base font-black text-emerald-400 truncate font-display">
-              {effectiveRound! >= 30 ? '16 VAGAS HOMOLOGADAS' : 'FASE ELIMINATÓRIA'}
-            </div>
-            <span className="text-xs font-mono text-slate-300 font-bold">{effectiveRound! >= 30 ? 'Oitavas na R31' : `Rodada ${effectiveRound}`}</span>
-          </div>
+          {edition.stats.highestScore && <div className="bg-black/40 border border-white/5 rounded-2xl p-3.5">
+            <span className="text-[10px] text-slate-500 block">Maior pontuação R{effectiveRound}</span>
+            <strong className="text-blue-400">{edition.stats.highestScore.clubName}</strong>
+            <p className="text-slate-300">{edition.stats.highestScore.score} pts</p>
+          </div>}
+          {edition.geralTop5.length > 0 && <div className="bg-black/40 border border-white/5 rounded-2xl p-3.5">
+            <span className="text-[10px] text-slate-500 block">Líder do Geral</span>
+            <strong className="text-[#D4AF37]">{edition.geralTop5[0].name}</strong>
+            <p className="text-slate-300">{edition.geralTop5[0].points} pts</p>
+          </div>}
+          {edition.monthlyTop5.length > 0 && <div className="bg-black/40 border border-white/5 rounded-2xl p-3.5">
+            <span className="text-[10px] text-slate-500 block">Líder do Mês</span>
+            <strong className="text-purple-400">{edition.monthlyTop5[0].name}</strong>
+            <p className="text-slate-300">{edition.monthlyTop5[0].points} pts</p>
+          </div>}
         </div>
       </div>
 
@@ -337,7 +325,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
       </div>
 
       {/* 4. HISTÓRIAS CRUZADAS: O MESMO CLUBE EM DUAS FRENTES */}
-      <div className="space-y-4">
+      {(edition.crossStories.length > 0) && <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-xl sm:text-2xl font-black font-display uppercase tracking-tight text-white flex items-center gap-2">
@@ -381,10 +369,10 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
             </div>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* 5. DESTAQUES DA RODADA (REPORTAGENS ESPECIAIS) */}
-      <div className="space-y-4">
+      {(edition.featuredStories.length > 0) && <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-xl sm:text-2xl font-black font-display uppercase tracking-tight text-white flex items-center gap-2">
@@ -429,10 +417,10 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
             </div>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* 6. GIRO DAS COPAS: B10 FASE 4 & M10 MUNDIAL */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {(edition.b10Digest.length > 0 || edition.stats.m10Champion || edition.geralTop5.length > 0) && <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* TABELA DOS 16 CONFRONTOS B10 */}
         {edition.b10Digest.length > 0 && <div className="lg:col-span-2 rounded-3xl border border-white/10 bg-[#121216] p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
@@ -499,35 +487,12 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
         }
         {/* PÓDIO M10 E TEMPORADA GERAL TOP 5 */}
         <div className="space-y-6">
-          {/* M10 MUNDIAL */}
-          {edition.stats.m10Champion && <div className="rounded-3xl border border-white/10 bg-[#121216] p-6 space-y-3">
-            <span className="text-[10px] font-mono uppercase font-black text-blue-400 block">
-              COPA M10 • MUNDIAL ENCERRADO NA R29
-            </span>
-            <h3 className="text-lg font-black font-display uppercase text-white flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-amber-400" />
-              Pódio Mundial Homologado
-            </h3>
-
-            <div className="space-y-2 text-xs font-mono pt-2">
-              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
-                <span className="font-bold text-amber-300">🥇 Campeão: Tainha Ovada FC</span>
-                <span className="text-[10px] text-amber-400 font-mono">+2.18 pts</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-slate-800/40 border border-white/5 flex items-center justify-between">
-                <span className="text-slate-300">🥈 Vice: Dois Vizinhos SA</span>
-                <span className="text-[10px] text-slate-400 font-mono">117.68 pts</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-amber-900/20 border border-amber-700/20 flex items-center justify-between">
-                <span className="text-amber-200">🥉 3º Lugar: Camisa Pesada SA</span>
-                <span className="text-[10px] text-amber-300 font-mono">132.96 pts</span>
-              </div>
-            </div>
-          </div>
-
-          }
+          {edition.stats.m10Champion && <div className="rounded-3xl border border-white/10 bg-[#121216] p-6">
+            <h3 className="text-lg font-bold text-white">Campeão da Copa M10</h3>
+            <p className="text-amber-300">{edition.stats.m10Champion}</p>
+          </div>}
           {/* TOP 5 GERAL */}
-          <div className="rounded-3xl border border-white/10 bg-[#121216] p-6 space-y-3">
+          {edition.geralTop5.length > 0 && <div className="rounded-3xl border border-white/10 bg-[#121216] p-6 space-y-3">
             <span className="text-[10px] font-mono uppercase font-black text-[#D4AF37] block">
               CAMPEONATO GERAL APÓS R{effectiveRound}
             </span>
@@ -546,12 +511,13 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
                 </div>
               ))}
             </div>
-          </div>
+          </div>}
+
         </div>
-      </div>
+      </div>}
 
       {/* 7. RADAR EDITORIAL DOS 50 CLUBES (PESQUISÁVEL) */}
-      <div className="rounded-3xl border border-white/10 bg-[#121216] p-6 sm:p-8 space-y-6">
+      {edition.radarClubs.length > 0 && <div className="rounded-3xl border border-white/10 bg-[#121216] p-6 sm:p-8 space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
           <div>
             <h3 className="text-xl sm:text-2xl font-black font-display uppercase tracking-tight text-white flex items-center gap-2">
@@ -654,7 +620,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
             </div>
           ))}
         </div>
-      </div>
+      </div>}
     </div>
   );
 };

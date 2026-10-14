@@ -1,5 +1,5 @@
 import type { GazetaEdition } from './types';
-import { PUBLISHED_GAZETA_EDITIONS } from './publishedGazetaEditions';
+import { buildVerifiedGazetaEdition } from './editorialVerification';
 import { ARCHIVED_EDITIONS_CATALOG } from './gazetaArchive';
 
 // Freeze the editorial objects, never the application's sports data.
@@ -10,10 +10,15 @@ function freezeEdition<T>(value: T): T {
   }
   return value;
 }
-freezeEdition(PUBLISHED_GAZETA_EDITIONS);
+const VERIFIED_EDITIONS: Record<number, GazetaEdition> = {};
+for (const item of ARCHIVED_EDITIONS_CATALOG) {
+  const edition = buildVerifiedGazetaEdition(item.round);
+  if (edition) VERIFIED_EDITIONS[item.round] = edition;
+}
+freezeEdition(VERIFIED_EDITIONS);
 
 export function getPublishedGazetaEdition(round: number): GazetaEdition | null {
-  return PUBLISHED_GAZETA_EDITIONS[round] ?? null;
+  return VERIFIED_EDITIONS[round] ?? null;
 }
 
 export function getAvailableGazetaEditions(_currentRound?: number) {
