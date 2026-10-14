@@ -262,3 +262,13 @@ Gazeta restabelecida com fonte conferida, capa de retificação, matérias, hist
 Detalhes, lista de arquivos e limitações: `docs/gazeta/RETIFICACAO_AUTORIZADA_R30.md`. Testes de fonte, correção do cache antigo, preservação de entradas/rodadas desconhecidas, 16 confrontos nos dois componentes B10, M10 sem alteração e Chromium desktop/mobile com três situações de leitura e rede totalmente interceptada. TypeScript/build e cópia WhatsApp conferidos. Nenhum dado de R31/R32 fornecido: não apurar partidas posteriores por suposição.
 
 Codex sem bloqueio conhecido; cota restante não visível. IA amiga deve consultar esta seção, o relatório e main antes de retomar. A referência correta passa a ser a retificação autorizada, não as afirmações antigas de vitória de Galo na Fase 4. Publicação acompanhada pelo status da integração GitHub/Vercel; a inspeção direta do domínio está bloqueada pelo proxy do ambiente e não deve ser declarada como realizada.
+
+### 13.1. Integração e publicação concluídas
+
+- PR **#1**: https://github.com/rafaofh-crypto/socamisa10/pull/1 — integrado por squash, sem conflitos, após build da versão de revisão confirmado pela Vercel.
+- Commit da correção na main: **`9c1ec3e330dbed09a24394bbc8aeeb0feae64f82`**. Árvore Git igual à árvore preparada/testada (`b400f5a9143b1932c69c05da6095c9272173f81c`).
+- Vercel confirmou **`success` / `Deployment has completed`** para esse commit em **14/10/2026 às 16h31min58s (America/Sao_Paulo)**: https://vercel.com/socamisa10/socamisa10/DpJMWEp3fK4zDZZ5DG6SWy9nype9.
+- Correção disponibilizada: Pirika 229,49 x 200,39 Galo; Pirika na dupla com Tainha; Buske 80,58; placares dos confrontos 2 e 15 retificados; Gazeta conferida, radar dos 50 clubes, WhatsApp e histórico preparados.
+- Verificação técnica/local e inspeção visual de capa mobile concluídas. O domínio de produção não pôde ser inspecionado diretamente devido ao bloqueio de rede do ambiente; a confirmação de publicação vem do status oficial da integração Vercel no GitHub, não de uma navegação em produção.
+- Não há implementação B10 Mobile, alteração de regulamento ou correção esportiva fora do erro material identificado. A retificação é a exceção autorizada na seção 13. Arquivos de outras rodadas existentes, playoffs e M10 preservados.
+- IA amiga deve partir da main publicada, consultar esta seção e o relatório de retificação. A branch anterior era de revisão e não deve ser usada para restaurar a versão contestada. Responsável pela execução/registro: Codex; sem bloqueio conhecido, cota restante não visível.

@@ -49,3 +49,13 @@ Rascunhos anteriores contestados seguem preservados para auditoria fora da inter
 A integração deve ser feita a partir do diff revisado, com checagem da main e acompanhamento do status Vercel. Uma confirmação de deploy não equivale a inspeção visual direta do site: o domínio oficial está bloqueado pelo proxy de rede deste ambiente. Registrar os identificadores efetivos de commit/PR/deploy após concluir, sem prometer acesso que não ocorreu.
 
 IA amiga: consultar este documento, a seção 13 do Caderno e o estado da main antes de qualquer edição. Não reintroduzir a vitória de Galo na Fase 4, os números antigos, o motor de conteúdo substituto ou aplicar esta exceção a outros resultados. Gepeto: preservar a personalidade do jornal e a transparência da retificação. Nenhuma nova regra está autorizada por este registro.
+
+### 13.1. Integração e publicação concluídas
+
+- PR **#1**: https://github.com/rafaofh-crypto/socamisa10/pull/1 — integrado por squash, sem conflitos, após build da versão de revisão confirmado pela Vercel.
+- Commit da correção na main: **`9c1ec3e330dbed09a24394bbc8aeeb0feae64f82`**. Árvore Git igual à árvore preparada/testada (`b400f5a9143b1932c69c05da6095c9272173f81c`).
+- Vercel confirmou **`success` / `Deployment has completed`** para esse commit em **14/10/2026 às 16h31min58s (America/Sao_Paulo)**: https://vercel.com/socamisa10/socamisa10/DpJMWEp3fK4zDZZ5DG6SWy9nype9.
+- Correção disponibilizada: Pirika 229,49 x 200,39 Galo; Pirika na dupla com Tainha; Buske 80,58; placares dos confrontos 2 e 15 retificados; Gazeta conferida, radar dos 50 clubes, WhatsApp e histórico preparados.
+- Verificação técnica/local e inspeção visual de capa mobile concluídas. O domínio de produção não pôde ser inspecionado diretamente devido ao bloqueio de rede do ambiente; a confirmação de publicação vem do status oficial da integração Vercel no GitHub, não de uma navegação em produção.
+- Não há implementação B10 Mobile, alteração de regulamento ou correção esportiva fora do erro material identificado. A retificação é a exceção autorizada na seção 13. Arquivos de outras rodadas existentes, playoffs e M10 preservados.
+- IA amiga deve partir da main publicada, consultar esta seção e o relatório de retificação. A branch anterior era de revisão e não deve ser usada para restaurar a versão contestada. Responsável pela execução/registro: Codex; sem bloqueio conhecido, cota restante não visível.
