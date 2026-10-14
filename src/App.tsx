@@ -15,6 +15,8 @@ import RulesBook from "./pages/RulesBook";
 import GazetaC10 from "./pages/GazetaC10";
 import CompetitionSelector from "./components/CompetitionSelector";
 import TournamentCalendarView from "./components/TournamentCalendarView";
+import ErrorBoundary from "./components/ErrorBoundary";
+
 
 export default function App() {
   const { data, loading, error, sync, lastSync, progressLog, source } = useCartolaData();
@@ -144,8 +146,9 @@ export default function App() {
 
         {/* Tab content renders */}
         {(!isSyncing || teams.length > 0) && (
-          <>
+          <ErrorBoundary fallbackTitle="Falha ao renderizar a aba selecionada">
             {activeTab === "dashboard" && (
+
               <Dashboard 
                 teams={teams} 
                 currentRound={currentRound} 
@@ -233,8 +236,9 @@ export default function App() {
               />
             )}
 
-          </>
+          </ErrorBoundary>
         )}
+
       </main>
 
       {/* Footer credits block */}
