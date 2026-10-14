@@ -132,3 +132,73 @@ Base de análise auditada no repositório: **Commit `f56474e7327aec2e50b01aee04e
 - **Decisões / Dúvidas pendentes:** Nenhuma dúvida pendente. Decisão soberana cumprida integralmente.
 - **Autorizações e restrições ativas:** Nenhuma publicação, branch ou commit de código autorizado. Apenas o arquivo `docs/CADERNO_DE_CAMPO.md` mantido para registro e coordenação.
 
+## 7. Preparação autorizada da Gazeta C10 — 14/10/2026
+
+### 7.1. Autorização atual do diretor
+
+O diretor do Só Camisa 10 autorizou expressamente o **Codex** a executar melhorias seguras, isoladas e reversíveis de preparação da Gazeta: documentação técnica/editorial, mapa de fontes, limitações, contrato conceitual, plano de testes e casos de validação isolados. Autorizou atualizar este registro oficial e trabalhar em branch própria, sem solicitar aprovação individual para cada uma dessas tarefas.
+
+Essa autorização **não inclui** alterações de funcionamento esportivo, textos atualmente publicados, edições históricas, componentes do aplicativo, importação/sincronização, pontuações, patrimônio, rankings, desempates, confrontos, regras ou resultados. Não autoriza merge na `main` ou publicação em produção. Esta seção complementa os registros anteriores; não libera a frente mobile suspensa na seção 4.1.
+
+O arquivo oficial foi confirmado na árvore da `main`: `docs/CADERNO_DE_CAMPO.md`. O nome “Diário de Campo” utilizado na solicitação refere-se a este registro; não foi criado um segundo Diário. Base remota da entrega: `3532b5a1aae62320c6162da29c27564f3bb46dec`. Branch de preparação: `codex/gazeta-preparacao-2026-10-14`.
+
+### 7.2. Decisões editoriais vigentes
+
+- A Gazeta deve ser o jornal da temporada, acompanhando os 50 clubes e todas as competições. A rodada inicia a notícia; a temporada fornece o contexto.
+- Identificar trajetórias, rivalidades demonstráveis, reviravoltas, eliminações, classificações e histórias cruzadas. Clubes fora das copas continuam elegíveis para pautas.
+- Linguagem emocionante, criativa e esportiva: batalha, duelo, atropelo, apagou as luzes e sobreviveu por um fio são metáforas bem-vindas, proporcionais ao fato.
+- **Liberdade narrativa, rigor factual:** não inventar acontecimentos, causas, escalações, scouts individuais, comportamento ou estado psicológico dos participantes.
+- **Integração de scouts e suas pontuações expressamente descartada**, incluindo tabelas e analogias. Não permanece no plano.
+- A Gazeta observa resultados oficiais; nunca determina vencedores ou recalcula competições.
+- Edições históricas devem ser preservadas. Eventuais correções dependem de aprovação editorial e registro rastreável.
+
+### 7.3. Trabalho realizado e orientação à IA amiga
+
+| Arquivo criado/modificado | Trabalho e motivo | Segurança / uso na retomada |
+| --- | --- | --- |
+| `docs/CADERNO_DE_CAMPO.md` | Acrescentada somente esta seção: autorização, decisões e passagem. | Conteúdo anterior preservado; não tratar registros antigos de estabilidade como nova certificação. |
+| `docs/gazeta/README.md` | Índice e instruções do pacote. | Sem ligação ao produto; ponto de entrada para a IA amiga. |
+| `docs/gazeta/DIRETRIZES_EDITORIAIS.md` | Consolidação das decisões atuais. | Não muda redação publicada; consultar antes de propor modelos. |
+| `docs/gazeta/MAPA_TECNICO.md` | Responsabilidades, dependências e fontes. | Leitura de código referenciada à base; validar novamente ao retomar. |
+| `docs/gazeta/PENDENCIAS.md` | Inventário de problemas e limites. | Nenhuma correção aplicada; separar histórico, texto dinâmico e regras. |
+| `docs/gazeta/CONTRATO_DE_OBSERVACAO.md` | Proposta de contrato e invariantes editoriais. | Documento conceitual, sem API ou integração; precisa de revisão conjunta. |
+| `docs/gazeta/PLANO_DE_TESTES.md` | Critérios de isolamento, regressão e sequência futura. | Plano não autoriza implementação; não iniciar servidor com autosync. |
+| `docs/gazeta/validacao/casos.json` | Dez registros e quatro histórias cruzadas fictícias. | IDs fictícios, nenhuma pontuação de clubes oficiais; não publicar como temporada. |
+| `docs/gazeta/validacao/verificar.mjs` | Verificador manual dos casos e imutabilidade. | Só lê JSON local; sem rede, escrita, imports do app ou cálculo de resultados. Não é módulo de produção. |
+
+Verificações da entrega: casos válidos/inválidos com resultados esperados, preservação de entradas, TypeScript sem emissão, links locais, diff limitado à documentação e ausência de imports do pacote no aplicativo. O registro de verificações descreve a preparação, não certifica homologação ou estabilidade de produção. Nenhuma dependência, configuração, serviço ou arquivo em `src/` foi alterado.
+
+### 7.4. Achados relatados, não corrigidos
+
+- Dependência de matérias cadastradas R19–R29 e textos genéricos; ausência de visão integrada das competições.
+- A Gazeta não recebe resultados estruturados das copas nem sinal suficiente de homologação.
+- Afirmações sem evidência em Gazeta e Destaques: causa atribuída a scouts, esquecimento do mercado, desgaste de elenco e conclusões táticas não demonstradas. Metáforas esportivas não são proibidas.
+- Textos históricos são combinados com dados atuais; alterar modelos pode mudar edições anteriores. Preservação futura de edições publicadas continua necessária.
+- **R21:** diretor corrigiu a pontuação de Fernandoguinho FC para **29,80**. O Codex confirmou a nova leitura da fonte em 14/10/2026, sem a data anteriormente retornada, e compatibilidade com o parser. **A correção não foi feita pelo Codex.** Cache/servidor e tipo interno da célula não foram certificados. Esta preparação não modificou dados ou classificações.
+- As pendências esportivas anteriores continuam apenas relatadas; não foram usadas como oportunidade de manutenção.
+
+### 7.5. Caminho futuro — direções, não autorizações automáticas
+
+1. Organizar a base técnica e editorial (pacote desta entrega).
+2. Validar fontes oficiais de cada competição com a IA amiga e o responsável.
+3. Desenvolver mecanismos de observação dos acontecimentos da temporada.
+4. Conectar histórias de um mesmo clube entre competições.
+5. Definir critérios de seleção e prioridade das notícias.
+6. Desenvolver redação jornalística com personalidade.
+7. Implantar revisão editorial e preservação das edições.
+8. Testar isoladamente antes de qualquer integração ao aplicativo oficial.
+
+O isolamento acompanha todas as etapas. As etapas de implementação exigem autorização posterior; o contrato e os verificadores fictícios não significam inteligência jornalística instalada.
+
+### 7.6. Mensagem expressa à IA amiga
+
+> A IA amiga deve considerar o trabalho de preparação realizado pelo Codex como uma intervenção autorizada pelo diretor. As decisões editoriais registradas refletem a orientação atual do projeto. Antes de propor novas implementações, deve consultar os documentos preparados, verificar o estado atual do repositório e considerar as pendências e limitações identificadas. Nenhuma alteração futura está automaticamente autorizada por este registro.
+
+### 7.7. Passagem de trabalho
+
+- **Executor:** Codex. **Disponibilidade:** sem bloqueio conhecido; cota restante não visível. Sem previsão de bloqueio informada.
+- **Concluído:** preparação documental e material de validação isolado; aplicativo e textos publicados preservados.
+- **Pendências:** IA amiga validar fontes reconhecidas, sinais de homologação e IDs; Gepeto revisar critérios de pauta; responsável aprovar passos futuros.
+- **Arquivos desta frente:** somente este Caderno e `docs/gazeta/`; nenhuma reserva de componentes ou serviços esportivos. Na retomada, combinar executor único para o Caderno.
+- **Restrição:** nenhuma integração, refatoração executável do app, limpeza publicada, merge ou publicação autorizados.
+- **Revisão/reversão:** entrega em branch própria; remover o pacote e somente esta seção se houver ordem de reversão, preservando registros posteriores. Conferir a `main` antes de eventual integração.

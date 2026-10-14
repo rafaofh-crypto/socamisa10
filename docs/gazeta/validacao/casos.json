@@ -1,0 +1,21 @@
+{
+  "escopo": "FICTICIO_ISOLADO_NAO_PUBLICAR",
+  "casos": [
+    { "id": "zero-real", "entrada": { "clubes": ["clube-teste-a"], "competicao": "teste-geral", "momento": "teste-r2", "valor": 0, "disponivel": true, "situacao": "parcial", "fonte": "fixture-local", "evidencias": ["fixture-zero"], "afirmacaoDefinitiva": false }, "errosEsperados": [] },
+    { "id": "ausente", "entrada": { "clubes": ["clube-teste-a"], "competicao": "teste-geral", "momento": "teste-r2", "valor": null, "disponivel": false, "situacao": "nao-verificavel", "fonte": "fixture-local", "evidencias": [], "afirmacaoDefinitiva": false }, "errosEsperados": [] },
+    { "id": "negativo-real", "entrada": { "clubes": ["clube-teste-a"], "competicao": "teste-geral", "momento": "teste-r2", "valor": -1, "disponivel": true, "situacao": "parcial", "fonte": "fixture-local", "evidencias": ["fixture-negativo"], "afirmacaoDefinitiva": false }, "errosEsperados": [] },
+    { "id": "confirmado-recebido", "entrada": { "clubes": ["clube-teste-a"], "competicao": "teste-copa", "momento": "teste-r2", "valor": 10, "disponivel": true, "situacao": "confirmado", "fonte": "fixture-local", "evidencias": ["fixture-confirmacao"], "afirmacaoDefinitiva": true }, "errosEsperados": [] },
+    { "id": "ausencia-nao-e-zero", "entrada": { "clubes": ["clube-teste-a"], "competicao": "teste-copa", "momento": "teste-r2", "valor": 0, "disponivel": false, "situacao": "parcial", "fonte": "fixture-local", "evidencias": [], "afirmacaoDefinitiva": false }, "errosEsperados": ["valor-ausente"] },
+    { "id": "data-nao-e-pontuacao", "entrada": { "clubes": ["clube-teste-a"], "competicao": "teste-copa", "momento": "teste-r2", "valor": "2026-01-01", "disponivel": true, "situacao": "parcial", "fonte": "fixture-local", "evidencias": ["fixture-data"], "afirmacaoDefinitiva": false }, "errosEsperados": ["valor-numerico"] },
+    { "id": "parcial-nao-homologa", "entrada": { "clubes": ["clube-teste-a"], "competicao": "teste-copa", "momento": "teste-r2", "valor": 10, "disponivel": true, "situacao": "parcial", "fonte": "fixture-local", "evidencias": ["fixture-parcial"], "afirmacaoDefinitiva": true }, "errosEsperados": ["confirmacao"] },
+    { "id": "confirmado-sem-evidencia", "entrada": { "clubes": ["clube-teste-a"], "competicao": "teste-copa", "momento": "teste-r2", "valor": 10, "disponivel": true, "situacao": "confirmado", "fonte": "fixture-local", "evidencias": [], "afirmacaoDefinitiva": true }, "errosEsperados": ["evidencia"] },
+    { "id": "identidade-duplicada", "entrada": { "clubes": ["clube-teste-a", "clube-teste-a"], "competicao": "teste-copa", "momento": "teste-r2", "valor": 10, "disponivel": true, "situacao": "parcial", "fonte": "fixture-local", "evidencias": ["fixture-ids"], "afirmacaoDefinitiva": false }, "errosEsperados": ["identidade"] },
+    { "id": "fonte-ausente", "entrada": { "clubes": ["clube-teste-a"], "competicao": "teste-copa", "momento": "teste-r2", "valor": 10, "disponivel": true, "situacao": "confirmado", "fonte": "", "evidencias": ["fixture-origem"], "afirmacaoDefinitiva": true }, "errosEsperados": ["fonte"] }
+  ],
+  "historiasCruzadas": [
+    { "id": "mesmo-clube-duas-disputas", "eventos": [ { "clube": "clube-teste-a", "competicao": "teste-copa", "momento": "teste-r2", "evidencias": ["fixture-copa"] }, { "clube": "clube-teste-a", "competicao": "teste-mensal", "momento": "teste-r2", "evidencias": ["fixture-mensal"] } ], "valida": true },
+    { "id": "clubes-diferentes", "eventos": [ { "clube": "clube-teste-a", "competicao": "teste-copa", "momento": "teste-r2", "evidencias": ["fixture-copa"] }, { "clube": "clube-teste-b", "competicao": "teste-mensal", "momento": "teste-r2", "evidencias": ["fixture-mensal"] } ], "valida": false },
+    { "id": "momentos-incompativeis", "eventos": [ { "clube": "clube-teste-a", "competicao": "teste-copa", "momento": "teste-r2", "evidencias": ["fixture-copa"] }, { "clube": "clube-teste-a", "competicao": "teste-mensal", "momento": "teste-r3", "evidencias": ["fixture-mensal"] } ], "valida": false },
+    { "id": "segunda-evidencia-ausente", "eventos": [ { "clube": "clube-teste-a", "competicao": "teste-copa", "momento": "teste-r2", "evidencias": ["fixture-copa"] }, { "clube": "clube-teste-a", "competicao": "teste-mensal", "momento": "teste-r2", "evidencias": [] } ], "valida": false }
+  ]
+}
