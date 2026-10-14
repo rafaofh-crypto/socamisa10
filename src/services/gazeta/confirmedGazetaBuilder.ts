@@ -1,3 +1,4 @@
+import { getRestoredR30Stories } from './r30RestoredStories';
 import type { CartolaTeam } from '../cartolaService';
 import { MONTH_TO_ROUNDS } from '../cartollaApi';
 import { OFFICIAL_CUP_REGISTRY } from './cupOfficialRegistry';
@@ -43,31 +44,10 @@ export function buildConfirmedEdition(round:number):GazetaEdition|null {
   const crossStories:GazetaStory[]=[];
   let headlineStory:GazetaStory;
   if(round===30){
-    const pirika=b10Digest.find(m=>m.matchNumber===12)!;
-    const rivers=b10Digest.find(m=>m.matchNumber===9)!;
-    const carlao=b10Digest.find(m=>m.matchNumber===15)!;
-    const ninja=b10Digest.find(m=>m.matchNumber===8)!;
-    const tainhaMatch=b10Digest.find(m=>m.matchNumber===6)!;
-    headlineStory=story('manchete-r30','manchete','Pirika avança, Rivers sobrevive por 0,32 e Ninja brilha: a B10 fecha uma rodada de tirar o fôlego!',
-      `C.R.Pirika venceu CRF Galo por ${pts(pirika.homeAggregate)} a ${pts(pirika.awayAggregate)} e enfrentará Tainha nas oitavas. Rivers of Babylon avançou por ${pts(rivers.diff)} ponto, enquanto ${best.name} marcou a maior pontuação da R30: ${pts(best.roundScore)}.`,
-      ['c-r-pirika','crf-galo','rivers-of-babylon',best.id],
-      [['Pirika x Galo',`${pts(pirika.homeAggregate)} x ${pts(pirika.awayAggregate)}`],['Rivers x Montinho',`${pts(rivers.awayAggregate)} x ${pts(rivers.homeAggregate)}`],['Maior pontuação R30',`${best.name}: ${pts(best.roundScore)}`]],
-      ['Retificação: após a correção da planilha pelo responsável da liga, o confronto Pirika x Galo passa a ter Pirika como classificado. A versão anterior da Gazeta usava pontuações incorretas.']);
-    featuredStories.push(story('destaque-pirika','copa_b10','Pirika vence a batalha e prepara duelo com Tainha!',
-      `Com ${pts(pirika.homeLeg1)} na ida e ${pts(pirika.homeLeg2)} na volta, C.R.Pirika fechou ${pts(pirika.homeAggregate)} contra ${pts(pirika.awayAggregate)} do CRF Galo. A vaga veio por ${pts(pirika.diff)} pontos.`,['c-r-pirika','crf-galo'],[['Ida R29',`${pts(pirika.homeLeg1)} x ${pts(pirika.awayLeg1)}`],['Volta R30',`${pts(pirika.homeLeg2)} x ${pts(pirika.awayLeg2)}`]]));
-    featuredStories.push(story('destaque-ninja','destaque',`${best.name} comanda o show da R30 com ${pts(best.roundScore)} pontos!`,
-      `A maior pontuação entre os 50 clubes foi de ${best.name}. Na B10, o Ninja avançou sobre Marixco por ${pts(ninja.awayAggregate)} a ${pts(ninja.homeAggregate)}.`,[best.id,'marixco-fc'],[['R30',pts(best.roundScore)],['B10',`${pts(ninja.awayAggregate)} x ${pts(ninja.homeAggregate)}`]]));
-    featuredStories.push(story('destaque-carlao','mensal',`Carlao07 crava ${pts(carlao.awayAggregate)} no agregado e mantém a liderança de outubro!`,
-      `O maior agregado individual da Fase 4 foi do Carlao07: ${pts(carlao.awayLeg1)} na R29 e ${pts(carlao.awayLeg2)} na R30. Chinchila somou ${pts(carlao.homeAggregate)}.`,['carlao07','chinchila-cabecuda'],[['Fase 4',`${pts(carlao.awayAggregate)} x ${pts(carlao.homeAggregate)}`],['Outubro',`${pts(monthly.find(t=>t.id==='carlao07')!.month)} pontos`]]));
-    const buske=profiles.find(t=>t.id==='capita-buske')!;
-    crossStories.push(story('cruzada-buske','cruzada',`Capitã Buske segue na temporada: ${pts(buske.roundScore)} pontos na R30`,
-      `O mata-mata terminou nos playoffs diante do CRF Galo (${pts(galo.scoreLoser)} a ${pts(galo.scoreWinner)}), mas a temporada continua. Buske marcou ${pts(buske.roundScore)} na R30.`,['capita-buske','crf-galo'],[['Playoffs B10',`${pts(galo.scoreLoser)} x ${pts(galo.scoreWinner)}`],['R30',pts(buske.roundScore)]]));
-    const tainha=profiles.find(t=>t.id==='tainha-ovada-fc')!;
-    crossStories.push(story('cruzada-tainha','cruzada','Tainha carrega a taça da M10 e segue vivo na B10!',
-      `Campeão da M10 na R29, Tainha avançou na B10 contra Dique por ${pts(tainhaMatch.homeAggregate)} a ${pts(tainhaMatch.awayAggregate)}. Agora encontrará C.R.Pirika. Na Geral, soma ${pts(tainha.total)} pontos.`,['tainha-ovada-fc','c-r-pirika'],[['M10','Campeão na R29'],['B10',`${pts(tainhaMatch.homeAggregate)} x ${pts(tainhaMatch.awayAggregate)}`],['Geral',pts(tainha.total)]]));
-    const cas=profiles.find(t=>t.id==='casquinha-ec')!;
-    crossStories.push(story('cruzada-casquinha','cruzada',`Casquinha marca ${pts(cas.roundScore)} na R30 após despedida dos playoffs`,
-      `O Casquinha caiu diante do Futcafa por ${pts(casquinha.scoreLoser)} a ${pts(casquinha.scoreWinner)} nos playoffs. Na R30, a pontuação foi ${pts(cas.roundScore)}; a disputa da temporada segue.`,['casquinha-ec','futcafa'],[['Playoffs',`${pts(casquinha.scoreLoser)} x ${pts(casquinha.scoreWinner)}`],['R30',pts(cas.roundScore)]]));
+    const restored = getRestoredR30Stories({profiles,general,monthly,b10Digest});
+    headlineStory = restored.headlineStory;
+    featuredStories.push(...restored.featuredStories);
+    crossStories.push(...restored.crossStories);
   }else if(round===29){
     const final=OFFICIAL_CUP_REGISTRY.m10.finalMatch;
     headlineStory=story('manchete-r29','manchete','Tainha levanta a taça da M10; Carlao07 lidera o show da R29!',

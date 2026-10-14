@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+import { renderToStaticMarkup } from 'react-dom/server';
+import React from 'react';
+import GazetaEditionView from '../../components/GazetaEditionView';
+import { getPublishedGazetaEdition } from './publishedGazetaArchive';
+import { CONFIRMED_SEASON_TEAMS } from './confirmedSeason2026';
+
+const edition=getPublishedGazetaEdition(30)!;
+const stories=[edition.headlineStory,...edition.featuredStories,...edition.crossStories];
+assert.equal(stories.length,7);
+assert.equal(new Set(stories.map(s=>s.id)).size,7);
+assert.equal(new Set(stories.map(s=>s.headline)).size,7);
+assert.ok(!stories.some(s=>s.id.includes('buske')||s.id.includes('casquinha')));
+for(const s of stories){
+ assert.ok(s.body.length>=2,`${s.id}: reportagem completa`);
+ assert.notEqual(s.subheadline,s.lead,`${s.id}: evitar repetição`);
+ assert.ok(s.lead.length>180);
+ assert.ok(s.evidences.length>=3);
+}
+const replacement=stories.find(s=>s.id==='destaque-pretinho')!;
+assert.deepEqual(replacement.clubsInvolved.map(c=>c.id),['pretinho99-f-c','sovaco-da-pantera']);
+const pretinho=CONFIRMED_SEASON_TEAMS.find(c=>c.id==='pretinho99-f-c')!;
+const sovaco=CONFIRMED_SEASON_TEAMS.find(c=>c.id==='sovaco-da-pantera')!;
+assert.equal(pretinho.scores[29],116.96);assert.equal(sovaco.scores[29],133.56);
+assert.equal(pretinho.scores[30],109.83);assert.equal(sovaco.scores[30],90.82);
+assert.ok(replacement.lead.includes('16,60'));
+assert.ok(replacement.body[0].includes('19,01'));
+assert.ok(replacement.lead.includes('226,79 a 224,38'));
+assert.ok(replacement.headline.includes('2,41'));
+assert.equal(edition.b10Digest.find(m=>m.matchNumber===12)!.winnerId,'c-r-pirika');
+assert.equal(edition.radarClubs.find(c=>c.id==='capita-buske')!.roundScore,80.58);
+const text=stories.flatMap(s=>[s.headline,s.subheadline,s.lead,...s.body]).join(' ');
+for(const forbidden of ['cala críticos','escalação perfeita','capitães e desarmes','99%','melhor média das últimas','117,13 pontos na Rodada 30 — a segunda','Galo colocou a alma em campo'])assert.ok(!text.includes(forbidden),forbidden);
+assert.ok(text.includes('229,49'));assert.ok(text.includes('200,39'));assert.ok(text.includes('265,94'));
+assert.ok(edition.whatsappText.includes(replacement.headline));
+assert.ok(edition.whatsappText.includes('80,58'));
+const html=renderToStaticMarkup(React.createElement(GazetaEditionView,{teams:[],currentRound:30}));
+assert.equal((html.match(/Ler reportagem completa/g)||[]).length,6);
+for(const s of [...edition.featuredStories,...edition.crossStories])for(const paragraph of s.body)assert.ok(html.includes(paragraph.replaceAll('&','&amp;')),`${s.id}: corpo não pode ficar invisível no código`);
+console.log('✓ Sete pautas distintas, reportagens completas acessíveis, virada comprovada, fatos retificados e WhatsApp preservados.');
