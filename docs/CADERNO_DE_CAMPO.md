@@ -164,5 +164,39 @@ Base de análise auditada no repositório: **Commit `f56474e7327aec2e50b01aee04e
   - `compile_applet`: 100% aprovado (build succeeded).
   - `src/services/gazeta/test_gazeta_validation.ts`: Todas as 5 validações de integridade aprovadas com louvor.
 
+## 9. Continuidade autorizada pelo diretor — Gazeta única e histórico (14/10/2026)
+
+### Autorização e coordenação
+
+Após esgotamento dos créditos da IA amiga, o diretor pediu ao Codex avaliar o trabalho, verificar o pedido pendente e concluir a preparação da plataforma com uma única linha editorial (Gazeta) e histórico que preserve a R30 quando vier a R31. A intervenção está na branch `codex/gazeta-unica-historico-2026-10-14`, baseada na versão remota `62144816e0a9ceafb32063ef64b4ee105ca06cbd`. Nenhum merge/publicação é realizado por esta entrega; o diretor deve revisar a proposta antes da divulgação oficial.
+
+O conteúdo das seções anteriores permanece como registro histórico da IA amiga. Afirmações de aprovação de todas as verificações não substituem esta nova conferência: o checkout revisado apresentou erros de TypeScript no `ErrorBoundary`, corrigidos nesta branch.
+
+### Entrega e limitações
+
+- Boletim Clássico já removido pela IA amiga; mantida apenas a Gazeta.
+- Criados `publishedGazetaEditions.ts` e `publishedGazetaArchive.ts`: retratos completos R28/R29/R30, congelados e independentes dos dados vivos. R28/R29 são retratos editoriais preparados agora, não reprodução certificada de boletins publicados anteriormente.
+- Atualizado `GazetaEditionView.tsx`: arquivo por edição, seleção, aviso de próxima edição em preparação, filtros reiniciados ao trocar edição e fallback correto de cópia WhatsApp.
+- Atualizados `gazetaArchive.ts` e a preparação editorial em `gazetaEngine.ts`: correções factuais propostas e prevenção de resultados futuros em retratos anteriores; sem alterações em qualquer motor esportivo.
+- Ajustado `ErrorBoundary.tsx` para TypeScript e mensagem amigável. Não há garantia absoluta de ausência de falhas de produção.
+- Criado `test_gazeta_archive.ts` e documento `docs/gazeta/HISTORICO_DE_EDICOES.md`, que descreve origem, correções, verificações e procedimento de continuidade.
+
+### Revisão editorial explícita, sujeita à aprovação de publicação
+
+Carlao07 teve o maior agregado individual da Fase 4 (257,24), mas sua margem (83,22) foi a segunda maior; Tainha teve a maior (114,50). Carlao já liderava outubro após R29. FURACÃO marcou a sexta maior pontuação da R30 (116,43), não a terceira. A pontuação 148,81 de Carlao foi a maior da R29, não da temporada. Retiradas causas atribuídas a scouts/escalações sem dados, crítica/estado psicológico de participantes e probabilidade inventada de classificação. Metáforas e estrutura apreciadas pelo diretor preservadas.
+
+Essas correções alteram somente a proposta editorial desta branch; a versão anterior permanece no commit de referência. Não foram reabertos resultados, campeões ou classificados homologados. O registro editorial de copas da IA amiga foi mantido inalterado. Pontuações utilizadas são cópias consultadas da fonte, sem gravação na planilha. A correção R21 para 29,80 foi feita pelo diretor, não pelo Codex.
+
+### Verificações e passagem
+
+TypeScript, build, casos isolados e novo teste de histórico/renderização aprovados. As cinco baterias anteriores passaram com cópia isolada R1–R30; elas dependem de dados R29/R30 não versionados na base, portanto não são reproduzíveis sem fornecer esses arquivos. O teste de histórico não muda as entradas esportivas nem deriva notícia nova da R31 por calendário.
+
+Nova edição depende de preparo e revisão explícitos antes de entrar no catálogo. A chegada de uma rodada não implica homologação ou publicação. Interface sem modo clássico; nenhum scout/analogia foi integrado.
+
+Conferência no Chromium em desktop (1280×900) e mobile (390×844), com rede integralmente interceptada: navegação, histórico, filtros/busca, cópia WhatsApp com permissão negada e fallback, falha de cópia comunicada, ausência de textarea residual e ausência de overflow horizontal aprovados. Imagens locais inspecionadas. Ajustada apenas a quebra do título da Gazeta no celular, sem redesenho do aplicativo.
+
+Responsável atual desta frente: Codex. Disponibilidade sem bloqueio conhecido; cota restante não visível. IA amiga deve consultar esta seção e o documento de histórico antes de retomar. Pendências: revisão do diretor, aprovação das correções editoriais e autorização de merge/publicação. Nenhuma tarefa futura fica automaticamente autorizada.
+
+
 
 

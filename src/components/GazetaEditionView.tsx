@@ -1,7 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { CartolaTeam } from '../services/cartolaService';
-import { buildGazetaEdition } from '../services/gazeta/gazetaEngine';
-import { ARCHIVED_EDITIONS_CATALOG } from '../services/gazeta/gazetaArchive';
+import { getPublishedGazetaEdition, getAvailableGazetaEditions, getLatestGazetaEditionRound } from '../services/gazeta/publishedGazetaArchive';
 import { GazetaStory, CupMatchReport, RadarClubDigest } from '../services/gazeta/types';
 import TeamShield from './TeamShield';
 import { 
@@ -30,65 +29,49 @@ interface GazetaEditionViewProps {
 export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = [], currentRound = 30 }) => {
   const safeCurrentRound = Number.isFinite(currentRound) ? currentRound : 30;
 
-  // Selected round defaults to safeCurrentRound, capped between 1 and 38
-  const [selectedRound, setSelectedRound] = useState<number>(() => Math.min(Math.max(safeCurrentRound, 1), 38));
+  const [selectedRound, setSelectedRound] = useState<number | null>(() => getLatestGazetaEditionRound(safeCurrentRound));
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'ALL' | 'OITAVAS' | 'ELIMINADOS' | 'TOP10'>('ALL');
+  const availableEditions = useMemo(() => getAvailableGazetaEditions(safeCurrentRound), [safeCurrentRound]);
+  const effectiveRound = availableEditions.some(item => item.round === selectedRound)
+    ? selectedRound : availableEditions[0]?.round ?? null;
+  const edition = effectiveRound === null ? null : getPublishedGazetaEdition(effectiveRound);
 
-  // Compute all available editions for the archive selector (R30, R29, R28, and any newer round like R31)
-  const availableEditions = useMemo(() => {
-    const list = [...ARCHIVED_EDITIONS_CATALOG];
-    if (safeCurrentRound > 30 && !list.some(e => e.round === safeCurrentRound)) {
-      list.unshift({
-        editionNumber: safeCurrentRound,
-        round: safeCurrentRound,
-        dateStr: 'Outubro de 2026',
-        badge: `RODADA ${safeCurrentRound} • ATUAL`,
-        badgeColor: 'gold',
-        title: `Oitavas de Final da B10 e a Corrida pelo Trono Geral`,
-        subheadline: `Cobertura atualizada em tempo real da Rodada ${safeCurrentRound}.`,
-        highlights: [`Rodada ${safeCurrentRound}`, 'Oitavas B10', 'Disputa do Mês'],
-        isCurated: false
-      });
-    }
-    return list.sort((a, b) => b.round - a.round);
-  }, [safeCurrentRound]);
-
-  // Build the complete edition dynamically with safety
-  const edition = useMemo(() => {
-    try {
-      return buildGazetaEdition(teams, selectedRound);
-    } catch (e) {
-      console.error("Falha ao montar edição da Gazeta com times recebidos:", e);
-      try {
-        return buildGazetaEdition([], selectedRound);
-      } catch (err2) {
-        console.error("Falha crítica ao montar edição da Gazeta:", err2);
-        return null;
-      }
-    }
-  }, [teams, selectedRound]);
+  useEffect(() => {
+    setSearchTerm('');
+    setSelectedFilter('ALL');
+    setCopied(false);
+    setCopyError('');
+  }, [effectiveRound]);
 
   const handleCopyWhatsApp = async () => {
     if (!edition?.whatsappText) return;
+    setCopied(false);
+    setCopyError('');
     try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(edition.whatsappText);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 3000);
-      } else {
-        const textArea = document.createElement("textarea");
-        textArea.value = edition.whatsappText;
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(edition.whatsappText);
+      setCopied(true);
+    } catch {
+      const textArea = document.createElement('textarea');
+      textArea.value = edition.whatsappText;
+      textArea.setAttribute('readonly', '');
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      const previousFocus = document.activeElement as HTMLElement | null;
+      try {
         document.body.appendChild(textArea);
         textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
+        if (!document.execCommand('copy')) throw new Error('Copy declined');
         setCopied(true);
-        setTimeout(() => setCopied(false), 3000);
+      } catch {
+        setCopyError('Não foi possível copiar. Tente novamente em outra janela do navegador.');
+      } finally {
+        textArea.remove();
+        previousFocus?.focus();
       }
-    } catch (e) {
-      console.warn("Falha ao copiar boletim para área de transferência:", e);
     }
   };
 
@@ -138,20 +121,14 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
   if (!edition || !edition.headlineStory) {
     return (
       <div className="rounded-3xl border border-white/10 bg-[#121216] p-12 text-center space-y-4 max-w-2xl mx-auto my-8">
-        <Newspaper className="w-12 h-12 text-[#D4AF37] mx-auto animate-pulse" />
-        <h3 className="text-xl font-bold font-display uppercase text-white">Consolidando Edição #{selectedRound}...</h3>
-        <p className="text-xs text-slate-400 font-mono">Processando estatísticas da Rodada {selectedRound} e cruzando resultados oficiais.</p>
-        <button
-          onClick={() => setSelectedRound(30)}
-          className="mt-4 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-mono text-white transition-all cursor-pointer"
-        >
-          Voltar para Edição Canônica #30
-        </button>
+        <Newspaper className="w-12 h-12 text-[#D4AF37] mx-auto" />
+        <h3 className="text-xl font-bold font-display uppercase text-white">Edição em preparação</h3>
+        <p className="text-sm text-slate-300">Ainda não há uma edição disponível para esta rodada.</p>
       </div>
     );
   }
 
-  const currentArchiveItem = availableEditions.find(e => e.round === selectedRound);
+  const currentArchiveItem = availableEditions.find(e => e.round === effectiveRound);
 
   return (
     <div className="space-y-8 animate-fadeIn max-w-7xl mx-auto">
@@ -180,11 +157,12 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
           {/* LISTA DE EDIÇÕES SELECIONÁVEIS */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 scrollbar-thin">
             {availableEditions.map(ed => {
-              const isSelected = selectedRound === ed.round;
+              const isSelected = effectiveRound === ed.round;
               return (
                 <button
                   key={ed.round}
                   onClick={() => setSelectedRound(ed.round)}
+                  aria-pressed={isSelected}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono transition-all flex-shrink-0 cursor-pointer ${
                     isSelected
                       ? 'bg-[#D4AF37] text-black font-black shadow-lg shadow-[#D4AF37]/25 scale-102 border border-[#D4AF37]'
@@ -209,12 +187,19 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
           <div className="mt-3 pt-2.5 border-t border-white/5 flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-400">
             <span className="flex items-center gap-1.5 text-slate-300">
               <ChevronRight className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <strong>Edição #{selectedRound}:</strong> {currentArchiveItem.title}
+              <strong>Edição #{effectiveRound}:</strong> {currentArchiveItem.title}
             </span>
             <span className="text-slate-500">{currentArchiveItem.dateStr}</span>
           </div>
         )}
       </div>
+
+      {safeCurrentRound > (availableEditions[0]?.round ?? 0) && (
+        <p role="status" className="text-sm text-slate-300 rounded-xl bg-white/5 border border-white/10 p-3">
+          A edição da R{safeCurrentRound} está em preparação. As edições anteriores continuam disponíveis no histórico.
+        </p>
+      )}
+      {copyError && <p role="alert" className="text-sm text-amber-300">{copyError}</p>}
 
       {/* 2. MASTHEAD DO JORNAL */}
       <div className="relative rounded-3xl overflow-hidden border border-[#D4AF37]/20 bg-gradient-to-br from-[#0e0e12] via-[#14141a] to-[#0a0a0d] p-6 sm:p-8 shadow-2xl">
@@ -224,13 +209,13 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
           <div className="space-y-1">
             <div className="flex items-center gap-2.5">
               <span className="px-2.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
-                EDIÇÃO #{selectedRound} • JORNAL DA TEMPORADA
+                EDIÇÃO #{effectiveRound} • JORNAL DA TEMPORADA
               </span>
               <span className="text-slate-500 text-xs font-mono">• {edition.dateStr}</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black font-display uppercase tracking-tight text-white flex items-center gap-3">
-              <Newspaper className="w-8 h-8 sm:w-11 h-11 text-[#D4AF37]" />
-              Gazeta <span className="text-[#D4AF37]">Só Camisa 10</span>
+            <h1 className="text-2xl sm:text-5xl font-black font-display uppercase tracking-tight text-white flex items-center gap-3">
+              <Newspaper className="w-8 h-8 sm:w-11 h-11 text-[#D4AF37] shrink-0" />
+              <span className="min-w-0">Gazeta <span className="text-[#D4AF37]">Só Camisa 10</span></span>
             </h1>
             <p className="text-slate-400 text-xs sm:text-sm font-sans">
               O Jornal Oficial da Temporada · Cobertura Factual dos 50 Clubes, Copas B10/M10 e Disputas Mensais
@@ -260,7 +245,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
         {/* TERMÔMETRO RÁPIDO DA RODADA */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 relative z-10">
           <div className="bg-black/40 border border-white/5 rounded-2xl p-3.5">
-            <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">Maior Mitada R{selectedRound}</span>
+            <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">Maior Mitada R{effectiveRound}</span>
             <div className="text-sm sm:text-base font-black text-blue-400 truncate font-display">
               {edition.stats?.highestScore?.clubName || 'Craque da Rodada'}
             </div>
@@ -286,9 +271,9 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
           <div className="bg-black/40 border border-white/5 rounded-2xl p-3.5">
             <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">Copa B10</span>
             <div className="text-sm sm:text-base font-black text-emerald-400 truncate font-display">
-              {selectedRound >= 30 ? '16 VAGAS HOMOLOGADAS' : 'FASE ELIMINATÓRIA'}
+              {effectiveRound! >= 30 ? '16 VAGAS HOMOLOGADAS' : 'FASE ELIMINATÓRIA'}
             </div>
-            <span className="text-xs font-mono text-slate-300 font-bold">{selectedRound >= 30 ? 'Oitavas na R31' : `Rodada ${selectedRound}`}</span>
+            <span className="text-xs font-mono text-slate-300 font-bold">{effectiveRound! >= 30 ? 'Oitavas na R31' : `Rodada ${effectiveRound}`}</span>
           </div>
         </div>
       </div>
@@ -301,7 +286,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
           <div className="flex flex-wrap items-center justify-between gap-3">
             {renderBadge(edition.headlineStory.badge, edition.headlineStory.badgeColor)}
             <span className="text-slate-500 text-xs font-mono uppercase font-bold tracking-widest">
-              Reportagem Especial de Capa • Edição #{selectedRound}
+              Reportagem Especial de Capa • Edição #{effectiveRound}
             </span>
           </div>
 
@@ -404,7 +389,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
           <div>
             <h3 className="text-xl sm:text-2xl font-black font-display uppercase tracking-tight text-white flex items-center gap-2">
               <Flame className="w-6 h-6 text-red-500" />
-              Grandes Reportagens da Edição #{selectedRound}
+              Grandes Reportagens da Edição #{effectiveRound}
             </h3>
             <p className="text-xs sm:text-sm text-slate-400 font-sans">
               As atuações memoráveis, recordes e duelos de alto impacto apurados com rigor jornalístico.
@@ -449,14 +434,14 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
       {/* 6. GIRO DAS COPAS: B10 FASE 4 & M10 MUNDIAL */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* TABELA DOS 16 CONFRONTOS B10 */}
-        <div className="lg:col-span-2 rounded-3xl border border-white/10 bg-[#121216] p-6 space-y-4">
+        {edition.b10Digest.length > 0 && <div className="lg:col-span-2 rounded-3xl border border-white/10 bg-[#121216] p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div>
               <span className="text-[10px] font-mono uppercase font-black text-[#D4AF37] block">
                 FASE 4 • 16 AVOS DE FINAL (180 MINUTOS)
               </span>
               <h3 className="text-lg font-black font-display uppercase text-white">
-                Copa B10 · Os 16 Confrontos Homologados pelo Motor do Torneio
+                Copa B10 · Confrontos encerrados da Fase 4
               </h3>
             </div>
             <span className="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold">
@@ -511,10 +496,11 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
           </div>
         </div>
 
+        }
         {/* PÓDIO M10 E TEMPORADA GERAL TOP 5 */}
         <div className="space-y-6">
           {/* M10 MUNDIAL */}
-          <div className="rounded-3xl border border-white/10 bg-[#121216] p-6 space-y-3">
+          {edition.stats.m10Champion && <div className="rounded-3xl border border-white/10 bg-[#121216] p-6 space-y-3">
             <span className="text-[10px] font-mono uppercase font-black text-blue-400 block">
               COPA M10 • MUNDIAL ENCERRADO NA R29
             </span>
@@ -539,10 +525,11 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
             </div>
           </div>
 
+          }
           {/* TOP 5 GERAL */}
           <div className="rounded-3xl border border-white/10 bg-[#121216] p-6 space-y-3">
             <span className="text-[10px] font-mono uppercase font-black text-[#D4AF37] block">
-              CAMPEONATO GERAL APÓS R{selectedRound}
+              CAMPEONATO GERAL APÓS R{effectiveRound}
             </span>
             <h3 className="text-lg font-black font-display uppercase text-white flex items-center gap-2">
               <Crown className="w-5 h-5 text-[#D4AF37]" />
@@ -650,7 +637,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
 
               <div className="pt-2 border-t border-white/5 grid grid-cols-3 gap-2 text-[10px] font-mono text-center">
                 <div className="bg-zinc-900/60 p-1.5 rounded-lg">
-                  <span className="text-slate-500 block text-[8px] uppercase">R{selectedRound}</span>
+                  <span className="text-slate-500 block text-[8px] uppercase">R{effectiveRound}</span>
                   <span className="font-bold text-white">{club.roundScore} pts</span>
                 </div>
                 <div className="bg-zinc-900/60 p-1.5 rounded-lg">
@@ -673,3 +660,4 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
 };
 
 export default GazetaEditionView;
+

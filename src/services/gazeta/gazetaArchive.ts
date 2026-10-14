@@ -146,10 +146,10 @@ export function getEditionStories(
         badge: 'CRAQUE DA RODADA • 122,33 PTS',
         badgeColor: 'blue',
         headline: 'A Grande Mitada da R30: Ninja do Ocidente Atropela Marixco FC e Garante Vaga de Gala!',
-        subheadline: 'Fabio Okuno comanda a escalação perfeita da rodada, fecha agregado em 236,09 e carimba passagem às oitavas.',
+        subheadline: 'Fabio Okuno comanda a maior pontuação da rodada, fecha agregado em 236,09 e carimba passagem às oitavas.',
         lead: 'Quem piscou perdeu o show do NINJA DO OCIDENTE na Rodada 30! Com pontuação estratosférica de 122,33 pontos — a maior de toda a Liga Só Camisa 10 entre os 50 clubes participantes —, a equipe de Fabio Okuno não deu a menor chance de reação ao Marixco FC (Elite #8). No placar agregado de 180 minutos, o confronto fechou em acachapantes 236,09 a 208,85 pontos, consagrando uma das atuações mais dominantes do ano.',
         body: [
-          'Na partida de ida, o confronto havia sido equilibrado (113,76 a 97,62 a favor do Ninja). Na volta, enquanto o Marixco tentava reagir com 111,23 pontos, o Ninja desferiu o golpe de misericórdia com 122,33 pontos, somando 24 pontos acima da média geral da liga.',
+          'Na partida de ida, o confronto havia sido equilibrado (113,76 a 97,62 a favor do Ninja). Na volta, enquanto o Marixco tentava reagir com 111,23 pontos, o Ninja desferiu o golpe de misericórdia com 122,33 pontos, somando 26,05 pontos acima da média de 96,28 da liga.',
           'Além de avançar na Copa B10, o resultado projeta Fabio Okuno com moral renovada para a reta decisiva da temporada.'
         ],
         clubsInvolved: [
@@ -166,17 +166,17 @@ export function getEditionStories(
       {
         id: 'destaque-carlao',
         category: 'destaque',
-        badge: 'RECORDE AGREGADO • 257,24 PTS',
+        badge: 'MAIOR AGREGADO DA FASE • 257,24 PTS',
         badgeColor: 'purple',
-        headline: 'Carlao07 Bate Recorde de Pontos na B10 e Assume a Liderança Absoluta de Outubro!',
+        headline: 'Carlao07 Faz o Maior Agregado da Fase 4 e Mantém a Liderança de Outubro!',
         subheadline: 'Com 148,81 na ida e 108,43 na volta, Carlos Henrique R. H atropela Chinchila Cabeçuda e desponta no mês.',
-        lead: 'Se alguém tinha dúvidas sobre quem é o clube mais quente do segundo semestre, Carlos Henrique tratou de responder no gramado virtual. O Carlao07 pulverizou a Fase 4 da Copa B10 com o maior placar agregado de todo o campeonato: estarrecedores 257,24 pontos (148,81 na R29 e 108,43 na R30). O atropelo sobre a tradicional Chinchila Cabeçuda (174,02 pts) colocou o time diretamente na liderança da premiação mensal de Outubro!',
+        lead: 'Se alguém tinha dúvidas sobre quem é o clube mais quente do segundo semestre, Carlos Henrique tratou de responder no gramado virtual. O Carlao07 pulverizou a Fase 4 da Copa B10 com o maior pontuação agregada individual da Fase 4: estarrecedores 257,24 pontos (148,81 na R29 e 108,43 na R30). O atropelo sobre a tradicional Chinchila Cabeçuda (174,02 pts) manteve o clube na liderança de Outubro, posição que já ocupava após a R29!',
         body: [
-          'A vantagem de 83,22 pontos foi a mais elástica entre todos os 16 confrontos da copa, confirmando que a estratégia agressiva de capitães e desarmes funcionou com 100% de precisão.',
-          'Na briga de Outubro, Carlao07 salta para a ponta da tabela com folga expressiva e se credencia como o principal favorito a levar a coroa mensal.'
+          'A vantagem de 83,22 pontos foi a segunda maior da fase. A maior margem ficou com Tainha Ovada FC: 114,50 pontos sobre o Dique SC. Carlao07 liderou em pontuação agregada individual, com 257,24.',
+          'Na briga de Outubro, Carlao07 soma 257,24 pontos, contra 242,90 do Real Barreiros. A vantagem é de 14,34 pontos; o mês segue aberto até a R33.'
         ],
         clubsInvolved: [
-          { id: 'carlao07', name: 'Carlao07', owner: 'Carlos Henrique R. H', shieldUrl: '/escudos/Carlao07.avif', role: 'Recordista Agregado (257.24 pts)' },
+          { id: 'carlao07', name: 'Carlao07', owner: 'Carlos Henrique R. H', shieldUrl: '/escudos/Carlao07.avif', role: 'Maior Agregado da Fase 4 (257.24 pts)' },
           { id: 'chinchila-cabecuda', name: 'Chinchila cabeçuda', owner: 'Sartori', shieldUrl: '/escudos/Chinchila cabeçuda.avif', role: 'Eliminado na B10' }
         ],
         evidences: [
@@ -191,11 +191,11 @@ export function getEditionStories(
         category: 'destaque',
         badge: 'RESILIÊNCIA FACTUAL • 117,13 PTS',
         badgeColor: 'emerald',
-        headline: 'Capitã Buske Dá a Volta por Cima com 117,13 Pontos e Cala Críticos na Classificação Geral!',
+        headline: 'Capitã Buske Dá a Volta por Cima com 117,13 Pontos na Rodada 30!',
         subheadline: 'Após eliminação nos playoffs da B10 diante do CRF Galo, Bruno Buske faz a 2ª maior pontuação da R30 e sobe na tabela.',
-        lead: 'Cair em um torneio mata-mata abala a maioria dos competidores, mas a Capitã Buske mostrou do que é feita. Eliminada nos playoffs de acesso da Copa B10 na R28 diante do CRF Galo (139,83 a 155,76), a equipe de Bruno Buske não se deixou abater: concentrou toda sua força no Campeonato Geral e cravou implacáveis 117,13 pontos na Rodada 30 — a segunda melhor marca de toda a liga, atrás apenas do craque Ninja do Ocidente!',
+        lead: 'O mata-mata terminou, mas a temporada segue viva para a Capitã Buske. Eliminada nos playoffs de acesso da Copa B10 na R28 diante do CRF Galo (139,83 a 155,76), a equipe de Bruno Buske cravou implacáveis 117,13 pontos na Rodada 30 — a segunda melhor marca de toda a liga, atrás apenas do craque Ninja do Ocidente!',
         body: [
-          'A atuação demolidora recoloca a Capitã Buske em curva ascendente nos pontos corridos, provando que o time tem repertório tático para brigar pelas primeiras colocações.',
+          'A atuação demolidora rendeu a segunda maior pontuação da R30. É uma história de reação depois da eliminação na B10, sem apagar o confronto dos playoffs.',
           'Nosso jornalismo registra com rigor: na B10 o sonho ficou nos playoffs, mas na temporada geral a Capitã Buske segue viva e perigosa!'
         ],
         clubsInvolved: [
@@ -242,7 +242,7 @@ export function getEditionStories(
         subheadline: 'Cassio crava 116,43 pontos, elimina o cabeça de chave Avaih FC e mantém a perseguição implacável.',
         lead: 'Enquanto os holofotes se voltam para o Tainha Ovada, o FURACÃO K7 FC avança silencioso e mortal. Com uma pontuação maiúscula de 116,43 pontos na Rodada 30, Cassio superou o Avaih FC (241,07 a 231,69 no agregado) e carimbou sua vaga nas oitavas de final da B10. Mais do que isso: manteve a pressão máxima no Campeonato Geral, ficando a meros 19,12 pontos da liderança da liga!',
         body: [
-          'O Furacão K7 acumula 2.637,17 pontos e possui a melhor média das últimas quatro rodadas entre os concorrentes diretos ao troféu de pontos corridos.',
+          'O Furacão K7 acumula 2.637,17 pontos. A distância para Tainha caiu de 20,32 após a R29 para 19,12 após a R30: a perseguição segue acesa.',
           'A briga pela taça geral promete fortes emoções até a Rodada 38.'
         ],
         clubsInvolved: [
@@ -250,7 +250,7 @@ export function getEditionStories(
           { id: 'avaih-f-c', name: 'Avaih F C', owner: 'Gabriel Alvarez', shieldUrl: '/escudos/Avaih F C.avif', role: 'Eliminado na B10' }
         ],
         evidences: [
-          { label: 'Pontuação R30', value: '116.43 pts (3º Lugar Geral da Rodada)', verified: true },
+          { label: 'Pontuação R30', value: '116.43 pts (6º Lugar da Rodada)', verified: true },
           { label: 'Copa B10', value: 'Avançou às Oitavas (241.07 x 231.69)', verified: true },
           { label: 'Distância da Liderança', value: 'Escassos 19.12 pontos do Tainha', verified: true }
         ],
@@ -293,11 +293,11 @@ export function getEditionStories(
       category: 'manchete',
       badge: 'FINAL M10 & ABERTURA FASE 4 B10',
       badgeColor: 'blue',
-      headline: 'Carlao07 Pulveriza Recordes com 148,81 Pontos e Tainha Ovada É Campeão Mundial da M10!',
-      subheadline: 'Rodada 29 fica marcada pela maior mitada individual da temporada e a consagração de Alexandre De Sousa na primeira taça oficial do ano.',
-      lead: 'A Rodada 29 entrou para a história da Liga Só Camisa 10 como um marco inesquecível. Em uma jornada onde poucos previam tamanha avalanche de pontos, Carlos Henrique R. H (Carlao07) operou um milagre tático ao registrar estratosféricos 148,81 pontos no jogo de ida dos 16 avos da Copa B10 diante da Chinchila Cabeçuda — disparada a maior pontuação em uma única rodada de todo o ano de 2026! Ao mesmo tempo, os holofotes internacionais testemunharam o Tainha Ovada FC bater o Dois Vizinhos SA por 119,86 a 117,68 na finalíssima da Copa M10, erguendo a primeira taça oficial do torneio.',
+      headline: 'Carlao07 Lidera a R29 com 148,81 Pontos e Tainha Ovada É Campeão Mundial da M10!',
+      subheadline: 'Rodada 29 fica marcada pela maior pontuação individual da rodada e a consagração de Alexandre De Sousa na primeira taça oficial do ano.',
+      lead: 'A Rodada 29 entrou para a história da Liga Só Camisa 10 como um marco inesquecível. Em uma jornada onde poucos previam tamanha avalanche de pontos, Carlos Henrique R. H (Carlao07) operou um milagre tático ao registrar estratosféricos 148,81 pontos no jogo de ida dos 16 avos da Copa B10 diante da Chinchila Cabeçuda — a maior pontuação entre os 50 clubes naquela rodada! Ao mesmo tempo, os holofotes internacionais testemunharam o Tainha Ovada FC bater o Dois Vizinhos SA por 119,86 a 117,68 na finalíssima da Copa M10, erguendo a primeira taça oficial do torneio.',
       body: [
-        'A atuação de Carlao07 foi um primor de precisão: desarmes limpos, múltiplos gols e o capitão dobrando pontuações épicas garantiram uma vantagem de mais de 66 pontos logo no primeiro tempo do confronto eliminatório da B10.',
+        'Carlao07 marcou 148,81 contra 81,87 da Chinchila Cabeçuda na ida: vantagem de 66,94 pontos, com a decisão ainda reservada para a volta da R30.',
         'Já na decisão da M10, o duelo entre Alexandre De Sousa e Angelo Cassol foi resolvido nos acréscimos: escassos 2,18 pontos separaram o campeão Tainha Ovada da prata concedida ao Dois Vizinhos SA.',
         'Na disputa pelo terceiro lugar do Mundial, o Camisa Pesada SA (Gean Marques) garantiu o bronze ao derrotar o Monges Tibetanos FC por expressivos 132,96 a 113,86.'
       ],
@@ -307,7 +307,7 @@ export function getEditionStories(
         { id: 'dois-vizinhos-sa', name: 'Dois Vizinhos SA', owner: 'Angelo Cassol', shieldUrl: '/escudos/Dois Vizinhos SA.avif', role: 'Vice-Campeão M10' }
       ],
       evidences: [
-        { label: 'Maior Pontuação do Ano', value: 'Carlao07 com 148.81 pts na R29', verified: true },
+        { label: 'Maior Pontuação da R29', value: 'Carlao07 com 148.81 pts na R29', verified: true },
         { label: 'Final M10', value: 'Tainha 119.86 x 117.68 Dois Vizinhos (+2.18 pts)', verified: true },
         { label: 'Bronze M10', value: 'Camisa Pesada 132.96 x 113.86 Monges Tibetanos', verified: true }
       ],
@@ -318,14 +318,14 @@ export function getEditionStories(
       {
         id: 'destaque-r29-carlao',
         category: 'destaque',
-        badge: 'RECORDE ABSOLUTO DA TEMPORADA',
+        badge: 'MAIOR PONTUAÇÃO DA R29',
         badgeColor: 'purple',
         headline: '148,81 Pontos: A Mitada que Fez a Liga Parar e Aplaudir Carlao07!',
-        subheadline: 'Estratégia ofensiva impecável coloca Carlos Henrique como a grande referência da R29.',
-        lead: 'Quando a escalação do Carlao07 entrou em campo na R29, ninguém imaginava o massacre que se desenharia. Atingindo a marca espetacular de 148,81 pontos, o clube não apenas garantiu 99% de sua vaga nas oitavas da B10, como também abriu Outubro na dianteira com números quase inalcançáveis.',
-        body: ['Um daqueles domingos onde cada jogador escalado performou acima de 10 pontos.'],
+        subheadline: 'A pontuação de 148,81 coloca Carlos Henrique como a grande referência da R29.',
+        lead: 'Quando a escalação do Carlao07 entrou em campo na R29, ninguém imaginava o massacre que se desenharia. Atingindo a marca espetacular de 148,81 pontos, o clube abriu uma vantagem de 66,94 na ida da B10 e liderou Outubro. A vaga ainda dependia da volta.',
+        body: ['Uma grande pontuação de equipe: 148,81 pontos, sem atribuir o desempenho a scouts individuais não disponíveis.'],
         clubsInvolved: [{ id: 'carlao07', name: 'Carlao07', owner: 'Carlos Henrique R. H', role: '148.81 pts' }],
-        evidences: [{ label: 'Recorde 2026', value: '148.81 pontos', verified: true }],
+        evidences: [{ label: 'Maior Pontuação R29', value: '148.81 pontos', verified: true }],
         priority: 85
       },
       {
@@ -448,7 +448,7 @@ export function getEditionStories(
     subheadline: `A Rodada ${round} movimenta a classificação geral da Só Camisa 10 e acirra os duelos eliminatórios na reta decisiva da temporada.`,
     lead: `A Rodada ${round} da Liga Só Camisa 10 consolidou números impactantes e aqueceu a disputa pelo troféu da temporada. O grande craque da jornada foi o ${bestClubName}, que liderou a rodada com ${bestClubScore}, desequilibrando as médias dos adversários. Na ponta da classificação geral acumulada, ${leaderName} sustenta ${leaderPoints}, sob forte pressão do pelotão perseguidor.`,
     body: [
-      `Em uma rodada marcada por estratégias ousadas nos capitães e escolhas cirúrgicas de desarmes, os cartoleiros precisaram de nervos de aço para manter a consistência.`,
+      `A rodada reuniu novas pontuações e capítulos nas disputas da temporada; a cobertura deve acompanhar as consequências verificadas desses resultados.`,
       `Na briga pelas copas e pela premiação mensal, cada décimo de ponto altera a posição na tabela e define o futuro dos clubes participantes.`
     ],
     clubsInvolved: [
@@ -503,3 +503,4 @@ export function getEditionStories(
 
   return { headlineStory, featuredStories, crossStories };
 }
+

@@ -107,7 +107,7 @@ export function buildClubProfiles(teams: CartolaTeam[] = [], currentRound: numbe
   const sortedPrev = [...rawProfiles].sort((a, b) => b.prevTotalPoints - a.prevTotalPoints);
   const sortedMonth = [...rawProfiles].sort((a, b) => b.monthPoints - a.monthPoints);
 
-  const b10Matches = OFFICIAL_CUP_REGISTRY.b10.confirmedMatchesR29R30;
+  const b10Matches = safeRound >= 30 ? OFFICIAL_CUP_REGISTRY.b10.confirmedMatchesR29R30 : [];
   const m10Data = OFFICIAL_CUP_REGISTRY.m10;
 
   return rawProfiles.map(item => {
@@ -159,14 +159,12 @@ export function buildClubProfiles(teams: CartolaTeam[] = [], currentRound: numbe
         isWinner,
         isUpset: b10Match.isUpset
       };
-    } else {
+    } else if (safeRound >= 28) {
       // Clubes que não jogaram a Fase 4 (caíram na Repescagem/Playoffs)
       if (itemSlug.includes('buske') || itemNameSlug.includes('buske')) {
         b10Status = 'ELIMINADO_PLAYOFFS';
       } else if (itemSlug.includes('casquinha') || itemNameSlug.includes('casquinha')) {
         b10Status = 'ELIMINADO_PLAYOFFS';
-      } else {
-        b10Status = 'ELIMINADO_REPESCAGEM';
       }
     }
 
@@ -183,16 +181,16 @@ export function buildClubProfiles(teams: CartolaTeam[] = [], currentRound: numbe
       itemSlug === target || itemNameSlug === target || 
       itemNameSlug.includes(target) || target.includes(itemNameSlug);
 
-    if (matchesM10(champSlug)) {
+    if (safeRound >= 29 && matchesM10(champSlug)) {
       m10Status = 'CAMPEAO_MUNDIAL';
       m10Notes = 'Campeão da Copa M10 na R29 (119.86 x 117.68)';
-    } else if (matchesM10(runnerSlug)) {
+    } else if (safeRound >= 29 && matchesM10(runnerSlug)) {
       m10Status = 'VICE_CAMPEAO';
       m10Notes = 'Vice-Campeão da Copa M10 na R29';
-    } else if (matchesM10(thirdSlug)) {
+    } else if (safeRound >= 29 && matchesM10(thirdSlug)) {
       m10Status = 'TERCEIRO_LUGAR';
       m10Notes = 'Medalhista de Bronze da Copa M10 na R29 (132.96 x 113.86)';
-    } else if (matchesM10(fourthSlug)) {
+    } else if (safeRound >= 29 && matchesM10(fourthSlug)) {
       m10Status = 'QUARTO_LUGAR';
       m10Notes = '4º Lugar da Copa M10 na R29';
     }
@@ -514,43 +512,43 @@ export function generateRadarClubs(profiles: ClubSeasonProfile[], currentRound: 
     const pSlug = slugify(p.id);
     const pName = slugify(p.name);
 
-    if (pSlug.includes('tainha') || pName.includes('tainha')) {
+    if (currentRound === 30 && (pSlug.includes('tainha') || pName.includes('tainha'))) {
       headline = 'Líder Absoluto da Geral e Campeão Mundial M10';
       miniSummary = `Soma ${p.totalPoints} pts na Geral e avançou na Copa B10 (235,09 pts agregados). Rumo à Tríplice Coroa!`;
       highlightTag = 'LÍDER GERAL';
-    } else if (pSlug.includes('ninja') || pName.includes('ninja')) {
+    } else if (currentRound === 30 && (pSlug.includes('ninja') || pName.includes('ninja'))) {
       headline = 'O Craque da R30 com Espantosos 122,33 Pontos';
       miniSummary = `Maior pontuação da rodada na liga e vaga brilhante nas Oitavas da B10 após atropelar o Marixco.`;
       highlightTag = 'MITADA DA R30';
-    } else if (pSlug.includes('carlao') || pName.includes('carlao')) {
+    } else if (currentRound === 30 && (pSlug.includes('carlao') || pName.includes('carlao'))) {
       headline = 'Dono de Outubro e Recordista Agregado da B10';
       miniSummary = `Lidera o mês com ${p.monthPoints} pts e bateu recorde da B10 com 257,24 no agregado.`;
       highlightTag = 'LÍDER DE OUTUBRO';
-    } else if (pSlug.includes('rivers') || pName.includes('rivers')) {
+    } else if (currentRound === 30 && (pSlug.includes('rivers') || pName.includes('rivers'))) {
       headline = 'Venceu a Batalha dos 0,32 Ponto e Está nas Oitavas';
       miniSummary = `Eliminou Montinho Artilheiro por 208,59 x 208,27 no confronto mais dramático da temporada.`;
       highlightTag = 'HERÓI DOS DÉCIMOS';
-    } else if (pSlug.includes('capita-buske') || pName.includes('buske')) {
+    } else if (currentRound === 30 && (pSlug.includes('capita-buske') || pName.includes('buske'))) {
       headline = 'Volta por Cima na Geral com 117,13 Pontos na R30';
       miniSummary = `Caiu nos Playoffs da B10 diante do CRF Galo, mas deu show na R30 com a 2ª maior pontuação da liga!`;
       highlightTag = 'VOLTA POR CIMA';
-    } else if (pSlug.includes('furacao') || pName.includes('furacao')) {
+    } else if (currentRound === 30 && (pSlug.includes('furacao') || pName.includes('furacao'))) {
       headline = 'Caça Implacável ao Líder: Vice da Geral com 2.637 Pontos';
       miniSummary = `Fez 116,43 pts na rodada, avançou na B10 e segue colado no topo a apenas 19,12 pts do líder.`;
       highlightTag = 'VICE-LÍDER GERAL';
-    } else if (pSlug.includes('casquinha') || pName.includes('casquinha')) {
-      headline = 'Top 5 Geral Ferido após Eliminação nos Playoffs da B10';
-      miniSummary = `Caiu na B10 para o Futcafa nos playoffs, mas segue firme na luta pelo pódio geral (2.493 pts).`;
-      highlightTag = 'TOP 5 GERAL';
-    } else if (pSlug.includes('crf-galo') || pName.includes('crf-galo')) {
+    } else if (currentRound === 30 && (pSlug.includes('casquinha') || pName.includes('casquinha'))) {
+      headline = `Casquinha Segue na Disputa Geral após os Playoffs da B10`;
+      miniSummary = `Caiu na B10 para o Futcafa nos playoffs e ocupa o ${p.geralRank}º lugar geral com ${p.totalPoints} pts.`;
+      highlightTag = 'DISPUTA GERAL';
+    } else if (currentRound === 30 && (pSlug.includes('crf-galo') || pName.includes('crf-galo'))) {
       headline = 'Guerreiro da B10: Despachou Capitã Buske e C.R.Pirika';
       miniSummary = `Passou pelos playoffs e bateu o C.R.Pirika por 1,98 pt na Fase 4 (225,27 x 223,29). Vaga nas Oitavas!`;
       highlightTag = 'GUERREIRO DA B10';
-    } else if (pSlug.includes('camisa-pesada') || pName.includes('camisa-pesada')) {
+    } else if (currentRound === 30 && (pSlug.includes('camisa-pesada') || pName.includes('camisa-pesada'))) {
       headline = 'Bronze Mundial e Vaga Firme nas Oitavas da B10';
       miniSummary = `Após pódio na M10, despachou Lendinhaxx FC com 237,09 agregados.`;
       highlightTag = 'PÓDIO M10';
-    } else if (pSlug.includes('pirika') || pName.includes('pirika')) {
+    } else if (currentRound === 30 && (pSlug.includes('pirika') || pName.includes('pirika'))) {
       headline = 'Campeão de Setembro Cai de Pé na B10 por 1,98 Ponto';
       miniSummary = `Fez 223,29 no agregado da Fase 4, mas foi superado pelo inspirado CRF Galo na volta.`;
       highlightTag = 'CAMPEÃO SET';
@@ -572,7 +570,7 @@ export function generateRadarClubs(profiles: ClubSeasonProfile[], currentRound: 
       highlightTag = 'EM ALTA';
     } else if (p.roundScore <= 70) {
       headline = `Rodada Tímida de ${p.roundScore} Pontos Exige Reabilitação`;
-      miniSummary = `Dificuldades nas escolhas da R${currentRound}; hora de ajustar a prancheta para a próxima jornada.`;
+      miniSummary = `Fez ${p.roundScore} pontos na R${currentRound}. A temporada segue aberta para uma reação.`;
       highlightTag = 'ALERTA';
     } else {
       headline = `Regularidade Mantida com ${p.roundScore} Pontos na R${currentRound}`;
@@ -591,8 +589,8 @@ export function generateRadarClubs(profiles: ClubSeasonProfile[], currentRound: 
       geralRankDelta: p.rankDelta,
       monthPoints: p.monthPoints,
       monthRank: p.monthRank,
-      b10StatusLabel: p.b10Status === 'CLASSIFICADO_OITAVAS' ? 'Oitavas (R31)' : p.b10Status === 'ELIMINADO_FASE4' ? 'Eliminado Fase 4' : p.b10Status === 'ELIMINADO_PLAYOFFS' ? 'Eliminado Playoff' : 'Fase Prévia',
-      m10StatusLabel: p.m10Status === 'CAMPEAO_MUNDIAL' ? 'Campeão Mundial' : p.m10Status === 'VICE_CAMPEAO' ? 'Vice-Campeão' : p.m10Status === 'TERCEIRO_LUGAR' ? 'Bronze' : 'Encerrada',
+      b10StatusLabel: p.b10Status === 'CLASSIFICADO_OITAVAS' ? 'Oitavas (R31)' : p.b10Status === 'ELIMINADO_FASE4' ? 'Eliminado Fase 4' : p.b10Status === 'ELIMINADO_PLAYOFFS' ? 'Eliminado Playoff' : 'Campanha não detalhada nesta edição',
+      m10StatusLabel: p.m10Status === 'CAMPEAO_MUNDIAL' ? 'Campeão Mundial' : p.m10Status === 'VICE_CAMPEAO' ? 'Vice-Campeão' : p.m10Status === 'TERCEIRO_LUGAR' ? 'Bronze' : currentRound >= 29 ? 'Encerrada' : 'Em disputa',
       headline,
       miniSummary,
       highlightTag
@@ -621,14 +619,17 @@ export function generateWhatsAppBulletin(edition: GazetaEdition): string {
     text += `${t.rank}º ${t.name} — ${t.points} pts\n`;
   });
 
-  text += `\n📅 *TOP 3 DISPUTA DE OUTUBRO (R29+R30):*\n`;
+  const month = Object.entries(MONTH_TO_ROUNDS).find(([, rounds]) => rounds.includes(edition.round));
+  const monthLabel = month ? `${month[0]} (até R${edition.round})` : `até R${edition.round}`;
+  text += `\n📅 *TOP 3 DO MÊS — ${monthLabel}:*\n`;
   (edition.monthlyTop5 || []).slice(0, 3).forEach(t => {
     text += `${t.rank}º ${t.name} — ${t.points} pts\n`;
   });
 
-  text += `\n⚔️ *COPA B10 — CLASSIFICADOS ÀS OITAVAS (R31):*\n`;
-  const winners = (edition.b10Digest || []).map(m => m.winnerName).slice(0, 8);
-  text += `${winners.join(' • ')} e mais 8 gigantes!\n\n`;
+  if (edition.b10Digest?.length) {
+    text += `\n⚔️ *COPA B10 — CLASSIFICADOS ÀS OITAVAS (R31):*\n`;
+    text += `${edition.b10Digest.map(m => m.winnerName).join(' • ')}\n\n`;
+  }
 
   text += `📲 _Acesse a edição completa e o radar dos 50 clubes no app Só Camisa 10!_`;
 
@@ -656,7 +657,7 @@ export function buildGazetaEdition(teams: CartolaTeam[] = [], currentRound: numb
     score: sortedByRound[sortedByRound.length - 1]?.roundScore || 39.16
   };
 
-  const b10Digest = OFFICIAL_CUP_REGISTRY.b10.confirmedMatchesR29R30;
+  const b10Digest = targetRound >= 30 ? OFFICIAL_CUP_REGISTRY.b10.confirmedMatchesR29R30 : [];
 
   const sortedMonth = [...profiles].sort((a, b) => b.monthPoints - a.monthPoints);
   const monthlyTop5 = sortedMonth.slice(0, 5).map((p, idx) => ({
@@ -691,7 +692,7 @@ export function buildGazetaEdition(teams: CartolaTeam[] = [], currentRound: numb
       highestScore,
       lowestScore,
       totalMatchesB10Concluded: b10Digest.length,
-      m10Champion: OFFICIAL_CUP_REGISTRY.m10.championName
+      m10Champion: targetRound >= 29 ? OFFICIAL_CUP_REGISTRY.m10.championName : ''
     },
     headlineStory,
     featuredStories,
@@ -708,4 +709,5 @@ export function buildGazetaEdition(teams: CartolaTeam[] = [], currentRound: numb
 
   return partialEdition as GazetaEdition;
 }
+
 
