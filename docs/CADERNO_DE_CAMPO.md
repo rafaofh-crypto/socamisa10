@@ -226,3 +226,13 @@ Comparação por identificador: oito pontuações R30 diferentes da cópia anter
 Persistem cinco pontuações de volta antigas no registro editorial das copas da Gazeta (confrontos 2, 12 e 15). Apenas comparadas pontuações, **sem recalcular agregados, classificados ou posições e sem alterar resultados homologados**. A atualização da planilha não corrige sozinha as matérias literais ou retratos anteriores. A Gazeta completa permanece pendente de reconciliação editorial com os registros homologados; não certificar nem publicar automaticamente.
 
 Esta continuidade atualizou somente este Caderno e o novo relatório da conferência, na branch de revisão. Nenhum código esportivo, planilha, cache, regra, dado ou produção foi alterado; sem sincronização. Disponibilidade sem bloqueio conhecido, cota restante não visível. IA amiga e Gepeto devem consultar esta seção e o relatório antes de continuar. Merge/publicação seguem sem autorização nesta etapa.
+
+## 12. Auditoria de impacto em confrontos solicitada pelo diretor (14/10/2026)
+
+Nova orientação expressa: "mas se esse vacilo alterou algum resultado de confronto eu preciso muito saber e ate mesmo corrigir". Codex investigou com dados reais anteriores/corrigidos e os componentes esportivos reais, sem modificar campeonatos.
+
+Achado comprovado no cálculo dos 16 confrontos da Fase 4: somente #12 troca vencedor. Antes: C.R.Pirika 223,29 x 225,27 CRF Galo. Fonte corrigida: **C.R.Pirika 229,49 x 200,39 CRF Galo**, vantagem 29,10, sem desempate. Ambos os componentes da B10 concordam. O cálculo das oitavas troca o adversário do Tainha de Galo para Pirika; outras sete duplas iguais. Confrontos #2 e #15 mudam apenas de placar. Playoffs da B10 e chaveamento/classificação final da M10 iguais.
+
+Relatório e proposta concreta em `docs/gazeta/IMPACTO_CONFRONTOS_R30.md`. Arquivos esportivos usados no teste conferidos contra main. Instrumentação somente em memória/área de trabalho. Sem dados inventados, gravação de pontuação, sincronização, alteração de regra, homologação ou publicação. Tentativas de ler produção pela ferramenta não foram acessíveis; o estado do cache/resultado efetivamente homologado continua pendente. Sem dados R31/R32 para apurar consequências posteriores.
+
+A decisão do diretor sobre eventual retificação por erro material deverá identificar o confronto, resultado e efeito no chaveamento, além de etapas posteriores já disputadas. Não executar propagação em cascata automática. Esta auditoria não formaliza mudança esportiva; prepara uma decisão informada diante da nova solicitação. Codex sem bloqueio conhecido, cota restante não visível. IA amiga deve consultar este relatório antes de retomar; manter separação entre registro jornalístico e resultado oficial.
