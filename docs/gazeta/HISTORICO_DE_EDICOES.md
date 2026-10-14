@@ -1,3 +1,5 @@
+> **Atualização posterior:** execução da retificação autorizada pelo diretor; consulte [RETIFICACAO_AUTORIZADA_R30.md](RETIFICACAO_AUTORIZADA_R30.md) e seção 13 do Caderno. As pendências abaixo descrevem o estado anterior à autorização.
+
 > **RETIFICAÇÃO — 14/10/2026:** a origem descrita nesta entrega foi contestada pelo diretor: Buske R30=80,58, não 117,13. As afirmações numéricas abaixo não constituem conferência oficial. Os retratos R28/R29/R30 foram colocados em quarentena editorial e saíram do catálogo do leitor; seus objetos permanecem como rascunhos de auditoria. Consulte [RIGOR_FACTUAL.md](RIGOR_FACTUAL.md) e seção 10 do Caderno. Esta entrega substitui a proposta do commit 83235a2, ainda não publicada.
 
 # Gazeta única e histórico editorial — entrega Codex, 14/10/2026

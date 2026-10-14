@@ -1,5 +1,7 @@
 # Caderno de Campo — Só Camisa 10 (C10) ⚽📋
 
+> **Orientação mais recente: seção 13 — retificação da R30 autorizada pelo diretor em 14/10/2026.** As suspensões e pendências anteriores registram o estado à época e são superadas apenas no alcance dessa ordem.
+
 > **Status:** Documento Oficial de Referência e Coordenação da Equipe  
 > **Versão de Referência do Repositório (Auditoria):** Commit `f56474e7327aec2e50b01aee04e7a26c642cc5d1`  
 > **Última Atualização:** Outubro de 2026  
@@ -236,3 +238,27 @@ Achado comprovado no cálculo dos 16 confrontos da Fase 4: somente #12 troca ven
 Relatório e proposta concreta em `docs/gazeta/IMPACTO_CONFRONTOS_R30.md`. Arquivos esportivos usados no teste conferidos contra main. Instrumentação somente em memória/área de trabalho. Sem dados inventados, gravação de pontuação, sincronização, alteração de regra, homologação ou publicação. Tentativas de ler produção pela ferramenta não foram acessíveis; o estado do cache/resultado efetivamente homologado continua pendente. Sem dados R31/R32 para apurar consequências posteriores.
 
 A decisão do diretor sobre eventual retificação por erro material deverá identificar o confronto, resultado e efeito no chaveamento, além de etapas posteriores já disputadas. Não executar propagação em cascata automática. Esta auditoria não formaliza mudança esportiva; prepara uma decisão informada diante da nova solicitação. Codex sem bloqueio conhecido, cota restante não visível. IA amiga deve consultar este relatório antes de retomar; manter separação entre registro jornalístico e resultado oficial.
+
+## 13. Ordem de execução imediata e retificação específica da R30 (14/10/2026)
+
+### Autorização expressa e exceção delimitada
+
+Após conhecer o impacto, o diretor determinou: "CODEX, nao posso esperar a ia amiga voltar a funcionar amigo. tenho que fazer essa alteracao agora. faz o que precisa fazer, deixa tudo publicado no diario como estamos fazendo mas nao posso divulgar coisa errada."
+
+Codex executa a retificação comprovada agora, com testes e registro, sem aguardar a IA amiga. Esta ordem supera a suspensão anterior **exclusivamente para o erro material da R30 e suas consequências demonstradas**, não autoriza reabrir outros resultados, mudar critérios ou fabricar etapas posteriores.
+
+### Correção concreta
+
+**C.R.Pirika 229,49 x 200,39 CRF Galo; Pirika classificado e adversário do Tainha nas oitavas.** Camisa Pesada x Lendinhaxx passa a 243,79 x 212,44; Chinchila x Carlao07 a 176,26 x 265,94, mantendo os vencedores desses dois duelos. Buske R30=80,58.
+
+Fonte corrigida pelo próprio diretor, relida e conferida: 50 clubes únicos, R1–R30 numéricas, versão `2026-10-14T18:59:08.861Z`. Incluídas cópias persistidas R29/R30 e patrimônios. Arquivos históricos existentes R1–R28 não editados. Sem gravação na planilha, alteração de fórmula, desempate, regulamento ou componentes de competição. Playoffs B10 e M10 preservados nos testes.
+
+Proteção no ponto de entrada do aplicativo reconhece a cópia antiga exata dos 50 scores R30 e retifica somente as oito entradas comprovadas. Não modifica novos dados desconhecidos nem outras rodadas. Todas as telas passam a receber os mesmos dados corrigidos, inclusive quando o navegador traz o cache antigo reconhecido.
+
+Gazeta restabelecida com fonte conferida, capa de retificação, matérias, histórias cruzadas, radar dos 50, tabelas e WhatsApp consistentes; histórico R28/R29/R30 preparado e congelado. Nada de scouts, causas inventadas, posições/números substitutos ou geração de edições futuras por calendário. Os rascunhos contestados seguem preservados fora da interface.
+
+### Testes e passagem
+
+Detalhes, lista de arquivos e limitações: `docs/gazeta/RETIFICACAO_AUTORIZADA_R30.md`. Testes de fonte, correção do cache antigo, preservação de entradas/rodadas desconhecidas, 16 confrontos nos dois componentes B10, M10 sem alteração e Chromium desktop/mobile com três situações de leitura e rede totalmente interceptada. TypeScript/build e cópia WhatsApp conferidos. Nenhum dado de R31/R32 fornecido: não apurar partidas posteriores por suposição.
+
+Codex sem bloqueio conhecido; cota restante não visível. IA amiga deve consultar esta seção, o relatório e main antes de retomar. A referência correta passa a ser a retificação autorizada, não as afirmações antigas de vitória de Galo na Fase 4. Publicação acompanhada pelo status da integração GitHub/Vercel; a inspeção direta do domínio está bloqueada pelo proxy do ambiente e não deve ser declarada como realizada.

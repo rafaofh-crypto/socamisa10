@@ -1,3 +1,5 @@
+> **Atualização posterior:** execução da retificação autorizada pelo diretor; consulte [RETIFICACAO_AUTORIZADA_R30.md](RETIFICACAO_AUTORIZADA_R30.md) e seção 13 do Caderno. As pendências abaixo descrevem o estado anterior à autorização.
+
 # Retificação e proteção factual da Gazeta — 14/10/2026
 
 ## Ordem e limites

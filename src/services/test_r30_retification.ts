@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {repairKnownR30Snapshot} from './r30Retification';
+import {CONFIRMED_SEASON_TEAMS} from './gazeta/confirmedSeason2026';
+import {UNVERIFIED_GAZETA_DRAFTS} from './gazeta/publishedGazetaEditions';
+const correct=structuredClone(CONFIRMED_SEASON_TEAMS);
+const wrong=correct.map(t=>({...t,scores:{...t.scores,30:UNVERIFIED_GAZETA_DRAFTS[30].radarClubs.find(c=>c.id===t.id)!.roundScore}}));
+const before=JSON.stringify(wrong);
+const result=repairKnownR30Snapshot(wrong);
+assert.ok(result.corrected);
+assert.deepEqual(result.teams,correct);
+assert.equal(JSON.stringify(wrong),before);
+assert.equal(repairKnownR30Snapshot(correct).teams,correct);
+assert.equal(repairKnownR30Snapshot(correct).corrected,false);
+assert.equal(repairKnownR30Snapshot([]).corrected,false);
+const mixed=structuredClone(wrong);mixed.find(t=>t.id==='capita-buske')!.scores[30]=80.58;
+assert.equal(repairKnownR30Snapshot(mixed).corrected,false,'Não sobrescrever versão desconhecida/parcial');
+const realIds=wrong.map((t,i)=>({...t,id:String(i+1)}));
+assert.ok(repairKnownR30Snapshot(realIds).corrected);
+const unknown=structuredClone(realIds);unknown[0].name='Nome não cadastrado';
+assert.equal(repairKnownR30Snapshot(unknown).corrected,false);
+const later=structuredClone(wrong);later.forEach(t=>t.scores[31]=0);
+assert.ok(repairKnownR30Snapshot(later).corrected);
+assert.ok(repairKnownR30Snapshot(later).teams.every(t=>t.scores[31]===0));
+for(const round of [29,30]){
+ const persisted=JSON.parse(readFileSync(`round${round}_scores_db.json`,'utf8'));
+ assert.equal(Object.keys(persisted).length,50);
+ for(const t of correct)assert.equal(persisted[t.id],t.scores[round]);
+}
+console.log('✓ Correção exata de 8 entradas, cache antigo, IDs da API, ausência de mutação, preservação de outras rodadas e dados persistidos.');

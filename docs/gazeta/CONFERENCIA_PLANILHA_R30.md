@@ -1,3 +1,5 @@
+> **Atualização posterior:** execução da retificação autorizada pelo diretor; consulte [RETIFICACAO_AUTORIZADA_R30.md](RETIFICACAO_AUTORIZADA_R30.md) e seção 13 do Caderno. As pendências abaixo descrevem o estado anterior à autorização.
+
 # Conferência da planilha corrigida — R30 (14/10/2026)
 
 Fonte indicada novamente pelo diretor: https://docs.google.com/spreadsheets/d/1wGw0eOvoqS-Iv_qSqzpRBSPA815SqHFiEu2TMk0O_Lk/edit?usp=sharing

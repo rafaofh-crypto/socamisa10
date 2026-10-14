@@ -1,3 +1,5 @@
+> **Atualização posterior:** execução da retificação autorizada pelo diretor; consulte [RETIFICACAO_AUTORIZADA_R30.md](RETIFICACAO_AUTORIZADA_R30.md) e seção 13 do Caderno. As pendências abaixo descrevem o estado anterior à autorização.
+
 # Impacto das correções R30 em confrontos — 14/10/2026
 
 ## Direção e conclusão

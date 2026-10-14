@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import correctedR30 from '../round30_scores_db.json';
+import { repairKnownR30Snapshot } from './services/r30Retification';
+import React, { useState, useEffect, useMemo } from "react";
 import { RefreshCw } from "lucide-react";
 import { useCartolaData } from "./hooks/useCartolaData";
 import { CartolaTeam } from "./services/cartolaService";
@@ -58,7 +60,8 @@ export default function App() {
   };
 
   // Derived states from the useCartolaData hook
-  const teams = data?.times || [];
+  const r30Repair = useMemo(() => repairKnownR30Snapshot(data?.times || []), [data?.times]);
+  const teams = r30Repair.teams;
   const currentRound = data?.rodadaAtual || 17;
   const syncTimestamp = lastSync || "Carregando...";
   const isSyncing = loading;
@@ -226,7 +229,7 @@ export default function App() {
                 theme={theme}
                 onThemeChange={setTheme}
                 teams={teams}
-                allSyncedScores={data?.allSyncedScores}
+                allSyncedScores={r30Repair.corrected ? { ...data?.allSyncedScores, 30: correctedR30 } : data?.allSyncedScores}
                 isM10Enabled={isM10Enabled}
                 onM10EnabledChange={handleM10EnabledChange}
                 isB10Enabled={isB10Enabled}
@@ -255,3 +258,4 @@ export default function App() {
     </div>
   );
 }
+
