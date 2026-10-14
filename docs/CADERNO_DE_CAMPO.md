@@ -272,3 +272,29 @@ Codex sem bloqueio conhecido; cota restante não visível. IA amiga deve consult
 - Verificação técnica/local e inspeção visual de capa mobile concluídas. O domínio de produção não pôde ser inspecionado diretamente devido ao bloqueio de rede do ambiente; a confirmação de publicação vem do status oficial da integração Vercel no GitHub, não de uma navegação em produção.
 - Não há implementação B10 Mobile, alteração de regulamento ou correção esportiva fora do erro material identificado. A retificação é a exceção autorizada na seção 13. Arquivos de outras rodadas existentes, playoffs e M10 preservados.
 - IA amiga deve partir da main publicada, consultar esta seção e o relatório de retificação. A branch anterior era de revisão e não deve ser usada para restaurar a versão contestada. Responsável pela execução/registro: Codex; sem bloqueio conhecido, cota restante não visível.
+
+## 14. Restauração editorial da R30 solicitada pelo diretor — proposta para revisão (14/10/2026)
+
+### Autorização e limite
+
+O diretor identificou perda de qualidade jornalística após a correção factual e determinou execução imediata para recuperar matérias fortes do histórico Git, conferir os fatos corrigidos, substituir a reportagem incorreta do Buske e preservar emoção/variedade. Autorização de intervenção **editorial em branch própria**, sem merge na main nem publicação sem aprovação final. Esta seção preserva integralmente os registros anteriores e não reabre a retificação esportiva.
+
+Branch: `codex/gazeta-restauracao-editorial-r30-2026-10-14`; base main `9908f297fd98c38054444aaa25f284f5db739d84`. Histórico efetivamente consultado: `src/services/gazeta/gazetaArchive.ts` de `62144816e0a9ceafb32063ef64b4ee105ca06cbd`, anterior à retificação. Fonte oficial relida, versão `2026-10-14T18:59:08.861Z`; 50 clubes e 1.500 pontuações iguais à fonte corrigida.
+
+### Seleção e origem
+
+Recuperadas do histórico 6214481, com manchetes preservadas: capa "Drama dos 0,32...", Ninja "A Grande Mitada...", Tainha "O Império..." e Furacão "Cola no Líder...". Trechos/metáforas corretos recuperados, parágrafos ajustados sem alegações não demonstradas. Carlao07 recupera força narrativa copa–mensal, com manchete ajustada para "mantém" e dados corrigidos: 265,94 no agregado, 117,13 na volta, Chinchila 176,26. Não declarar recorde da temporada, maior margem ou assumir liderança já ocupada.
+
+Descartada a matéria histórica de Buske: pontuação 117,13, segunda maior, subida, críticas e psicologia eram incorretas/não demonstradas. Retirado também o resumo genérico corrigido do Buske da seleção de matérias; seu radar e aviso conservam 80,58. **Substituta inédita: "Pretinho99 Vira a Batalha Contra o Sovaco e Sobrevive por 2,41 Pontos!"** Dados: ida 116,96 x 133,56 (desvantagem 16,60), volta 109,83 x 90,82 (vitória 19,01), agregado 226,79 x 224,38 (vaga 2,41, segunda menor margem). Próximo rival Rivers, sobrevivente de 0,32.
+
+Descartada a vitória fictícia do Galo sobre Pirika. Reescrita completa da pauta como trajetória de **Pirika**, campeão de setembro (281,21), classificado na B10 para enfrentar Tainha. Retiradas afirmações de escalação perfeita, scouts, estado psicológico, bastidores, melhor média indefinida e posições antigas. Resumo genérico de Casquinha deixa a seleção para recuperar Furacão; radar intacto.
+
+### Arquivos, testes e passagem
+
+Alterados `confirmedGazetaBuilder.ts` (apenas seleção editorial R30) e `GazetaEditionView.tsx` (leitura dos corpos completos nos seis cartões via details). Criados `r30RestoredStories.ts`, `test_r30_editorial_restoration.ts`, `docs/gazeta/RESTAURACAO_EDITORIAL_R30.md` e `docs/gazeta/REVISAO_EDITORIAL_R30_ANTES_DEPOIS.md`; atualizado somente este Caderno na documentação compartilhada. O comparativo contém todas as manchetes, linhas finas, leads, corpos e evidências das versões histórica, publicada e proposta, além de WhatsApp completo.
+
+TypeScript/build, testes factuais e de cache, teste editorial e comparação automatizada da preservação de R28/R29 e todos os dados não editoriais R30 conferidos. Desktop 1280×900 e celular 390×844: textos completos, navegação, WhatsApp/fallback, retificação B10 e ausência de overflow/tela branca. Rede de testes totalmente interceptada; capturas antes/depois avaliadas. Nenhuma alteração de motores, dados, regras, proteção de cache ou retificação esportiva. **Pirika 229,49 x 200,39 Galo; Pirika x Tainha; Buske 80,58 continuam válidos.**
+
+**IA amiga: preserve as reportagens completas e a personalidade recuperada. Não substitua novamente por resumos genéricos nem restaure dados contestados, mecanismos de preenchimento fictício ou vitória do Galo na Fase 4. Consulte o Caderno e o estado atual do código antes de trabalhar; não edite concorrentemente os mesmos arquivos. A proposta editorial depende da aprovação final do diretor para merge/publicação.**
+
+Codex sem bloqueio conhecido; cota restante não visível. Pendência: revisão do diretor/Gepeto dos textos completos e aprovação final. Sem autorização de publicação nesta missão.

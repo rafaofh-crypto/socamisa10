@@ -356,6 +356,12 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
                 <p className="text-xs text-slate-400 font-sans leading-relaxed">
                   {story.lead}
                 </p>
+                {story.body.length > 0 && <details className="text-xs text-slate-300 font-sans">
+                  <summary className="cursor-pointer font-bold text-[#D4AF37] py-2">Ler reportagem completa</summary>
+                  <div className="space-y-3 pt-2 leading-relaxed">
+                    {story.body.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+                  </div>
+                </details>}
               </div>
 
               <div className="mt-6 pt-4 border-t border-white/5 space-y-2">
@@ -404,6 +410,12 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
                 <p className="text-xs text-slate-400 font-sans leading-relaxed">
                   {story.lead}
                 </p>
+                {story.body.length > 0 && <details className="text-xs text-slate-300 font-sans">
+                  <summary className="cursor-pointer font-bold text-[#D4AF37] py-2">Ler reportagem completa</summary>
+                  <div className="space-y-3 pt-2 leading-relaxed">
+                    {story.body.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+                  </div>
+                </details>}
               </div>
 
               <div className="mt-6 pt-4 border-t border-white/5 space-y-2">
