@@ -339,3 +339,7 @@ Chromium local em 320, 390, 768 e 1280 pixels: associação correta dos dois jog
 ### Passagem para revisão
 
 Arquivos da proposta remota: somente este Caderno (acréscimo desta seção) e `src/components/B10FinalBracket.tsx`. Sem reserva de outros arquivos. IA amiga: preservar a disposição por clube e não interpretar contorno verde como homologação ou novo critério esportivo. O diretor/Gepeto revisam a apresentação. Merge e publicação dependem de aprovação expressa; nenhuma publicação oficial realizada nesta tarefa.
+
+### 15.1. Aprovação visual e autorização de publicação (21/10/2026)
+
+Após acessar a prévia da Vercel vinculada ao PR #3, o diretor aprovou: **"boa amigo! ficou otimo! pode publicar por favor"**. Autorizado integrar a versão visual revisada e publicá-la no aplicativo oficial. A autorização supera a pendência de publicação da seção 15 exclusivamente para esta proposta. Código aprovado: commit `875faec8759f0ab15027387762951ebdbc89a7a9`; prévia com implantação confirmada pela Vercel. Este registro acrescenta somente documentação, sem alterar o código aprovado. Codex acompanhará o status da integração e implantação; autorização não equivale a confirmação antecipada de sucesso. Resultados, cálculos e regras permanecem preservados.
