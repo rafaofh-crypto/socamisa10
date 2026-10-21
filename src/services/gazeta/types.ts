@@ -151,6 +151,17 @@ export interface GazetaEdition {
   featuredStories: GazetaStory[];
   crossStories: GazetaStory[];
   b10Digest: CupMatchReport[];
+  b10FirstLegDigest?: {
+    matchNumber: number;
+    homeClub: CupMatchReport['homeClub'];
+    awayClub: CupMatchReport['awayClub'];
+    homeScore: number;
+    awayScore: number;
+    round: number;
+    returnRound: number;
+  }[];
+  editorialNotes?: { title: string; text: string }[];
+  closingParagraphs?: string[];
   monthlyTop5: { rank: number; name: string; owner: string; points: number }[];
   geralTop5: { rank: number; name: string; owner: string; points: number; delta: number }[];
   radarClubs: RadarClubDigest[];
