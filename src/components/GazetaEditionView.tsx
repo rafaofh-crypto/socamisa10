@@ -431,6 +431,38 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
         </div>
       </div>}
 
+      {edition.editorialNotes && <section className="rounded-3xl border border-[#D4AF37]/20 bg-[#121216] p-6 sm:p-8 space-y-5">
+        <h3 className="text-xl sm:text-2xl font-black font-display uppercase text-[#D4AF37]">Notas da redação · A R31 também teve isso</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {edition.editorialNotes.map(note => <article key={note.title} className="space-y-2">
+            <h4 className="font-bold text-white text-sm">{note.title}</h4>
+            <p className="text-sm text-slate-300 leading-relaxed">{note.text}</p>
+          </article>)}
+        </div>
+      </section>}
+
+      {edition.b10FirstLegDigest && <section className="rounded-3xl border border-white/10 bg-[#121216] p-6 space-y-4">
+        <div className="border-b border-white/10 pb-4 space-y-2">
+          <span className="text-[10px] font-mono uppercase font-black text-[#D4AF37]">Copa B10 · Oitavas de final</span>
+          <h3 className="text-lg font-black font-display uppercase text-white">Ida R31 · A disputa continua</h3>
+          <p className="text-xs text-slate-400">Placares da ida. Volta na R32 pendente nesta edição; nenhuma vaga definida.</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {edition.b10FirstLegDigest.map(match => <article key={match.matchNumber} className="bg-black/40 border border-white/5 rounded-2xl p-4 space-y-3 text-xs font-mono">
+            <span className="text-slate-400">Confronto #{match.matchNumber} · Ida</span>
+            {[[match.homeClub, match.homeScore], [match.awayClub, match.awayScore]].map(([club, score]) => {
+              const team = club as typeof match.homeClub;
+              return <div key={team.id} className="flex items-center gap-2 min-w-0">
+                <TeamShield shieldUrl={team.shieldUrl} fallbackText={team.name} className="w-6 h-6 shrink-0" />
+                <span className="text-slate-200 min-w-0 flex-1 truncate" title={team.name}>{team.name}</span>
+                <strong className="text-white shrink-0">{(score as number).toFixed(2)}</strong>
+              </div>;
+            })}
+            <span className="block text-amber-400 text-[10px]">Volta R{match.returnRound} · Pendente</span>
+          </article>)}
+        </div>
+      </section>}
+
       {/* 6. GIRO DAS COPAS: B10 FASE 4 & M10 MUNDIAL */}
       {(edition.b10Digest.length > 0 || edition.stats.m10Champion || edition.geralTop5.length > 0) && <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* TABELA DOS 16 CONFRONTOS B10 */}
@@ -633,6 +665,10 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
           ))}
         </div>
       </div>}
+      {edition.closingParagraphs && <section className="rounded-3xl border border-[#D4AF37]/25 bg-gradient-to-r from-[#14141a] to-[#101014] p-6 sm:p-8 space-y-4">
+        <h3 className="text-xl font-black font-display uppercase text-[#D4AF37]">A próxima rodada promete</h3>
+        {edition.closingParagraphs.map((paragraph, index) => <p key={index} className="text-sm text-slate-300 leading-relaxed">{paragraph}</p>)}
+      </section>}
     </div>
   );
 };

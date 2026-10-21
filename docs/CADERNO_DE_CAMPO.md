@@ -343,3 +343,31 @@ Arquivos da proposta remota: somente este Caderno (acréscimo desta seção) e `
 ### 15.1. Aprovação visual e autorização de publicação (21/10/2026)
 
 Após acessar a prévia da Vercel vinculada ao PR #3, o diretor aprovou: **"boa amigo! ficou otimo! pode publicar por favor"**. Autorizado integrar a versão visual revisada e publicá-la no aplicativo oficial. A autorização supera a pendência de publicação da seção 15 exclusivamente para esta proposta. Código aprovado: commit `875faec8759f0ab15027387762951ebdbc89a7a9`; prévia com implantação confirmada pela Vercel. Este registro acrescenta somente documentação, sem alterar o código aprovado. Codex acompanhará o status da integração e implantação; autorização não equivale a confirmação antecipada de sucesso. Resultados, cálculos e regras permanecem preservados.
+
+## 16. Gazeta R31 — edição recebida do diretor e prévia para revisão (21/10/2026)
+
+### Autorização e escopo
+
+O diretor forneceu a edição completa “SOBREVIVER VIROU ESPECIALIDADE. MAS ATÉ QUANDO?” e pediu: **“vai la amigo, depois gera uma previa pra eu olhar”**. Codex prepara a edição em branch própria, preservando o projeto gráfico; nenhuma autorização de merge ou publicação em produção nesta etapa. Branch: `codex/gazeta-r31-previa-2026-10-21`; base `649a59be23a316b0c13695ab067bfacebbcf27c7`. Caderno remoto consultado antes do trabalho. Disponibilidade sem bloqueio conhecido; cota restante não visível.
+
+### Texto e fontes
+
+Preservados capa, seis reportagens na ordem recebida, quatro notas e encerramento. Original arquivado em `docs/gazeta/EDICAO_R31_TEXTO_RECEBIDO.md`; texto para revisão em `docs/gazeta/EDICAO_R31_PREVIA.md`. Três ajustes mínimos de precisão, informados ao diretor e sujeitos à revisão da prévia: “voltaram a se encontrar” → “agora se encontram” (Pretinho e Rivers vieram de adversários diferentes); “favoritos” → “primeiros” na Geral (sem evidência de favoritismo); “sobreviveu por quase nada” → “largou à frente por quase nada” no encerramento (a volta ainda está pendente). Demais parágrafos preservados; marcadores Markdown convertidos em texto de apresentação.
+
+Planilha oficial relida nesta tarefa: versão `2026-10-20T22:47:31.749Z`; representação textual SHA-256 `8275d7319982c88d993375fd9dc6af5a3d39c661608aebf71c4aeae3daa3baf0`, idêntica à conferência anterior. 50 clubes por identificadores exatos, 1.550 pontuações R1–R31; R1–R30 mantêm a fonte corrigida. Os valores usados no texto foram comparados com o relatório factual. Dados R32 não recebidos nem presumidos.
+
+### Implementação isolada
+
+Novo retrato editorial `src/services/gazeta/r31CuratedEdition.ts`: fonte, 50 pontuações/patrimônios R31, sete matérias, notas, encerramento, radar dos 50, tabelas e WhatsApp. Não alimenta motores esportivos. Catálogo passa a oferecer R31 somente na branch de revisão; R28–R30 permanecem idênticas.
+
+`editorialVerification.ts` registra a fonte específica da R31 e valida identidade, valores e somas do retrato; conserva rejeição de fontes/rodadas/valores desconhecidos. `types.ts` acrescenta campos editoriais opcionais para notas, encerramento e idas. `GazetaEditionView.tsx` mantém cores, tipografia, cartões, leitura completa e histórico; os blocos opcionais são usados pela R31. O quadro novo traz somente ida R31 e volta R32 pendente, sem zeros fictícios, vencedores, classificados ou selo de homologação das oitavas. Componentes esportivos, cache, sincronização, planilha e regulamento não alterados.
+
+### Testes e revisão visual
+
+TypeScript e build aprovados (avisos anteriores de bundle/import misto permanecem). Teste novo `node --import tsx src/services/gazeta/test_r31_curated_edition.ts`: sete textos completos, notas/encerramento, comparação com original e três ajustes, 50 clubes/somas, oito idas sem vencedores/volta fictícia, rejeição de dados incorretos, zero/ausência, edição R32 indisponível e hashes R28–R30 preservados. Testes de retificação/cache R30 e restauração editorial também aprovados. Teste anterior atualizado apenas para conferir o corpo da edição mais recente renderizada, mantendo suas verificações factuais da R30.
+
+Chromium local 390×900 e 1280×900: capa, seis reportagens expandidas, quatro notas, encerramento, oito idas/retornos pendentes, navegação R28/R29/R30/R31 e cópia WhatsApp com fallback aprovados, sem tela branca, erros de execução ou transbordamento horizontal. Todas as requisições externas bloqueadas; arquivos e dados reais servidos localmente, sem sincronização. Capturas mobile e desktop inspecionadas.
+
+### Passagem
+
+IA amiga/Gepeto: preservar o texto fornecido, a qualidade editorial e o retrato congelado da R31; não substituir por geradores/resumos genéricos nem usar indicadores sintéticos de valorização mensal. Preservar retificação Pirika 229,49 × 200,39 Galo e Buske R30=80,58, histórico R28–R30 e ajuste B10 publicado. Aprovação da prévia e autorização de publicação continuam pendentes. O catálogo da branch é revisão, não prova de publicação em produção.

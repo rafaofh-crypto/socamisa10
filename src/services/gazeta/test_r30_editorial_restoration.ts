@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { renderToStaticMarkup } from 'react-dom/server';
 import React from 'react';
 import GazetaEditionView from '../../components/GazetaEditionView';
-import { getPublishedGazetaEdition } from './publishedGazetaArchive';
+import { getPublishedGazetaEdition, getLatestGazetaEditionRound } from './publishedGazetaArchive';
 import { CONFIRMED_SEASON_TEAMS } from './confirmedSeason2026';
 
 const edition=getPublishedGazetaEdition(30)!;
@@ -36,5 +36,6 @@ assert.ok(edition.whatsappText.includes(replacement.headline));
 assert.ok(edition.whatsappText.includes('80,58'));
 const html=renderToStaticMarkup(React.createElement(GazetaEditionView,{teams:[],currentRound:30}));
 assert.equal((html.match(/Ler reportagem completa/g)||[]).length,6);
-for(const s of [...edition.featuredStories,...edition.crossStories])for(const paragraph of s.body)assert.ok(html.includes(paragraph.replaceAll('&','&amp;')),`${s.id}: corpo não pode ficar invisível no código`);
+const renderedEdition=getPublishedGazetaEdition(getLatestGazetaEditionRound()!)!;
+for(const s of [...renderedEdition.featuredStories,...renderedEdition.crossStories])for(const paragraph of s.body)assert.ok(html.includes(paragraph.replaceAll('&','&amp;')),`${s.id}: corpo não pode ficar invisível no código`);
 console.log('✓ Sete pautas distintas, reportagens completas acessíveis, virada comprovada, fatos retificados e WhatsApp preservados.');
