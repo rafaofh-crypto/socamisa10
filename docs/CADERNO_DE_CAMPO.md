@@ -377,3 +377,9 @@ IA amiga/Gepeto: preservar o texto fornecido, a qualidade editorial e o retrato 
 O diretor avaliou a prévia e pediu substituir os cartões separados em colunas por um bloco único de texto corrido. Ajustada somente a apresentação da capa R31 em `GazetaEditionView.tsx`: lead e sete parágrafos no mesmo artigo, sem colunas ou caixas individuais; largura de leitura limitada, espaçamento entre parágrafos e tipografia confortável. Nenhum texto, número, evidência, radar, WhatsApp ou resultado alterado. Apresentação das edições anteriores preservada.
 
 TypeScript/build, testes R31 e restauração R30 aprovados. Chromium em 390 e 1280 pixels confirmou um artigo com oito parágrafos, sem grade interna, textos completos, histórico e cópia WhatsApp preservados, sem overflow/erros. Capturas inspecionadas; conexões externas bloqueadas. Mesma branch e PR #4; prévia atualizada, sem merge/publicação em produção. Aprovação final continua pendente.
+
+### 16.2. Alternativa em duas colunas solicitada pelo diretor (21/10/2026)
+
+Após avaliar o bloco único, o diretor solicitou testar duas colunas. A capa R31 passa a usar texto contínuo em duas colunas em telas a partir de 768px, com leitura de cima para baixo na primeira coluna e continuação na segunda; no celular mantém uma coluna. Sem cartões individuais e sem partir um parágrafo entre colunas. Alterada somente a classe de apresentação desse bloco; conteúdo e edições anteriores preservados.
+
+TypeScript/build e teste R31 aprovados. Chromium local em 390 e 1280px confirmou uma e duas colunas, respectivamente, os oito parágrafos completos, histórico e cópia WhatsApp, sem overflow/erros. Captura desktop inspecionada; requisições externas bloqueadas. Atualização da mesma prévia/PR #4, ainda sem aprovação final, merge ou publicação em produção.

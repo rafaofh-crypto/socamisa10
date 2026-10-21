@@ -288,7 +288,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
 
           {edition.round === 31 ? (
             <article aria-label="Reportagem de capa completa" className="bg-black/30 border border-white/5 rounded-2xl p-5 sm:p-8">
-              <div className="max-w-3xl mx-auto space-y-5 text-sm sm:text-base text-slate-300 font-sans leading-relaxed">
+              <div className="space-y-5 md:columns-2 md:gap-10 text-sm sm:text-base text-slate-300 font-sans leading-relaxed [&>p]:break-inside-avoid">
                 <p>{edition.headlineStory.lead}</p>
                 {(edition.headlineStory.body || []).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
               </div>
