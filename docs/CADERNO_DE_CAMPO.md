@@ -308,3 +308,34 @@ As sete pautas e os textos completos estão integrados; Buske foi substituído p
 Vercel confirmou **success / Deployment has completed** em **14/10/2026, 17:44:00 (America/Sao_Paulo)**: https://vercel.com/socamisa10/socamisa10/HL7VGjVzaigYgV6yRw4zmJ8F1tjM.
 
 A autorização de publicação supera a pendência de aprovação da seção 14 apenas para esta proposta. A confirmação vem do status oficial da Vercel no GitHub; a avaliação visual foi feita localmente e não se declara navegação em produção, pois o domínio está bloqueado pela rede deste ambiente. IA amiga deve partir da main publicada, preservar as reportagens completas e a curadoria aprovada e não reintroduzir textos genéricos, números contestados ou vitória de Galo na Fase 4. Codex sem bloqueio conhecido; cota restante não visível.
+
+## 15. Placar por clube nos cartões da B10 — revisão autorizada (21/10/2026)
+
+### Pedido e alcance
+
+O diretor solicitou restaurar a organização visual da fase anterior: ida e volta de cada clube abaixo do próprio escudo, agregado na base e contorno verde no placar do clube à frente, inclusive com confronto em andamento. Esta autorização supera a suspensão anterior somente para esse ajuste de apresentação. Não autoriza publicação em produção ou alteração esportiva.
+
+Executor: Codex. Disponibilidade sem bloqueio conhecido; cota restante não visível. Consultada a versão mais recente deste Caderno na main, commit `6b2c3eaf1af7cfaf84ad06e188812bbdd75eefbc`. Branch de revisão: `codex/b10-placar-por-clube-2026-10-21`. IA amiga deve evitar edição simultânea destes arquivos e partir da main vigente.
+
+### Implementação
+
+- Somente `src/components/B10FinalBracket.tsx` na aplicação: caixas individuais de IDA/VOLTA alinhadas a cada clube, identificação das rodadas e agregado na base.
+- O bloco compartilhado atende oitavas, quartas e semifinais. Fase anterior, final e terceiro lugar mantêm seus componentes.
+- Contorno verde usa o agregado já calculado para indicar quem está à frente; não cria vencedor nem propaga classificação. Empate, adversário virtual ou disponibilidade assimétrica entre os clubes não recebe indicação de liderança.
+- Ausência de pontuação aparece como “Pendente”; zero numérico continua 0.00. Texto do agregado distingue parcial de final conforme disponibilidade das quatro pontuações e estado já existente.
+- Este ajuste não certifica homologação. Os estados esportivos preexistentes, inclusive seus limites de apuração por calendário já relatados, não foram modificados.
+- Nenhuma alteração em fontes, planilha, sincronização, cache, motores, regulamento, desempates, resultados ou chaveamento. Preservada a retificação da R30 e a restauração editorial.
+
+### Verificações e limites
+
+TypeScript (`npm run lint`), compilação (`npm run build`), teste de retificação/cache (`node --import tsx src/services/test_r30_retification.ts`), teste editorial (`node --import tsx src/services/gazeta/test_r30_editorial_restoration.ts`) e diff sem erros aprovados. Persistem avisos anteriores de tamanho do bundle/importação mista.
+
+Auditoria isolada fora do produto comparou componentes anteriores/ajustados em 24 combinações: oitavas/quartas/semis/final nas rodadas 30, 31, 32, 34, 36 e 37. Mesmos resultados e estruturas de confrontos; entradas sem mutação. Trecho de cálculos do componente permaneceu idêntico byte a byte. Dados oficiais corrigidos R1–R30; ausência de dados posteriores mantida como ausência. Essas combinações verificam regressão, não homologam etapas sem dados.
+
+Conferida apresentação com os valores do print fornecido pelo diretor (Dois Vizinhos 89,04 e Carlao07 100,84), sem gravá-los em bases esportivas. Casos artificiais de zero/empate/ausência foram usados somente como entradas isoladas de teste e não representam resultados oficiais. As ferramentas de auditoria e capturas ficam na área de trabalho, fora do produto.
+
+Chromium local em 320, 390, 768 e 1280 pixels: associação correta dos dois jogos a cada clube, pendência visível, contorno no Carlao07 e nenhum transbordamento interno dos cartões. Escudos servidos de arquivos locais; conexões externas bloqueadas. Na página completa existe transbordamento anterior em 320 pixels (largura 362), igual antes/depois; não corrigido fora do escopo. Sem transbordamento da página nas outras larguras. Capturas antes/depois inspecionadas, sem navegação em produção.
+
+### Passagem para revisão
+
+Arquivos da proposta remota: somente este Caderno (acréscimo desta seção) e `src/components/B10FinalBracket.tsx`. Sem reserva de outros arquivos. IA amiga: preservar a disposição por clube e não interpretar contorno verde como homologação ou novo critério esportivo. O diretor/Gepeto revisam a apresentação. Merge e publicação dependem de aprovação expressa; nenhuma publicação oficial realizada nesta tarefa.
