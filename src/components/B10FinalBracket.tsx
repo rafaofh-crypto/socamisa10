@@ -783,6 +783,42 @@ export const B10FinalBracket = ({
             const score1Value = isAggregated ? match.totalScore1 : match.score1;
             const score2Value = isAggregated ? match.totalScore2 : match.score2;
 
+            // Presentation only: use the existing aggregate, never decide a qualifier here.
+            const [idaRound, voltaRound] = activeStage === 'oitavas'
+              ? [rOitavasIda, rOitavasVolta]
+              : activeStage === 'quartas' ? [rQuartasIda, rQuartasVolta] : [rSemiIda, rSemiVolta];
+            const visibleScore = (team: any, round: number): number | null => {
+              const value = team.scores?.[round];
+              return !team.isVirtual && (isSimulatorsEnabled || round <= currentRound)
+                && typeof value === 'number' && Number.isFinite(value) ? value : null;
+            };
+            const legs1 = [visibleScore(team1, idaRound), visibleScore(team1, voltaRound)];
+            const legs2 = [visibleScore(team2, idaRound), visibleScore(team2, voltaRound)];
+            const hasComparableScores = legs1.some((v, i) => v !== null && legs2[i] !== null)
+              && legs1.every((v, i) => (v !== null) === (legs2[i] !== null));
+            const leadingTeam = hasComparableScores && score1Value !== score2Value
+              ? score1Value > score2Value ? 'team1' : 'team2' : null;
+            const allLegsAvailable = [...legs1, ...legs2].every(v => v !== null);
+            const renderTeamLegs = (team: any, legs: (number | null)[], highlighted: boolean) => (
+              <div aria-label={`Pontuações de ${team.name}`} className={`mt-3 w-full min-w-0 bg-[#121212] rounded-xl p-2 border-2 ${
+                highlighted ? 'border-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.20)]' : 'border-white/10'
+              }`}>
+                <div className="grid grid-cols-2 gap-1 text-center font-mono">
+                  {legs.map((score, index) => (
+                    <div key={index} className="min-w-0">
+                      <span className="block text-[8px] font-bold text-slate-400 leading-relaxed">
+                        {index === 0 ? 'IDA' : 'VOLTA'}<br />(R{index === 0 ? idaRound : voltaRound})
+                      </span>
+                      <span className={`block mt-1 font-bold ${score === null ? 'text-[8px] text-slate-500' : 'text-[11px] text-white'}`}>
+                        {score === null ? 'Pendente' : score.toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                {highlighted && <span className="block mt-1 text-[7px] font-mono font-bold text-emerald-400 uppercase text-center">À frente no agregado</span>}
+              </div>
+            );
+
             return (
               <div 
                 key={match.id}
@@ -812,10 +848,10 @@ export const B10FinalBracket = ({
                 </div>
 
                 {/* Match Play Layout */}
-                <div className="grid grid-cols-11 items-center gap-1 py-1">
+                <div className="relative grid grid-cols-2 items-start gap-3 py-1">
                   
                   {/* Left Team */}
-                  <div className={`col-span-4 flex flex-col items-center text-center transition-all duration-300 ${
+                  <div className={`min-w-0 flex flex-col items-center text-center transition-all duration-300 ${
                     isPlayed && winner === 'team2' ? 'grayscale opacity-40' : ''
                   }`}>
                     <div className={`w-11 h-11 bg-zinc-950 rounded-full border p-1.5 flex items-center justify-center mb-1.5 shadow-inner transition-transform group-hover:scale-105 duration-300 ${
@@ -844,10 +880,11 @@ export const B10FinalBracket = ({
                     <span className="text-[7.5px] font-mono px-1 py-0.5 rounded bg-white/5 text-slate-400">
                       {team1.isVirtual ? 'Virtual' : `#${team1.rank}º`}
                     </span>
+                    {isAggregated && renderTeamLegs(team1, legs1, leadingTeam === 'team1')}
                   </div>
 
                   {/* VS center container (Simple fallback for dual-legs, scores in central subpanel) */}
-                  <div className="col-span-3 flex flex-col items-center justify-center">
+                  <div className="absolute left-1/2 top-4 -translate-x-1/2 flex flex-col items-center justify-center">
                     {isPlayed && !isAggregated ? (
                       <div className="flex flex-col items-center w-full text-center">
                         <div className="bg-black/60 border border-white/5 py-1 px-1.5 rounded-lg w-full flex flex-col items-center">
@@ -875,7 +912,7 @@ export const B10FinalBracket = ({
                   </div>
 
                   {/* Right Team */}
-                  <div className={`col-span-4 flex flex-col items-center text-center transition-all duration-300 ${
+                  <div className={`min-w-0 flex flex-col items-center text-center transition-all duration-300 ${
                     isPlayed && winner === 'team1' ? 'grayscale opacity-40' : ''
                   }`}>
                     <div className={`w-11 h-11 bg-zinc-950 rounded-full border p-1.5 flex items-center justify-center mb-1.5 shadow-inner transition-transform group-hover:scale-105 duration-300 ${
@@ -904,6 +941,7 @@ export const B10FinalBracket = ({
                     <span className="text-[7.5px] font-mono px-1 py-0.5 rounded bg-white/5 text-slate-400">
                       {team2.isVirtual ? 'Virtual' : `#${team2.rank}º`}
                     </span>
+                    {isAggregated && renderTeamLegs(team2, legs2, leadingTeam === 'team2')}
                   </div>
 
                 </div>
@@ -911,34 +949,11 @@ export const B10FinalBracket = ({
                 {/* 180-Minute View: split card for aggregate matches */}
                 {isAggregated && (
                   <div className="mt-3.5 space-y-2.5">
-                    {/* The Split leg scores block */}
-                    <div className="grid grid-cols-2 gap-2 text-center text-[10px] font-mono">
-                      {/* Left Side: Ida Score */}
-                      <div className="bg-black/45 border border-white/5 rounded-xl p-2 flex flex-col justify-between">
-                        <span className="text-[7.5px] uppercase tracking-widest text-slate-500 block mb-1">Ida</span>
-                        <div className="font-extrabold text-white text-xs tracking-wider">
-                          {(match.score1_r1 || 0).toFixed(2)} <span className="text-slate-600 text-[9px]">:</span> {(match.score2_r1 || 0).toFixed(2)}
-                        </div>
-                      </div>
-
-                      {/* Right Side: Volta Score or status */}
-                      <div className="bg-black/45 border border-white/5 rounded-xl p-2 flex flex-col justify-between">
-                        <span className="text-[7.5px] uppercase tracking-widest text-slate-500 block mb-1">Volta</span>
-                        {isPlayed ? (
-                          <div className="font-extrabold text-white text-xs tracking-wider">
-                            {(match.score1_r2 || 0).toFixed(2)} <span className="text-slate-600 text-[9px]">:</span> {(match.score2_r2 || 0).toFixed(2)}
-                          </div>
-                        ) : (
-                          <span className="text-[8.5px] text-amber-500/90 font-mono font-bold animate-pulse leading-none py-1">Iniciando</span>
-                        )}
-                      </div>
-                    </div>
-
                     {/* Centralized AGREGADO section */}
                     <div className="bg-gradient-to-r from-emerald-500/10 via-emerald-500/20 to-emerald-500/10 border border-emerald-500/25 rounded-2xl p-2 text-center shadow-[0_4px_12px_rgba(16,185,129,0.05)] relative overflow-hidden">
                       <div className="absolute top-0 left-0 w-full h-[0.5px] bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent" />
                       <span className="text-[8.5px] text-emerald-400 uppercase tracking-widest font-mono font-black block">
-                        AGREGADO
+                        {allLegsAvailable && isPlayed ? 'AGREGADO FINAL' : hasComparableScores ? 'AGREGADO PARCIAL' : 'AGREGADO'}
                       </span>
                       <div className="text-sm font-mono font-black tracking-wider text-white mt-0.5">
                         {score1Value.toFixed(2)} <span className="text-emerald-500/60">:</span> {score2Value.toFixed(2)}
