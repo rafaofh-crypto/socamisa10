@@ -371,3 +371,9 @@ Chromium local 390×900 e 1280×900: capa, seis reportagens expandidas, quatro n
 ### Passagem
 
 IA amiga/Gepeto: preservar o texto fornecido, a qualidade editorial e o retrato congelado da R31; não substituir por geradores/resumos genéricos nem usar indicadores sintéticos de valorização mensal. Preservar retificação Pirika 229,49 × 200,39 Galo e Buske R30=80,58, histórico R28–R30 e ajuste B10 publicado. Aprovação da prévia e autorização de publicação continuam pendentes. O catálogo da branch é revisão, não prova de publicação em produção.
+
+### 16.1. Refinamento da leitura da capa solicitado pelo diretor (21/10/2026)
+
+O diretor avaliou a prévia e pediu substituir os cartões separados em colunas por um bloco único de texto corrido. Ajustada somente a apresentação da capa R31 em `GazetaEditionView.tsx`: lead e sete parágrafos no mesmo artigo, sem colunas ou caixas individuais; largura de leitura limitada, espaçamento entre parágrafos e tipografia confortável. Nenhum texto, número, evidência, radar, WhatsApp ou resultado alterado. Apresentação das edições anteriores preservada.
+
+TypeScript/build, testes R31 e restauração R30 aprovados. Chromium em 390 e 1280 pixels confirmou um artigo com oito parágrafos, sem grade interna, textos completos, histórico e cópia WhatsApp preservados, sem overflow/erros. Capturas inspecionadas; conexões externas bloqueadas. Mesma branch e PR #4; prévia atualizada, sem merge/publicação em produção. Aprovação final continua pendente.

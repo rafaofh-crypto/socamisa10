@@ -286,6 +286,15 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
             {edition.headlineStory.subheadline}
           </p>
 
+          {edition.round === 31 ? (
+            <article aria-label="Reportagem de capa completa" className="bg-black/30 border border-white/5 rounded-2xl p-5 sm:p-8">
+              <div className="max-w-3xl mx-auto space-y-5 text-sm sm:text-base text-slate-300 font-sans leading-relaxed">
+                <p>{edition.headlineStory.lead}</p>
+                {(edition.headlineStory.body || []).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+              </div>
+            </article>
+          ) : (
+            <>
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
             {edition.headlineStory.lead}
           </p>
@@ -297,6 +306,9 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
               </div>
             ))}
           </div>
+
+            </>
+          )}
 
           {/* CLUBES ENVOLVIDOS NA MANCHETE */}
           <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-4">
