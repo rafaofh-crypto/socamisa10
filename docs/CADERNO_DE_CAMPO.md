@@ -383,3 +383,9 @@ TypeScript/build, testes R31 e restauração R30 aprovados. Chromium em 390 e 12
 Após avaliar o bloco único, o diretor solicitou testar duas colunas. A capa R31 passa a usar texto contínuo em duas colunas em telas a partir de 768px, com leitura de cima para baixo na primeira coluna e continuação na segunda; no celular mantém uma coluna. Sem cartões individuais e sem partir um parágrafo entre colunas. Alterada somente a classe de apresentação desse bloco; conteúdo e edições anteriores preservados.
 
 TypeScript/build e teste R31 aprovados. Chromium local em 390 e 1280px confirmou uma e duas colunas, respectivamente, os oito parágrafos completos, histórico e cópia WhatsApp, sem overflow/erros. Captura desktop inspecionada; requisições externas bloqueadas. Atualização da mesma prévia/PR #4, ainda sem aprovação final, merge ou publicação em produção.
+
+### 16.3. Aprovação final da edição R31 e autorização de publicação (21/10/2026)
+
+Após revisar a alternativa de duas colunas na prévia, o diretor aprovou expressamente: **“boa irmao! pode publicar”**. Autorizado integrar e publicar o PR #4 com o código aprovado no commit `89b5dfdc368a495bc703c044519c872a007d6bac`, cuja prévia foi concluída com sucesso pela Vercel. A aprovação supera a pendência de publicação das seções 16–16.2 somente para esta edição e apresentação.
+
+Capa R31 em duas colunas a partir de 768px e uma no celular; sete matérias completas, quatro notas, encerramento, oito idas sem antecipar classificados e radar dos 50. Três ajustes de precisão informados na seção 16 mantidos na versão revisada. R28–R30, retificação esportiva da R30, cache e funcionamento das competições preservados. Este acréscimo registra apenas a autorização, sem alterar o código revisado. Codex acompanha integração/implantação; não declarar conclusão do deploy antes da confirmação oficial da Vercel.
