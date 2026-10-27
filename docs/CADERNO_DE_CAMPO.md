@@ -417,3 +417,9 @@ Chromium local em 390×900 e 1280×900: duas/uma coluna, texto integral, oito cl
 Arquivos da proposta: `src/services/gazeta/r32CuratedEdition.ts`, `test_r32_curated_edition.ts` (novos), `editorialVerification.ts`, `gazetaArchive.ts`, `test_r31_curated_edition.ts`, `src/components/GazetaEditionView.tsx`, os dois documentos de texto R32 e este Caderno. Nada fora desta lista deve integrar a revisão.
 
 IA amiga/Gepeto: preservar as matérias recebidas, o ajuste factual indicado e as edições congeladas; não reintroduzir resumos genéricos, dados contestados ou indicadores sintéticos. A retificação Pirika 229,49 × 200,39 Galo e Buske R30=80,58 segue válida; o novo resultado Tainha 195,85 × 180,94 Pirika é outra fase, sem reabrir a anterior. Pendências: diretor revisar a prévia e autorizar expressamente eventual publicação.
+
+### 17.1. Aprovação final e autorização de publicação da R32 (27/10/2026)
+
+Após revisar a prévia, o diretor aprovou expressamente: **“pode publicar Codex! ta show!”**. Autorizado integrar e publicar o PR #5 com o código revisado no commit `25feed59d9eb6769e97972758c2a2a62cd92b397`, cuja prévia foi concluída com sucesso pela Vercel. A autorização supera a pendência de publicação da seção 17 somente para esta edição e apresentação.
+
+Mantidos os textos completos do Gepeto com o único ajuste factual informado na linha fina do Pretinho; capa em duas colunas no desktop e uma no celular; oito resultados das oitavas e classificados às quartas; radar dos 50 e WhatsApp. R28–R31, dados esportivos, critérios, motores, cache e retificações anteriores preservados. Este acréscimo registra apenas a autorização, sem modificar o código aprovado. Codex acompanha integração e implantação; não declarar deploy concluído antes da confirmação oficial da Vercel.
