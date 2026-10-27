@@ -389,3 +389,31 @@ TypeScript/build e teste R31 aprovados. Chromium local em 390 e 1280px confirmou
 Após revisar a alternativa de duas colunas na prévia, o diretor aprovou expressamente: **“boa irmao! pode publicar”**. Autorizado integrar e publicar o PR #4 com o código aprovado no commit `89b5dfdc368a495bc703c044519c872a007d6bac`, cuja prévia foi concluída com sucesso pela Vercel. A aprovação supera a pendência de publicação das seções 16–16.2 somente para esta edição e apresentação.
 
 Capa R31 em duas colunas a partir de 768px e uma no celular; sete matérias completas, quatro notas, encerramento, oito idas sem antecipar classificados e radar dos 50. Três ajustes de precisão informados na seção 16 mantidos na versão revisada. R28–R30, retificação esportiva da R30, cache e funcionamento das competições preservados. Este acréscimo registra apenas a autorização, sem alterar o código revisado. Codex acompanha integração/implantação; não declarar conclusão do deploy antes da confirmação oficial da Vercel.
+
+## 17. Gazeta R32 recebida do Gepeto — preparação de prévia (27/10/2026)
+
+### Pedido e limites
+
+O diretor entregou a edição “O DESTINO MARCOU O CONFRONTO!” e solicitou **“ai irmão. o Gepeto trouxe a nova edição do gazeta. arruma la pra nós”**. Codex prepara a edição e sua prévia para revisão, conforme o fluxo aprovado de entregas anteriores. Não há autorização de merge/publicação em produção nesta tarefa. Branch: `codex/gazeta-r32-previa-2026-10-27`; base main `1e8a078f62761aa1b0cd70faa9ef5cb804e1d977`. Consultado Caderno remoto atualizado antes da tarefa. Disponibilidade sem bloqueio conhecido; cota restante não visível.
+
+### Fonte e texto
+
+Planilha oficial relida: versão `2026-10-27T17:01:03.432Z`, representação textual idêntica à apuração R32. Conferidos 50 clubes, pontuações e patrimônios R1–R32 sem lacunas; histórico R1–R31 igual à cópia anterior. Apuração em área isolada conferiu os componentes da main, oito agregados/vencedores e quatro cruzamentos das quartas sem mutação. Fonte termina na R32; nenhum valor de R33/R34 foi presumido.
+
+Mantidas capa, seis reportagens na ordem do original, cinco notas e encerramento com as quartas. Único ajuste factual, informado ao diretor antes da implementação: “Depois de duas classificações no limite” → “Depois de sobreviver no limite na fase anterior” na linha fina do Pretinho. A fase anterior foi decidida por 2,41; as oitavas terminaram com margem de 25,95, portanto não foram outra classificação no limite. Original e proposta integralmente preservados em `docs/gazeta/EDICAO_R32_TEXTO_RECEBIDO.md` e `docs/gazeta/EDICAO_R32_PREVIA.md`.
+
+### Implementação editorial
+
+Novo `r32CuratedEdition.ts` guarda fonte R32, sete matérias completas, cinco notas, encerramento, radar dos 50, oito confrontos encerrados, tabelas e WhatsApp. Fonte/valores da R32 registrados no verificador; validação compara identidade, pontuação, somas com R31 e os oito agregados/classificados. Catálogo inclui R32 na branch. Sem alterações nos motores esportivos, fonte oficial, sincronização, cache, regulamento ou critérios.
+
+Visual preservado: capa R32 em duas colunas a partir de 768px e uma no celular; seis reportagens com leitura completa. Quadro da B10 identifica oitavas R31/R32, resultados conferidos e classificados às quartas, sem reutilizar título de Fase 4 ou selo de homologação da edição antiga. Filtro de radar mostra Quartas B10 na R32, mantendo o filtro histórico das oitavas na R31. Notas e encerramento usam títulos correspondentes à edição; quebras dos quatro próximos confrontos preservadas. Indicador de classificação por semente refere-se ao ranking de entrada, não a favoritismo atual.
+
+### Verificações e passagem
+
+Baseline local de todos os arquivos em src conferida byte a byte contra main antes da edição. TypeScript/build aprovados; persistem avisos anteriores de bundle/importação mista. Novo teste R32 verifica preservação dos parágrafos com o único ajuste, 50 clubes/somas/posições, oito resultados/vencedores, quartas, rejeição de dados incorretos e hashes R28–R31 idênticos. Teste R31 atualizado somente para reconhecer o novo catálogo e verificar que a próxima edição R33 permanece ausente; demais verificações R31 preservadas. Testes R30 de restauração e retificação/cache aprovados.
+
+Chromium local em 390×900 e 1280×900: duas/uma coluna, texto integral, oito classificados, filtro das quartas com oito clubes, histórico R28–R32, cópia WhatsApp com fallback, sem erros de execução/overflow. Imagens desktop/mobile inspecionadas. Toda rede externa bloqueada nos testes; dados/escudos servidos de arquivos locais, sem iniciar servidor com autosync ou gravar dados esportivos. Produção não foi inspecionada diretamente; a apuração anterior encontrou bloqueio de rede 403, sem prova de erro da aplicação.
+
+Arquivos da proposta: `src/services/gazeta/r32CuratedEdition.ts`, `test_r32_curated_edition.ts` (novos), `editorialVerification.ts`, `gazetaArchive.ts`, `test_r31_curated_edition.ts`, `src/components/GazetaEditionView.tsx`, os dois documentos de texto R32 e este Caderno. Nada fora desta lista deve integrar a revisão.
+
+IA amiga/Gepeto: preservar as matérias recebidas, o ajuste factual indicado e as edições congeladas; não reintroduzir resumos genéricos, dados contestados ou indicadores sintéticos. A retificação Pirika 229,49 × 200,39 Galo e Buske R30=80,58 segue válida; o novo resultado Tainha 195,85 × 180,94 Pirika é outra fase, sem reabrir a anterior. Pendências: diretor revisar a prévia e autorizar expressamente eventual publicação.
