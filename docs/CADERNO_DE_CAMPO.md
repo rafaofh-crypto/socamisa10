@@ -423,3 +423,35 @@ IA amiga/Gepeto: preservar as matérias recebidas, o ajuste factual indicado e a
 Após revisar a prévia, o diretor aprovou expressamente: **“pode publicar Codex! ta show!”**. Autorizado integrar e publicar o PR #5 com o código revisado no commit `25feed59d9eb6769e97972758c2a2a62cd92b397`, cuja prévia foi concluída com sucesso pela Vercel. A autorização supera a pendência de publicação da seção 17 somente para esta edição e apresentação.
 
 Mantidos os textos completos do Gepeto com o único ajuste factual informado na linha fina do Pretinho; capa em duas colunas no desktop e uma no celular; oito resultados das oitavas e classificados às quartas; radar dos 50 e WhatsApp. R28–R31, dados esportivos, critérios, motores, cache e retificações anteriores preservados. Este acréscimo registra apenas a autorização, sem modificar o código aprovado. Codex acompanha integração e implantação; não declarar deploy concluído antes da confirmação oficial da Vercel.
+
+## 18. Gazeta R33 recebida do diretor — prévia editorial (03/11/2026)
+
+### Autorização e alcance
+
+O diretor entregou a edição “A ÚLTIMA RODADA VIROU O JOGO!” e solicitou **“Cedex da massa! segunite may brother, ta ai a nova edição do Gazeta. Atualiza la pra nós!”**. Codex prepara a edição em branch própria e gera prévia para revisão, seguindo o fluxo das edições anteriores. Não há autorização de merge/publicação em produção nesta etapa. Branch: `codex/gazeta-r33-previa-2026-11-03`; base main `e43e19522fc3f138cdee6320f8dfa7e092416625`. Caderno remoto consultado. Disponibilidade sem bloqueio conhecido; cota restante não visível.
+
+### Texto, conferência e ajustes informados
+
+Original preservado em `docs/gazeta/EDICAO_R33_TEXTO_RECEBIDO.md`; proposta integral em `docs/gazeta/EDICAO_R33_PREVIA.md`. Mantidos capa, seis reportagens na ordem recebida, seis notas e encerramento.
+
+Dois ajustes de precisão, informados ao diretor antes da implementação e sujeitos à revisão: (1) “Depois de escapar por margens apertadas nas fases anteriores” → “Depois de escapar por margem apertada na Fase 4” na linha fina do Pretinho, pois as oitavas terminaram com margem de 25,95; (2) acrescentado “Na ida da B10” antes de “apenas 1,30 ponto separa líder e vice da Geral”, para não confundir a margem da copa com os 20,62 da classificação geral. Restante dos parágrafos preservado.
+
+Fonte oficial relida: versão `2026-11-03T19:58:27.656Z`, idêntica à apuração anterior. Representação textual SHA-256 `aa8003b58fb81718ada811d3690d3e9e538a260af6742b3feadc5e4f932954cd`. R33 identificada pelos dados; 50 clubes, 1.650 pontuações e 1.650 patrimônios R1–R33 sem lacunas. Histórico R1–R32 igual à cópia anterior. Funções da main conferiram 150 somas/posições de Geral, outubro e turno. Outubro é o recorte R29–R33 do sistema; Everton terminou com 527,45. Texto mantém a expressão “conquista apurada”, sem alegar homologação adicional ou inspeção de produção.
+
+### Implementação isolada
+
+Novo `src/services/gazeta/r33CuratedEdition.ts`: fonte/snapshot R33, sete matérias, notas, encerramento, radar dos 50, tabelas e WhatsApp. Verificador registra a fonte e valida identidade, pontuação, soma geral/mensal com R32 e as quatro idas. Catálogo inclui R33 somente na revisão. Nenhum arquivo de dados esportivos, motor de competição, planilha, sincronização, cache, regra ou desempate alterado.
+
+Visual aprovado preservado: capa em duas colunas a partir de 768px e uma no celular; seis reportagens com leitura completa. Quadro mostra quartas R33, volta R34 pendente e nenhuma vaga definida. Filtro exibe os oito clubes ativos nas quartas. Destaque mensal identifica “Outubro · resultado apurado”; notas e encerramento recebem os títulos da R33. O comportamento e conteúdo das edições anteriores permanecem preservados.
+
+### Verificações
+
+Baseline de todos os arquivos em src idêntica byte a byte à main antes da edição. TypeScript/build aprovados, com avisos anteriores de tamanho do bundle/import misto. Teste R33 verifica texto integral e os dois ajustes, 50 identidades/somas/posições, vencedor apurado de outubro, quatro idas sem classificados ou volta fictícia, onze centenários fora das quartas, rejeição de dados incorretos, zero/ausência e hashes R28–R32 idênticos. Testes R31/R32 atualizados somente para reconhecer catálogo R33 e manter R34 indisponível. Testes anteriores de restauração R30 e retificação/cache aprovados.
+
+Chromium local 390×900 e 1280×900: textos completos, dez parágrafos de capa em uma/duas colunas, seis matérias, notas/encerramento, quatro retornos R34 pendentes, filtro de oito clubes, histórico R28–R33 e WhatsApp com fallback. Sem erros de execução ou overflow. Capturas mobile/desktop inspecionadas. Requisições externas bloqueadas; arquivos e dados reais servidos localmente, sem iniciar servidor com autosync ou modificar fontes esportivas.
+
+### Passagem
+
+Arquivos da proposta: `r33CuratedEdition.ts`, `test_r33_curated_edition.ts` (novos), `editorialVerification.ts`, `gazetaArchive.ts`, `test_r31_curated_edition.ts`, `test_r32_curated_edition.ts`, `src/components/GazetaEditionView.tsx`, dois documentos de texto R33 e este Caderno. IA amiga/Gepeto devem preservar o texto recebido, os dois ajustes indicados e os retratos históricos; sem edições simultâneas nesses arquivos.
+
+Pendente: diretor revisar a prévia e autorizar eventual publicação. Nenhum semifinalista foi declarado; os quatro confrontos têm apenas ida disponível. Retificações anteriores, incluindo Buske R30=80,58 e Pirika 229,49 × 200,39 Galo, permanecem válidas. Buske R33=117,15 é um novo fato conferido, não restauração da matéria contestada da R30.

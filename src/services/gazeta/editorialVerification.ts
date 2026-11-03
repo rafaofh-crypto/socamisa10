@@ -1,3 +1,4 @@
+import { R33_CURATED_EDITION, R33_EDITORIAL_SOURCE } from './r33CuratedEdition';
 import { R32_CURATED_EDITION, R32_EDITORIAL_SOURCE } from './r32CuratedEdition';
 import { R31_CURATED_EDITION, R31_EDITORIAL_SOURCE } from './r31CuratedEdition';
 import type { CartolaTeam } from '../cartolaService';
@@ -12,6 +13,7 @@ export interface ConfirmedRoundScore {
 
 // Editorial only: this confirmation does not change sporting data.
 const APPROVED_SOURCES = Object.freeze({
+  [R33_EDITORIAL_SOURCE.id]: Object.freeze({authority: 'Planilha oficial R33 conferida para a prévia editorial', reference: R33_EDITORIAL_SOURCE.url + ' · ' + R33_EDITORIAL_SOURCE.modified}),
   [R32_EDITORIAL_SOURCE.id]: Object.freeze({authority: 'Planilha oficial R32 conferida para a prévia editorial', reference: R32_EDITORIAL_SOURCE.url + ' · ' + R32_EDITORIAL_SOURCE.modified}),
   [R31_EDITORIAL_SOURCE.id]: Object.freeze({authority: 'Planilha oficial R31 conferida para a prévia editorial', reference: R31_EDITORIAL_SOURCE.url + ' · ' + R31_EDITORIAL_SOURCE.modified}),
   [CONFIRMED_SOURCE.id]: Object.freeze({authority:'Planilha oficial corrigida pelo diretor',reference:CONFIRMED_SOURCE.url+' · '+CONFIRMED_SOURCE.modified}),
@@ -21,6 +23,7 @@ const APPROVED_SOURCES = Object.freeze({
   }),
 });
 export const CONFIRMED_ROUND_SCORES: readonly Readonly<ConfirmedRoundScore>[] = Object.freeze([
+  ...R33_EDITORIAL_SOURCE.records.map(t => Object.freeze({season:2026,round:33,clubId:t.id,clubName:t.name,score:t.score,sourceId:R33_EDITORIAL_SOURCE.id})),
   ...R32_EDITORIAL_SOURCE.records.map(t => Object.freeze({season: 2026, round: 32, clubId: t.id, clubName: t.name, score: t.score, sourceId: R32_EDITORIAL_SOURCE.id})),
   ...R31_EDITORIAL_SOURCE.records.map(t => Object.freeze({season: 2026, round: 31, clubId: t.id, clubName: t.name, score: t.score, sourceId: R31_EDITORIAL_SOURCE.id})),
   Object.freeze({ season: 2026, round: 30, clubId: 'capita-buske', clubName: 'Capitã Buske',
@@ -55,6 +58,7 @@ export function getGazetaSourceWarning(teams: CartolaTeam[], round: number): str
     if (matches.length === 0) continue;
     if (matches.length !== 1 || !isRecordedScore(matches[0].scores?.[round]) ||
         matches[0].scores[round] !== fact.score) {
+      if (round === 33) return 'Há divergência ou ausência de dados na leitura da R33. A Gazeta preserva a edição conferida com a planilha oficial.';
       if (round === 32) return 'Há divergência ou ausência de dados na leitura da R32. A Gazeta preserva a edição conferida com a planilha oficial.';
       if (round === 31) return 'Há divergência ou ausência de dados na leitura da R31. A Gazeta preserva a edição conferida com a planilha oficial.';
       return 'Há divergência ou ausência de dados na leitura da rodada. A Gazeta utiliza a edição retificada e conferida com a planilha oficial.';
@@ -65,6 +69,29 @@ export function getGazetaSourceWarning(teams: CartolaTeam[], round: number): str
 
 /** Every score in the story and WhatsApp comes from the same confirmed fact. */
 export function buildVerifiedGazetaEdition(round: number): GazetaEdition | null {
+  if (round === 33) {
+    const source = R33_EDITORIAL_SOURCE;
+    const edition = R33_CURATED_EDITION;
+    if (source.season !== 2026 || source.round !== 33 || source.records.length !== 50 ||
+        new Set(source.records.map(t => t.id)).size !== 50 || edition.radarClubs.length !== 50 ||
+        new Set(edition.radarClubs.map(t => t.id)).size !== 50 || edition.b10Digest.length !== 0 ||
+        edition.b10FirstLegDigest?.length !== 4) return null;
+    for (const record of source.records) {
+      const previous = R32_CURATED_EDITION.radarClubs.find(t => t.id === record.id);
+      const digest = edition.radarClubs.find(t => t.id === record.id);
+      if (!previous || !digest || previous.name !== record.name ||
+          !validateRoundScoreCandidate({season:2026,round:33,clubId:record.id,clubName:record.name,score:record.score,sourceId:source.id}) ||
+          digest.roundScore !== record.score ||
+          Math.round(digest.geralPoints*100) !== Math.round(previous.geralPoints*100)+Math.round(record.score*100) ||
+          Math.round(digest.monthPoints*100) !== Math.round(previous.monthPoints*100)+Math.round(record.score*100)) return null;
+    }
+    for (const match of edition.b10FirstLegDigest) {
+      const home = source.records.find(t => t.id === match.homeClub.id);
+      const away = source.records.find(t => t.id === match.awayClub.id);
+      if (!home || !away || match.round !== 33 || match.returnRound !== 34 || match.homeScore !== home.score || match.awayScore !== away.score) return null;
+    }
+    return edition;
+  }
   if (round === 32) {
     const source = R32_EDITORIAL_SOURCE;
     const edition = R32_CURATED_EDITION;
