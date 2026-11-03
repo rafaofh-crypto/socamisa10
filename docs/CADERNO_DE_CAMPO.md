@@ -455,3 +455,9 @@ Chromium local 390×900 e 1280×900: textos completos, dez parágrafos de capa e
 Arquivos da proposta: `r33CuratedEdition.ts`, `test_r33_curated_edition.ts` (novos), `editorialVerification.ts`, `gazetaArchive.ts`, `test_r31_curated_edition.ts`, `test_r32_curated_edition.ts`, `src/components/GazetaEditionView.tsx`, dois documentos de texto R33 e este Caderno. IA amiga/Gepeto devem preservar o texto recebido, os dois ajustes indicados e os retratos históricos; sem edições simultâneas nesses arquivos.
 
 Pendente: diretor revisar a prévia e autorizar eventual publicação. Nenhum semifinalista foi declarado; os quatro confrontos têm apenas ida disponível. Retificações anteriores, incluindo Buske R30=80,58 e Pirika 229,49 × 200,39 Galo, permanecem válidas. Buske R33=117,15 é um novo fato conferido, não restauração da matéria contestada da R30.
+
+### 18.1. Aprovação final e autorização de publicação da R33 (03/11/2026)
+
+Após revisar a prévia, o diretor aprovou expressamente: **“pode publicar irmão”**. Autorizado integrar e publicar o PR #6 com o código revisado no commit `67413fc91321741f795571a00e2740ff06326a1f`, cuja prévia foi concluída com sucesso pela Vercel. A autorização supera a pendência de publicação da seção 18 somente para esta edição e apresentação.
+
+Mantidos textos completos com os dois ajustes de precisão informados, capa em duas colunas no desktop e uma no celular, outubro como resultado apurado, quatro idas das quartas com volta pendente, radar dos 50 e WhatsApp. Nenhum semifinalista antecipado. Edições R28–R32, dados esportivos, regras, motores, cache e retificações anteriores preservados. Este acréscimo registra somente a autorização, sem alterar o código aprovado. Codex acompanha integração e implantação; a conclusão será comunicada após confirmação oficial da Vercel.
