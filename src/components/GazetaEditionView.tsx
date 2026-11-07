@@ -90,7 +90,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
 
       const statusLabel = club.b10StatusLabel || '';
       if (selectedFilter === 'OITAVAS') {
-        return edition.round === 33 ? statusLabel.includes('Quartas') : edition.round === 32 ? statusLabel.includes('Classificado às Quartas') : statusLabel.includes('Oitavas');
+        return edition.round === 34 ? statusLabel.includes('Classificado às Semifinais') : edition.round === 33 ? statusLabel.includes('Quartas') : edition.round === 32 ? statusLabel.includes('Classificado às Quartas') : statusLabel.includes('Oitavas');
       }
       if (selectedFilter === 'ELIMINADOS') {
         return statusLabel.includes('Eliminado') || statusLabel.includes('Playoff');
@@ -259,7 +259,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
             <p className="text-slate-300">{edition.geralTop5[0].points} pts</p>
           </div>}
           {edition.monthlyTop5.length > 0 && <div className="bg-black/40 border border-white/5 rounded-2xl p-3.5">
-            <span className="text-[10px] text-slate-500 block">{edition.round === 33 ? 'Outubro · resultado apurado' : 'Líder do Mês'}</span>
+            <span className="text-[10px] text-slate-500 block">{edition.round === 34 ? 'Líder parcial de novembro' : edition.round === 33 ? 'Outubro · resultado apurado' : 'Líder do Mês'}</span>
             <strong className="text-purple-400">{edition.monthlyTop5[0].name}</strong>
             <p className="text-slate-300">{edition.monthlyTop5[0].points} pts</p>
           </div>}
@@ -286,7 +286,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
             {edition.headlineStory.subheadline}
           </p>
 
-          {(edition.round === 31 || edition.round === 32 || edition.round === 33) ? (
+          {(edition.round === 31 || edition.round === 32 || edition.round === 33 || edition.round === 34) ? (
             <article aria-label="Reportagem de capa completa" className="bg-black/30 border border-white/5 rounded-2xl p-5 sm:p-8">
               <div className="space-y-5 md:columns-2 md:gap-10 text-sm sm:text-base text-slate-300 font-sans leading-relaxed [&>p]:break-inside-avoid">
                 <p>{edition.headlineStory.lead}</p>
@@ -444,7 +444,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
       </div>}
 
       {edition.editorialNotes && <section className="rounded-3xl border border-[#D4AF37]/20 bg-[#121216] p-6 sm:p-8 space-y-5">
-        <h3 className="text-xl sm:text-2xl font-black font-display uppercase text-[#D4AF37]">{edition.round === 33 ? 'Radar C10 · Outras histórias da R33' : edition.round === 32 ? 'Radar C10 · A rodada também teve isso' : 'Notas da redação · A R31 também teve isso'}</h3>
+        <h3 className="text-xl sm:text-2xl font-black font-display uppercase text-[#D4AF37]">{edition.round === 34 ? 'Radar C10 · O que mais aconteceu na R34' : edition.round === 33 ? 'Radar C10 · Outras histórias da R33' : edition.round === 32 ? 'Radar C10 · A rodada também teve isso' : 'Notas da redação · A R31 também teve isso'}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {edition.editorialNotes.map(note => <article key={note.title} className="space-y-2">
             <h4 className="font-bold text-white text-sm">{note.title}</h4>
@@ -482,17 +482,18 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div>
               <span className="text-[10px] font-mono uppercase font-black text-[#D4AF37] block">
-                {edition.round === 32 ? 'OITAVAS DE FINAL • IDA R31 / VOLTA R32' : 'FASE 4 • 16 AVOS DE FINAL (180 MINUTOS)'}
+                {edition.round === 34 ? 'QUARTAS DE FINAL • IDA R33 / VOLTA R34' : edition.round === 32 ? 'OITAVAS DE FINAL • IDA R31 / VOLTA R32' : 'FASE 4 • 16 AVOS DE FINAL (180 MINUTOS)'}
               </span>
               <h3 className="text-lg font-black font-display uppercase text-white">
-                {edition.round === 32 ? 'Copa B10 · Oito classificados às quartas' : 'Copa B10 · Confrontos encerrados da Fase 4'}
+                {edition.round === 34 ? 'Copa B10 · Quartas de final encerradas' : edition.round === 32 ? 'Copa B10 · Oito classificados às quartas' : 'Copa B10 · Confrontos encerrados da Fase 4'}
               </h3>
             </div>
             <span className="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold">
-              {edition.round === 32 ? 'RESULTADOS CONFERIDOS' : '100% HOMOLOGADOS'}
+              {edition.round === 34 ? 'HOMOLOGADOS PELA DIREÇÃO' : edition.round === 32 ? 'RESULTADOS CONFERIDOS' : '100% HOMOLOGADOS'}
             </span>
           </div>
 
+          {edition.b10EditorialSummary && <p className="text-sm text-slate-300">{edition.b10EditorialSummary.intro}</p>}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[460px] overflow-y-auto pr-1">
             {(edition.b10Digest || []).map(match => (
               <div 
@@ -530,7 +531,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
                 </div>
 
                 <div className="mt-2 pt-1.5 border-t border-white/5 flex items-center justify-between text-[10px]">
-                  <span className="text-slate-500">{edition.round === 32 ? 'Classificado às Quartas:' : 'Classificado às Oitavas:'}</span>
+                  <span className="text-slate-500">{edition.round === 34 ? 'Classificado às Semifinais:' : edition.round === 32 ? 'Classificado às Quartas:' : 'Classificado às Oitavas:'}</span>
                   <span className="text-[#D4AF37] font-black uppercase truncate max-w-[150px]">
                     ✓ {match.winnerName}
                   </span>
@@ -538,6 +539,10 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
               </div>
             ))}
           </div>
+          {edition.b10EditorialSummary && <div className="pt-4 border-t border-white/10 space-y-3">
+            <h4 className="text-sm font-bold text-[#D4AF37]">{edition.b10EditorialSummary.semifinalTitle}</h4>
+            {edition.b10EditorialSummary.semifinalParagraphs.map((paragraph, index) => <p key={index} className="text-sm text-slate-300 leading-relaxed">{paragraph}</p>)}
+          </div>}
         </div>
 
         }
@@ -609,7 +614,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
                 onClick={() => setSelectedFilter('OITAVAS')}
                 className={`px-2.5 py-1 rounded-lg cursor-pointer ${selectedFilter === 'OITAVAS' ? 'bg-emerald-500 text-white font-bold' : 'text-slate-400 hover:text-white'}`}
               >
-                {edition.round >= 32 ? 'Quartas B10' : 'Oitavas B10'}
+                {edition.round === 34 ? 'Semifinais B10' : edition.round >= 32 ? 'Quartas B10' : 'Oitavas B10'}
               </button>
               <button
                 onClick={() => setSelectedFilter('ELIMINADOS')}
@@ -668,7 +673,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
                 </div>
                 <div className="bg-zinc-900/60 p-1.5 rounded-lg">
                   <span className="text-slate-500 block text-[8px] uppercase">Copa B10</span>
-                  <span className={`font-bold truncate block ${(edition.round === 33 ? club.b10StatusLabel.includes('Quartas') : edition.round === 32 ? club.b10StatusLabel.includes('Classificado às Quartas') : club.b10StatusLabel.includes('Oitavas')) ? 'text-emerald-400' : 'text-slate-400'}`}>
+                  <span className={`font-bold truncate block ${(edition.round === 34 ? club.b10StatusLabel.includes('Classificado às Semifinais') : edition.round === 33 ? club.b10StatusLabel.includes('Quartas') : edition.round === 32 ? club.b10StatusLabel.includes('Classificado às Quartas') : club.b10StatusLabel.includes('Oitavas')) ? 'text-emerald-400' : 'text-slate-400'}`}>
                     {club.b10StatusLabel}
                   </span>
                 </div>
@@ -678,7 +683,7 @@ export const GazetaEditionView: React.FC<GazetaEditionViewProps> = ({ teams = []
         </div>
       </div>}
       {edition.closingParagraphs && <section className="rounded-3xl border border-[#D4AF37]/25 bg-gradient-to-r from-[#14141a] to-[#101014] p-6 sm:p-8 space-y-4">
-        <h3 className="text-xl font-black font-display uppercase text-[#D4AF37]">{edition.round === 33 ? 'Próximo capítulo · R34: quem vai às semifinais?' : edition.round === 32 ? 'Próximo capítulo · Quartas de final da B10' : 'A próxima rodada promete'}</h3>
+        <h3 className="text-xl font-black font-display uppercase text-[#D4AF37]">{edition.round === 34 ? 'Próxima parada: R35!' : edition.round === 33 ? 'Próximo capítulo · R34: quem vai às semifinais?' : edition.round === 32 ? 'Próximo capítulo · Quartas de final da B10' : 'A próxima rodada promete'}</h3>
         {edition.closingParagraphs.map((paragraph, index) => <p key={index} className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">{paragraph}</p>)}
       </section>}
     </div>

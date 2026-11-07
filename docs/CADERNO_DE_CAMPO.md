@@ -461,3 +461,41 @@ Pendente: diretor revisar a prévia e autorizar eventual publicação. Nenhum se
 Após revisar a prévia, o diretor aprovou expressamente: **“pode publicar irmão”**. Autorizado integrar e publicar o PR #6 com o código revisado no commit `67413fc91321741f795571a00e2740ff06326a1f`, cuja prévia foi concluída com sucesso pela Vercel. A autorização supera a pendência de publicação da seção 18 somente para esta edição e apresentação.
 
 Mantidos textos completos com os dois ajustes de precisão informados, capa em duas colunas no desktop e uma no celular, outubro como resultado apurado, quatro idas das quartas com volta pendente, radar dos 50 e WhatsApp. Nenhum semifinalista antecipado. Edições R28–R32, dados esportivos, regras, motores, cache e retificações anteriores preservados. Este acréscimo registra somente a autorização, sem alterar o código aprovado. Codex acompanha integração e implantação; a conclusão será comunicada após confirmação oficial da Vercel.
+
+## 19. Gazeta R34 recebida do Gepeto, prêmio de rodada e preferência de Drive (07/11/2026)
+
+### Autorização e limites
+
+O diretor entregou a edição “O FURACÃO VIROU O JOGO. E A GERAL PEGOU FOGO!” e autorizou expressamente: **“ta ai a materia do gazeta que o gepeto fez. pode publicar.”** Na mesma ordem, informou que o líder de cada rodada ganha **R$ 50**, autorizando corrigir o valor no sistema, e determinou: **“nao quero que voce sai salvando as coisas no eu google drive. me pergunte antes.”**
+
+**Diretriz permanente de entrega: nenhuma IA deve salvar, criar ou atualizar arquivos no Google Drive do diretor sem perguntar e receber autorização prévia para essa ação.** A autorização anterior de uma entrega não deve ser interpretada como permissão geral para envios futuros. Nesta publicação, nenhum arquivo foi enviado ao Drive.
+
+Autorizados implementação, revisão, integração e publicação desta edição e da correção do prêmio de rodada. Branch de trabalho `codex/gazeta-r34-publicacao-2026-11-07`, base main `0dba59070e18a85211c7a0c8418344cd9d457492`; checkout separado preserva os arquivos das frentes anteriores. Caderno remoto consultado. Disponibilidade sem bloqueio conhecido; cota restante não visível.
+
+### Fonte, confirmação esportiva e texto
+
+Planilha oficial relida, aba Página1, A1:BQ52: 50 clubes, pontuações e patrimônios R1–R34; R34 em BP/BQ. Resposta idêntica à apuração de 07/11/2026, versão modificada `2026-11-07T19:33:28.916Z`. Série anterior R1–R33 sem alterações na comparação com a captura da R33. Os campos da R34 são textos numéricos compatíveis com o parser; nenhum valor ausente foi completado.
+
+Durante a apuração, o diretor recebeu os quatro agregados e as semifinais e respondeu literalmente: **“Confirmo a homologação dos quatro resultados e das semifinais”**. Fatos autorizados: Pretinho99 210,31 × 153,01 Carlao07; Everton 203,56 × 187,91 Dida82; Camisa Pesada 184,96 × 161,02 Ninja; Furacão 188,91 × 180,51 Tainha. Semifinais: Pretinho99 × Everton e Camisa Pesada × Furacão, R35/R36. Não há finalistas antecipados. Registro no snapshot editorial não altera motores esportivos nem reabre histórico.
+
+Texto original integral em `docs/gazeta/EDICAO_R34_TEXTO_RECEBIDO.md`; texto de publicação em `EDICAO_R34_PUBLICACAO.md`. Um único ajuste de clareza, informado ao diretor antes da edição: “O Furacão ganhou a semifinal.” → “O Furacão ganhou a vaga na semifinal.”, evitando sugerir que a fase futura já foi disputada. Mantidos os demais parágrafos, sete matérias completas, cinco notas, introdução/quadro das quartas, chamadas das semifinais e encerramento. Sem scouts, entrevistas ou causas de desempenho inventadas.
+
+### Implementação delimitada
+
+Novo `r34CuratedEdition.ts` contém fonte R34, confirmação expressa da Direção, sete matérias, cinco notas, quatro resultados homologados, radar dos 50, tabelas e WhatsApp. `editorialVerification.ts` confere valores R34, soma geral com R33, novembro igual à primeira rodada do mês, pernas/agregados e participantes confirmados. Catálogo passa a incluir R34; R35 permanece indisponível.
+
+`GazetaEditionView.tsx` mantém capa em duas colunas no desktop e uma no celular, leitura completa das matérias e histórico. R34 identifica quartas R33/R34, classificado às semifinais, selo de homologação da Direção e quatro clubes no filtro das semifinais. Resumo de semifinais preserva o texto recebido. Novembro é identificado como liderança parcial; outubro mantém seu retrato R33. `types.ts` recebe apenas o resumo editorial opcional.
+
+`src/pages/Destaques.tsx`: alteração exclusivamente do rótulo do Mito da Rodada, de R$ 80,00 para **R$ 50,00**, conforme ordem do diretor. Não foram alterados prêmios de outras competições, classificados, pontuações, critérios, fonte, sincronização ou cache. Não confundir valor previsto com confirmação de pagamento.
+
+### Verificações e passagem
+
+TypeScript/build aprovados; permanecem avisos anteriores de tamanho de bundle/importação mista. Teste R34 confere preservação integral da redação com o único ajuste, 50 identidades/somas/posições, recorte de novembro, quatro agregados/classificados, semifinais homologadas, rejeição de fonte/valores/temporada incorretos, zero/ausência e hashes R28–R33 idênticos. Testes R31/R32/R33 atualizados apenas para incluir R34 no catálogo e manter R35 ausente; passaram, assim como restauração editorial R30.
+
+Limitação de testes legados: `test_gazeta_archive.ts` e seu importador `test_gazeta_validation.ts` pressupõem que `CONFIRMED_ROUND_SCORES[0]` seja Buske R30=80,58 e que o catálogo termine na R30. Essa premissa já falha na main R33 (90,70 ≠ 80,58); a falha foi reproduzida antes desta entrega e não é correção esportiva pendente. Não se alterou esse teste histórico nesta tarefa. As verificações específicas atuais e hashes preservam o cenário retificado de Buske/Pirika.
+
+Chromium local 390×900 e 1280×900: capa uma/duas colunas, textos completos, cinco notas, quatro classificados às semifinais, pares R35/R36, liderança parcial de novembro, filtro com quatro clubes, histórico R28–R34, cópia WhatsApp com fallback e prêmio R$ 50 em Destaques. Sem erros de execução ou overflow. Capturas de capa mobile/desktop e quadro B10 mobile inspecionadas. Toda rede externa bloqueada nos testes; fonte/escudos locais; sem servidor com autosync.
+
+IA amiga/Gepeto: preservar texto recebido, retificações e retratos históricos. A chegada de R35 não autoriza edição automática. Não restaurar resumos genéricos, dados contestados ou valor antigo de prêmio da rodada. Não enviar arquivos ao Drive sem autorização prévia do diretor.
+
+A autorização de publicação já foi dada nesta ordem. Codex acompanha integração e implantação; só declarar publicação concluída após confirmação oficial do deploy, distinguindo-a de inspeção direta de produção, que permanece sujeita ao bloqueio de rede do ambiente.

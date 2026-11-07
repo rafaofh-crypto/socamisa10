@@ -7,7 +7,7 @@ import { R31_CURATED_EDITION, R31_EDITORIAL_SOURCE } from './r31CuratedEdition';
 import { validateRoundScoreCandidate, getGazetaSourceWarning } from './editorialVerification';
 const e=getPublishedGazetaEdition(32)!;
 assert.ok(e);assert.equal(e,R32_CURATED_EDITION);assert.ok(Object.isFrozen(e));
-assert.deepEqual(getAvailableGazetaEditions().map(t=>t.round),[33,32,31,30,29,28]);assert.equal(getPublishedGazetaEdition(34),null);
+assert.deepEqual(getAvailableGazetaEditions().map(t=>t.round),[34,33,32,31,30,29,28]);assert.equal(getPublishedGazetaEdition(35),null);
 const stories=[e.headlineStory,...e.featuredStories,...e.crossStories];assert.equal(stories.length,7);assert.equal(e.featuredStories.length,6);assert.equal(new Set(stories.map(s=>s.id)).size,7);
 assert.equal(e.editorialNotes?.length,5);
 const norm=(s:string)=>s.replaceAll('*','').replace(/\s+/g,' ').trim();
