@@ -6,7 +6,7 @@ import {R33_EDITORIAL_SOURCE,R33_CURATED_EDITION} from './r33CuratedEdition';
 import {R32_CURATED_EDITION} from './r32CuratedEdition';
 import {validateRoundScoreCandidate,getGazetaSourceWarning,isRecordedScore} from './editorialVerification';
 const e=getPublishedGazetaEdition(33)!;assert.ok(e);assert.equal(e,R33_CURATED_EDITION);assert.ok(Object.isFrozen(e));
-assert.deepEqual(getAvailableGazetaEditions().map(t=>t.round),[33,32,31,30,29,28]);assert.equal(getPublishedGazetaEdition(34),null);
+assert.deepEqual(getAvailableGazetaEditions().map(t=>t.round),[34,33,32,31,30,29,28]);assert.equal(getPublishedGazetaEdition(35),null);
 const stories=[e.headlineStory,...e.featuredStories,...e.crossStories];assert.equal(stories.length,7);assert.equal(e.featuredStories.length,6);assert.equal(new Set(stories.map(t=>t.id)).size,7);assert.equal(e.editorialNotes?.length,6);
 const original=readFileSync('docs/gazeta/EDICAO_R33_TEXTO_RECEBIDO.md','utf8');const expected=original.replace('Depois de escapar por margens apertadas nas fases anteriores, clube abre','Depois de escapar por margem apertada na Fase 4, clube abre').replace('Apenas 1,30 ponto separa líder e vice da Geral.','Na ida da B10, apenas 1,30 ponto separa líder e vice da Geral.');
 assert.equal(readFileSync('docs/gazeta/EDICAO_R33_PREVIA.md','utf8').trim(),expected.trim());

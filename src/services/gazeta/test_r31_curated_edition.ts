@@ -8,8 +8,8 @@ import { validateRoundScoreCandidate, isRecordedScore, getGazetaSourceWarning } 
 
 const e=getPublishedGazetaEdition(31)!;
 assert.ok(e); assert.equal(e,R31_CURATED_EDITION); assert.ok(Object.isFrozen(e));
-assert.deepEqual(getAvailableGazetaEditions().map(x=>x.round),[33,32,31,30,29,28]);
-assert.equal(getPublishedGazetaEdition(34),null);
+assert.deepEqual(getAvailableGazetaEditions().map(x=>x.round),[34,33,32,31,30,29,28]);
+assert.equal(getPublishedGazetaEdition(35),null);
 const stories=[e.headlineStory,...e.featuredStories,...e.crossStories];
 assert.equal(stories.length,7);assert.equal(e.featuredStories.length,6);
 assert.equal(new Set(stories.map(s=>s.id)).size,7);

@@ -151,6 +151,7 @@ export interface GazetaEdition {
   featuredStories: GazetaStory[];
   crossStories: GazetaStory[];
   b10Digest: CupMatchReport[];
+  b10EditorialSummary?: { intro: string; semifinalTitle: string; semifinalParagraphs: string[] };
   b10FirstLegDigest?: {
     matchNumber: number;
     homeClub: CupMatchReport['homeClub'];

@@ -325,7 +325,7 @@ export default function Destaques({ teams, currentRound }: DestaquesProps) {
                 
                 {/* Golden Premium Badge */}
                 <span className="bg-gold text-charcoal-dark font-display font-black text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider shadow-md border border-[#ffffff]/20 flex items-center shrink-0">
-                  🏆 R$ 80,00
+                  🏆 R$ 50,00
                 </span>
               </div>
 
