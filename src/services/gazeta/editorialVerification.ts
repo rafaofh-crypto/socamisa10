@@ -1,3 +1,4 @@
+import { R35_CURATED_EDITION, R35_EDITORIAL_SOURCE } from './r35CuratedEdition';
 import { R34_CURATED_EDITION, R34_EDITORIAL_SOURCE } from './r34CuratedEdition';
 import { R33_CURATED_EDITION, R33_EDITORIAL_SOURCE } from './r33CuratedEdition';
 import { R32_CURATED_EDITION, R32_EDITORIAL_SOURCE } from './r32CuratedEdition';
@@ -14,6 +15,7 @@ export interface ConfirmedRoundScore {
 
 // Editorial only: this confirmation does not change sporting data.
 const APPROVED_SOURCES = Object.freeze({
+  [R35_EDITORIAL_SOURCE.id]: Object.freeze({authority: 'Planilha oficial R35 conferida para a edição autorizada', reference: R35_EDITORIAL_SOURCE.url + ' · ' + R35_EDITORIAL_SOURCE.modified}),
   [R34_EDITORIAL_SOURCE.id]: Object.freeze({authority: 'Planilha oficial R34 conferida e quartas homologadas pela Direção', reference: R34_EDITORIAL_SOURCE.url + ' · ' + R34_EDITORIAL_SOURCE.modified}),
   [R33_EDITORIAL_SOURCE.id]: Object.freeze({authority: 'Planilha oficial R33 conferida para a prévia editorial', reference: R33_EDITORIAL_SOURCE.url + ' · ' + R33_EDITORIAL_SOURCE.modified}),
   [R32_EDITORIAL_SOURCE.id]: Object.freeze({authority: 'Planilha oficial R32 conferida para a prévia editorial', reference: R32_EDITORIAL_SOURCE.url + ' · ' + R32_EDITORIAL_SOURCE.modified}),
@@ -25,6 +27,7 @@ const APPROVED_SOURCES = Object.freeze({
   }),
 });
 export const CONFIRMED_ROUND_SCORES: readonly Readonly<ConfirmedRoundScore>[] = Object.freeze([
+  ...R35_EDITORIAL_SOURCE.records.map(t => Object.freeze({season:2026,round:35,clubId:t.id,clubName:t.name,score:t.score,sourceId:R35_EDITORIAL_SOURCE.id})),
   ...R34_EDITORIAL_SOURCE.records.map(t => Object.freeze({season:2026,round:34,clubId:t.id,clubName:t.name,score:t.score,sourceId:R34_EDITORIAL_SOURCE.id})),
   ...R33_EDITORIAL_SOURCE.records.map(t => Object.freeze({season:2026,round:33,clubId:t.id,clubName:t.name,score:t.score,sourceId:R33_EDITORIAL_SOURCE.id})),
   ...R32_EDITORIAL_SOURCE.records.map(t => Object.freeze({season: 2026, round: 32, clubId: t.id, clubName: t.name, score: t.score, sourceId: R32_EDITORIAL_SOURCE.id})),
@@ -61,6 +64,7 @@ export function getGazetaSourceWarning(teams: CartolaTeam[], round: number): str
     if (matches.length === 0) continue;
     if (matches.length !== 1 || !isRecordedScore(matches[0].scores?.[round]) ||
         matches[0].scores[round] !== fact.score) {
+      if (round === 35) return 'Há divergência ou ausência de dados na leitura da R35. A Gazeta preserva a edição conferida com a planilha oficial.';
       if (round === 34) return 'Há divergência ou ausência de dados na leitura da R34. A Gazeta preserva a edição conferida com a planilha oficial.';
       if (round === 33) return 'Há divergência ou ausência de dados na leitura da R33. A Gazeta preserva a edição conferida com a planilha oficial.';
       if (round === 32) return 'Há divergência ou ausência de dados na leitura da R32. A Gazeta preserva a edição conferida com a planilha oficial.';
@@ -73,6 +77,37 @@ export function getGazetaSourceWarning(teams: CartolaTeam[], round: number): str
 
 /** Every score in the story and WhatsApp comes from the same confirmed fact. */
 export function buildVerifiedGazetaEdition(round: number): GazetaEdition | null {
+  if (round === 35) {
+    const source = R35_EDITORIAL_SOURCE;
+    const edition = R35_CURATED_EDITION;
+    if (source.season !== 2026 || source.round !== 35 || source.records.length !== 50 ||
+        new Set(source.records.map(t => t.id)).size !== 50 || edition.radarClubs.length !== 50 ||
+        new Set(edition.radarClubs.map(t => t.id)).size !== 50 || edition.b10Digest.length !== 0 ||
+        edition.b10FirstLegDigest?.length !== 2) return null;
+    for (const record of source.records) {
+      const previous = R34_CURATED_EDITION.radarClubs.find(t => t.id === record.id);
+      const digest = edition.radarClubs.find(t => t.id === record.id);
+      if (!previous || !digest || previous.name !== record.name ||
+          !validateRoundScoreCandidate({season:2026,round:35,clubId:record.id,clubName:record.name,score:record.score,sourceId:source.id}) ||
+          digest.roundScore !== record.score ||
+          Math.round(digest.geralPoints*100) !== Math.round(previous.geralPoints*100)+Math.round(record.score*100) ||
+          Math.round(digest.monthPoints*100) !== Math.round(previous.monthPoints*100)+Math.round(record.score*100)) return null;
+    }
+    const participants = new Set<string>();
+    for (const [index, match] of edition.b10FirstLegDigest.entries()) {
+      const pair = R34_EDITORIAL_SOURCE.cupApproval.semifinals[index];
+      const home = source.records.find(t => t.id === match.homeClub.id);
+      const away = source.records.find(t => t.id === match.awayClub.id);
+      if (!home || !away || match.round !== 35 || match.returnRound !== 36 ||
+          match.homeClub.id !== pair[0] || match.awayClub.id !== pair[1] ||
+          match.homeScore !== home.score || match.awayScore !== away.score ||
+          participants.has(home.id) || participants.has(away.id)) return null;
+      participants.add(home.id); participants.add(away.id);
+    }
+    if (participants.size !== 4 || !edition.radarClubs.filter(t => participants.has(t.id))
+        .every(t => t.b10StatusLabel === 'Semifinais · volta pendente')) return null;
+    return edition;
+  }
   if (round === 34) {
     const source = R34_EDITORIAL_SOURCE;
     const edition = R34_CURATED_EDITION;
