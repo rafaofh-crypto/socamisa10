@@ -499,3 +499,33 @@ Chromium local 390×900 e 1280×900: capa uma/duas colunas, textos completos, ci
 IA amiga/Gepeto: preservar texto recebido, retificações e retratos históricos. A chegada de R35 não autoriza edição automática. Não restaurar resumos genéricos, dados contestados ou valor antigo de prêmio da rodada. Não enviar arquivos ao Drive sem autorização prévia do diretor.
 
 A autorização de publicação já foi dada nesta ordem. Codex acompanha integração e implantação; só declarar publicação concluída após confirmação oficial do deploy, distinguindo-a de inspeção direta de produção, que permanece sujeita ao bloqueio de rede do ambiente.
+
+## 20. Gazeta R35 recebida do Gepeto — publicação autorizada (21/11/2026)
+
+### Pedido, fonte e limites
+
+O diretor entregou a edição **“APAGÃO GERAL! NINGUÉM CHEGOU AOS 100!”** e autorizou expressamente: **“Codex essa é a nova edicao do gazeta. pode publicar”**. Autorizados cadastro, verificações, integração e publicação desta edição. Branch `codex/gazeta-r35-publicacao-2026-11-21`, base main `93703d6c5ac0b935f328e85a7119dfe1a4ebc8cf`; Caderno remoto consultado antes de trabalhar. Checkout separado, sem interferir em outras frentes. Disponibilidade sem bloqueio conhecido; cota restante não visível.
+
+Planilha oficial relida em Página1, A1:BS55, versão modificada `2026-11-21T17:12:32.975Z`. A resposta é idêntica à apuração entregue ao diretor: última rodada preenchida R35; 50 slugs exatos, pontuações e patrimônios presentes; nenhuma R36 presumida. Na apuração, todas as 1.700 pontuações anteriores coincidiram com referências congeladas; 1.300 patrimônios anteriores comparáveis também coincidiram. Para os 400 patrimônios R2–R9 não havia snapshot independente na main; não se certificou imutabilidade desses valores nem se inventou divergência.
+
+O texto integral recebido fica em `docs/gazeta/EDICAO_R35_TEXTO_RECEBIDO.md`. Mantidos manchete, capa completa, seis reportagens, seis notas e encerramento, sem correção ou corte de parágrafos. Nenhum valor de prêmio foi introduzido na redação. Mantida a correção R$ 50 do destaque da rodada já publicada na R34.
+
+### Implementação editorial e segurança esportiva
+
+Novo `src/services/gazeta/r35CuratedEdition.ts` contém fonte, sete matérias completas, seis notas, duas idas da semifinal, radar dos 50, tabelas e texto para cópia WhatsApp. Snapshot exclusivamente editorial; não alimenta motores de competição, sincronização ou cache.
+
+B10: Pretinho99 57,99 × 66,59 Everton; Camisa Pesada 62,59 × 66,69 Furacão. Vantagens de 8,60 e 4,10 são **parciais**. Voltas R36 pendentes; nenhum finalista, eliminado ou vencedor de semifinal foi criado. Pares conferidos com a homologação das quartas/semifinais registrada na seção 19. Sem nova homologação automática, alteração de critério ou reabertura de histórico.
+
+`editorialVerification.ts` confere 50 identidades/valores, soma geral e mensal com a R34, pares homologados e duas idas sem volta fictícia. Catálogo incorpora R35 e mantém R36 indisponível. `GazetaEditionView.tsx` preserva capa em duas colunas no desktop e uma no celular, reportagens completas, notas e histórico; quadro mostra “Ida R35 · Finalistas ainda não definidos”, dois retornos R36 pendentes, quatro participantes no filtro das semifinais e liderança parcial de novembro. As edições anteriores mantêm seus títulos e estados históricos.
+
+Nenhum motor esportivo, dado oficial, fonte, planilha, regra, resultado homologado, patrimônio, posição ou cache foi alterado. Nenhum envio ao Google Drive: permanece obrigatória a pergunta e a autorização prévia do diretor para cada envio. WhatsApp foi testado somente como cópia local; nenhuma mensagem foi enviada.
+
+### Verificações e passagem
+
+TypeScript e build aprovados, com avisos anteriores de bundle/importação mista. Teste R35 verifica o texto recebido completo fora do campo WhatsApp, 50 clubes/somas/posições, novembro, duas idas sem finalistas, rejeição de fatos incorretos, zero/ausência e hashes das edições R28–R34 idênticos. Testes R31/R32/R33/R34 atualizados apenas quanto ao catálogo e à próxima edição ausente; passaram, assim como restauração R30. A limitação dos testes legados registrada na seção 19 permanece fora desta alteração.
+
+Chromium local 390×900 e 1280×900: textos completos, capa uma/duas colunas, seis notas, dois retornos R36 pendentes, ausência de selo/classificado definitivo na semifinal, filtro com quatro clubes, liderança parcial de novembro, histórico R28–R35 e cópia WhatsApp com fallback. Sem erros de execução/overflow. Capturas mobile/desktop da capa e mobile do quadro B10 inspecionadas. Rede externa bloqueada nos testes; dados e escudos locais; nenhum servidor com autosync iniciado.
+
+IA amiga/Gepeto: preservar a edição integral e os retratos anteriores. R36 depende de apuração e autorização próprias. O texto de ida não autoriza classificações antes da volta efetivamente apurada. Não restaurar dados contestados da R30 ou indicadores sintéticos. Nenhum arquivo de UX/mobile ou protótipo integra esta entrega.
+
+Publicação autorizada na ordem do diretor; Codex acompanha integração e implantação. Declarar publicação concluída somente após confirmação oficial do deploy, distinguindo-a da inspeção visual local.

@@ -6,7 +6,7 @@ import {R34_EDITORIAL_SOURCE,R34_CURATED_EDITION} from './r34CuratedEdition';
 import {R33_CURATED_EDITION,R33_EDITORIAL_SOURCE} from './r33CuratedEdition';
 import {validateRoundScoreCandidate,getGazetaSourceWarning,isRecordedScore} from './editorialVerification';
 const e=getPublishedGazetaEdition(34)!;assert.ok(e);assert.equal(e,R34_CURATED_EDITION);assert.ok(Object.isFrozen(e));
-assert.deepEqual(getAvailableGazetaEditions().map(t=>t.round),[34,33,32,31,30,29,28]);assert.equal(getPublishedGazetaEdition(35),null);
+assert.deepEqual(getAvailableGazetaEditions().map(t=>t.round),[35,34,33,32,31,30,29,28]);assert.equal(getPublishedGazetaEdition(36),null);
 assert.equal(e.featuredStories.length,6);assert.equal(e.editorialNotes?.length,5);assert.equal(e.radarClubs.length,50);assert.equal(new Set(e.radarClubs.map(t=>t.id)).size,50);
 const original=readFileSync('docs/gazeta/EDICAO_R34_TEXTO_RECEBIDO.md','utf8');const expected=original.replace('O Furacão ganhou a semifinal.','O Furacão ganhou a vaga na semifinal.');assert.equal(readFileSync('docs/gazeta/EDICAO_R34_PUBLICACAO.md','utf8').trim(),expected.trim());
 const norm=(s:string)=>s.replaceAll('*','').replace(/\s+/g,' ').trim();const {whatsappText,...shown}=e;const corpus=norm(JSON.stringify(shown));
